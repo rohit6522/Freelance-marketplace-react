@@ -1,0 +1,7 @@
+import { Router } from "express";
+import { myPayments } from "../controllers/payment.controller.js";
+import { protect } from "../middleware/auth.js";
+
+const router = Router();
+router.get("/mine", protect, myPayments);
+export default router;
