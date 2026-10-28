@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
+    passwordChangedAt: { type: Date, select: false },
   },
   { timestamps: true }
 );
@@ -33,6 +34,7 @@ userSchema.virtual("fullName").get(function () {
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
+  if (!this.isNew) this.passwordChangedAt = new Date(Date.now() - 1000);
 });
 
 userSchema.methods.comparePassword = function (candidate) {
@@ -45,6 +47,7 @@ userSchema.set("toJSON", {
     delete ret.password;
     delete ret.passwordResetToken;
     delete ret.passwordResetExpires;
+    delete ret.passwordChangedAt;
     delete ret.__v;
     delete ret.id;
     return ret;

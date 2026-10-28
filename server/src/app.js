@@ -6,6 +6,12 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import { env } from "./config/env.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import authRoutes from "./routes/auth.routes.js";
+import categoryRoutes from "./routes/category.routes.js";
+import gigRoutes from "./routes/gig.routes.js";
+import freelancerRoutes from "./routes/freelancer.routes.js";
+import profileRoutes from "./routes/profile.routes.js";
+import portfolioRoutes from "./routes/portfolio.routes.js";
 
 const app = express();
 
@@ -23,7 +29,14 @@ app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "GigCraft API is running" });
 });
 
-// Routes will be mounted here in later steps
+app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/gigs", gigRoutes);
+app.use("/api/freelancers", freelancerRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/portfolio", portfolioRoutes);
+// More routes will be mounted here in later steps
+// More routes will be mounted here in later steps
 
 app.use(notFound);
 app.use(errorHandler);

@@ -14,6 +14,7 @@ export const env = {
   mongoUri: process.env.MONGO_URI,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  cookieDays: Number(process.env.JWT_COOKIE_DAYS) || 7,
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
