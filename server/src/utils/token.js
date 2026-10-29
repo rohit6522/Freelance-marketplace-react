@@ -13,10 +13,10 @@ const cookieOptions = () => ({
   path: "/",
 });
 
-export const sendTokenCookie = (res, userId) =>
+export const sendTokenCookie = (res, userId, remember = true) =>
   res.cookie(COOKIE_NAME, signToken(userId), {
     ...cookieOptions(),
-    maxAge: env.cookieDays * 24 * 60 * 60 * 1000,
+    // no maxAge = session cookie (cleared when the browser closes)
+    ...(remember ? { maxAge: env.cookieDays * 24 * 60 * 60 * 1000 } : {}),
   });
-
 export const clearTokenCookie = (res) => res.clearCookie(COOKIE_NAME, cookieOptions());

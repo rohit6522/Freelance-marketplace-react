@@ -26,6 +26,7 @@ export const registerRules = [
 export const loginRules = [
   email,
   body("password").isString().notEmpty().withMessage("Password is required"),
+  body("remember").optional().isBoolean().withMessage("Invalid value"),
 ];
 
 export const forgotPasswordRules = [email];

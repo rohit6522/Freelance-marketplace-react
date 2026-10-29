@@ -30,7 +30,7 @@ export const register = asyncHandler(async (req, res) => {
 
 // POST /api/auth/login
 export const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, remember } = req.body;
 
   const user = await User.findOne({ email }).select("+password");
   // Same message for unknown email and wrong password (prevents account enumeration)
@@ -38,8 +38,7 @@ export const login = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid email or password");
   }
   if (!user.isActive) throw new ApiError(403, "This account has been disabled");
-
-  sendTokenCookie(res, user._id);
+  sendTokenCookie(res, user._id, remember !== false && remember !== "false");
   res.json({ success: true, user });
 });
 
