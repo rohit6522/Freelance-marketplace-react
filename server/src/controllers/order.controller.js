@@ -47,6 +47,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       },
       price: p.price,
       requirements,
+      attachments: (req.body.attachments || []).map((f) => pick(f, ["url", "name", "size", "publicId"])),
       status: "pending",
       statusHistory: [{ status: "pending", by: req.user._id, note: "Order placed" }],
     });

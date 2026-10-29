@@ -34,3 +34,9 @@ export const resetPasswordRules = [
   param("token").isHexadecimal().isLength({ min: 64, max: 64 }).withMessage("Invalid reset token"),
   strongPassword("password"),
 ];
+
+
+export const changePasswordRules = [
+  body("currentPassword").isString().notEmpty().withMessage("Current password is required"),
+  strongPassword("newPassword"),
+];

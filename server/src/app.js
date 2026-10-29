@@ -15,6 +15,10 @@ import portfolioRoutes from "./routes/portfolio.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
+import favoriteRoutes from "./routes/favorite.routes.js";
+import conversationRoutes from "./routes/conversation.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 
 const app = express();
 
@@ -41,8 +45,10 @@ app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
-// More routes will be mounted here in later steps
-// More routes will be mounted here in later steps
+app.use("/api/uploads", uploadRoutes);
+app.use("/api/favorites", favoriteRoutes);
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

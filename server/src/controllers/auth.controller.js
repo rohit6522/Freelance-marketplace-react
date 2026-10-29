@@ -91,3 +91,20 @@ export const resetPassword = asyncHandler(async (req, res) => {
   sendTokenCookie(res, user._id);
   res.json({ success: true, message: "Password updated", user });
 });
+
+
+// PUT /api/auth/change-password   (logged in)
+export const changePassword = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("+password");
+  if (!(await user.comparePassword(req.body.currentPassword))) {
+    throw new ApiError(400, "Current password is incorrect");
+  }
+  if (req.body.currentPassword === req.body.newPassword) {
+    throw new ApiError(400, "New password must be different from the current one");
+  }
+  user.password = req.body.newPassword;
+  await user.save(); // also invalidates all older tokens via passwordChangedAt
+
+  sendTokenCookie(res, user._id); // keep this device logged in
+  res.json({ success: true, message: "Password updated" });
+});
