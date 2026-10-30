@@ -11,6 +11,8 @@ import ExplorePage from "../pages/ExplorePage";
 import DashboardPage from "../pages/DashboardPage";
 import ComingSoonPage from "../pages/ComingSoonPage";
 import NotFoundPage from "../pages/NotFoundPage";
+import GigDetailPage from "../pages/GigDetailPage";
+import FreelancerProfilePage from "../pages/FreelancerProfilePage";
 
 export default function AppRoutes() {
   return (
@@ -18,6 +20,8 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         <Route index element={<Navigate to="/explore" replace />} />
         <Route path="explore" element={<ExplorePage />} />
+        <Route path="gigs/:id" element={<GigDetailPage />} />
+        <Route path="freelancers/:id" element={<FreelancerProfilePage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="dashboard" element={<DashboardPage />} />

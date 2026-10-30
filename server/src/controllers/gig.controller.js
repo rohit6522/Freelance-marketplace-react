@@ -105,6 +105,8 @@ export const listGigs = asyncHandler(async (req, res) => {
     price_asc: { startingPrice: 1, _id: 1 },
     price_desc: { startingPrice: -1, _id: -1 },
     rating: { ratingAverage: -1, ratingCount: -1, _id: -1 },
+    rating: { ratingAverage: -1, ratingCount: -1, _id: -1 },
+    popular: { completedOrders: -1, ratingAverage: -1, _id: -1 },
   }[sort];
 
   pipeline.push({

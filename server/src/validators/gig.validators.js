@@ -56,6 +56,6 @@ export const listGigsRules = [
   query("minExperience").optional().isInt({ min: 0 }).withMessage("Invalid minExperience"),
   query("levels").optional().isString().isLength({ max: 100 }),
   query("tags").optional().isString().isLength({ max: 200 }),
-  query("sort").optional().isIn(["relevance", "newest", "price_asc", "price_desc", "rating"])
+  query("sort").optional().isIn(["relevance", "newest", "price_asc", "price_desc", "rating", "popular"])
     .withMessage("Invalid sort"),
 ];
