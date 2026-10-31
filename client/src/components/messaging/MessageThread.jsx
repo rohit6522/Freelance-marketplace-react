@@ -125,7 +125,8 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
     if (files.length >= 5) return toast.error("Maximum 5 attachments per message");
     setUploading(true);
     try {
-      setFiles((l) => [...l, await uploadService.file(file)]);
+      const uploaded = await uploadService.file(file);
+      setFiles((l) => [...l, uploaded]);
     } catch (err) {
       toast.error(err.message);
     } finally {

@@ -28,7 +28,8 @@ export default function DeliverModal({ open, onClose, order, onDone }) {
     if (files.length >= 10) return toast.error("Maximum 10 files per delivery");
     setUploading(true);
     try {
-      setFiles((l) => [...l, await uploadService.file(file)]);
+      const uploaded = await uploadService.file(file);
+      setFiles((l) => [...l, uploaded]);
     } catch (err) {
       toast.error(err.message);
     } finally {

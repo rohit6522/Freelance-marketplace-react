@@ -11,4 +11,8 @@ export const favoriteService = {
   async remove(gigId) {
     await api.delete(`/favorites/${gigId}`);
   },
+    async list(params) {
+    const { data } = await api.get("/favorites", { params });
+    return data; // { gigs, pagination }
+  },
 };

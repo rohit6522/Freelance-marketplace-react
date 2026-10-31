@@ -8,13 +8,18 @@ import RegisterPage from "../pages/RegisterPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import ExplorePage from "../pages/ExplorePage";
-import DashboardPage from "../pages/DashboardPage";
+// import DashboardPage from "../pages/DashboardPage";
 import ComingSoonPage from "../pages/ComingSoonPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import GigDetailPage from "../pages/GigDetailPage";
 import FreelancerProfilePage from "../pages/FreelancerProfilePage";
 import OrdersPage from "../pages/OrdersPage";
 import MessagesPage from "../pages/MessagesPage";
+import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardHome from "../pages/dashboard/DashboardHome";
+import SavedGigsPage from "../pages/dashboard/SavedGigsPage";
+import ReviewsPage from "../pages/dashboard/ReviewsPage";
+import SettingsPage from "../pages/dashboard/SettingsPage";
 
 export default function AppRoutes() {
   return (
@@ -26,7 +31,24 @@ export default function AppRoutes() {
         <Route path="freelancers/:id" element={<FreelancerProfilePage />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="dashboard" element={<DashboardLayout />}>
+            <Route index element={<DashboardHome />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="reviews" element={<ReviewsPage />} />
+
+            <Route element={<ProtectedRoute roles={["client"]} />}>
+              <Route path="saved" element={<SavedGigsPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute roles={["freelancer"]} />}>
+              <Route path="gigs" element={<ComingSoonPage title="My Gigs" />} />
+              <Route path="gigs/new" element={<ComingSoonPage title="Create Gig" />} />
+              <Route path="gigs/:id/edit" element={<ComingSoonPage title="Edit Gig" />} />
+              <Route path="earnings" element={<ComingSoonPage title="Earnings & Payouts" />} />
+              <Route path="portfolio" element={<ComingSoonPage title="Portfolio" />} />
+            </Route>
+          </Route>
+
           <Route path="orders" element={<OrdersPage />} />
           <Route path="messages" element={<MessagesPage />} />
         </Route>

@@ -11,18 +11,26 @@ export function FavoritesProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [ids, setIds] = useState(() => new Set());
+  const [ready, setReady] = useState(false);
 
   // Load saved ids when the user logs in, clear on logout
   useEffect(() => {
     if (!user) {
       setIds(new Set());
+      setReady(true);
       return;
     }
     let active = true;
+    setReady(false);
     favoriteService
       .ids()
-      .then((list) => active && setIds(new Set(list)))
-      .catch(() => {});
+      .then((list) => {
+        if (active) {
+          setIds(new Set(list));
+          setReady(true);
+        }
+      })
+      .catch(() => active && setReady(true));
     return () => {
       active = false;
     };
@@ -61,6 +69,6 @@ export function FavoritesProvider({ children }) {
     [user, ids, navigate, location]
   );
 
-  const value = useMemo(() => ({ isSaved, toggle }), [isSaved, toggle]);
+  const value = useMemo(() => ({ isSaved, toggle, ready }), [isSaved, toggle, ready]);
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
 }

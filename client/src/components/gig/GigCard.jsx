@@ -7,7 +7,7 @@ import { LEVELS, money, fullName } from "../../utils/format";
 export default function GigCard({ gig }) {
   const { isSaved, toggle } = useFavorites();
   const saved = isSaved(gig._id);
-  const level = LEVELS[gig.sellerLevel] || LEVELS.rising;
+  const level = gig.sellerLevel ? LEVELS[gig.sellerLevel] : null;
   const express = gig.minDeliveryDays === 1;
 
   return (
@@ -23,18 +23,19 @@ export default function GigCard({ gig }) {
               </div>
             )}
           </Link>
-          <div className={`absolute top-2 left-2 font-code-sm text-label-sm px-2 py-0.5 font-bold uppercase tracking-wider ${level.badge}`}>
-            {level.label}
-          </div>
+          {level && (
+            <div className={`absolute top-2 left-2 font-code-sm text-label-sm px-2 py-0.5 font-bold uppercase tracking-wider ${level.badge}`}>
+              {level.label}
+            </div>
+          )}
           <button
             type="button" aria-pressed={saved}
             aria-label={saved ? "Remove from saved gigs" : "Save gig"}
             onClick={() => toggle(gig._id)}
-            className={`absolute top-2 right-2 w-8 h-8 border flex items-center justify-center transition-colors ${
-              saved
+            className={`absolute top-2 right-2 w-8 h-8 border flex items-center justify-center transition-colors ${saved
                 ? "bg-error text-on-error border-error"
                 : "bg-surface-container-lowest border-on-surface text-on-surface hover:bg-error hover:text-on-error hover:border-error"
-            }`}
+              }`}
           >
             <Icon name="favorite" filled={saved} className="text-[18px]" />
           </button>

@@ -16,4 +16,9 @@ export const reviewService = {
   async report(id, reason) {
     await api.post(`/reviews/${id}/report`, { reason });
   },
+
+  async mine() {
+    const { data } = await api.get("/reviews/mine");
+    return data; // { reviews, pending }
+  },
 };

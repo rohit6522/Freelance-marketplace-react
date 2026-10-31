@@ -104,3 +104,26 @@ export const reportReview = asyncHandler(async (req, res) => {
   await review.save();
   res.json({ success: true, message: "Report submitted. Thank you." });
 });
+
+// GET /api/reviews/mine   (client) -> reviews I wrote + completed orders still waiting for a review
+export const myReviews = asyncHandler(async (req, res) => {
+  const reviews = await Review.find({ client: req.user._id })
+    .select("-reports")
+    .sort({ createdAt: -1 })
+    .populate("gig", "title images")
+    .populate("freelancer", "firstName lastName avatar")
+    .lean();
+
+  const pending = await Order.find({
+    client: req.user._id,
+    status: "completed",
+    _id: { $nin: reviews.map((r) => r.order) },
+  })
+    .select("orderNumber price completedAt gig freelancer")
+    .sort({ completedAt: -1 })
+    .populate("gig", "title images")
+    .populate("freelancer", "firstName lastName avatar")
+    .lean();
+
+  res.json({ success: true, reviews, pending });
+});
