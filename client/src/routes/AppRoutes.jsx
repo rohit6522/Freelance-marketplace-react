@@ -13,6 +13,8 @@ import ComingSoonPage from "../pages/ComingSoonPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import GigDetailPage from "../pages/GigDetailPage";
 import FreelancerProfilePage from "../pages/FreelancerProfilePage";
+import OrdersPage from "../pages/OrdersPage";
+import MessagesPage from "../pages/MessagesPage";
 
 export default function AppRoutes() {
   return (
@@ -25,8 +27,8 @@ export default function AppRoutes() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="orders" element={<ComingSoonPage title="My Orders" />} />
-          <Route path="messages" element={<ComingSoonPage title="Messages" />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="messages" element={<MessagesPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

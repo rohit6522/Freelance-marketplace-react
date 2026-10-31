@@ -9,10 +9,9 @@ import { useCategories } from "../../hooks/useCategories";
 import { conversationService } from "../../services/conversationService";
 
 const navClass = ({ isActive }) =>
-  `font-label-md text-label-md transition-colors py-1 ${
-    isActive
-      ? "text-primary font-bold border-b-2 border-primary"
-      : "text-on-surface-variant hover:text-on-surface"
+  `font-label-md text-label-md transition-colors py-1 ${isActive
+    ? "text-primary font-bold border-b-2 border-primary"
+    : "text-on-surface-variant hover:text-on-surface"
   }`;
 
 export default function Navbar() {
@@ -35,11 +34,18 @@ export default function Navbar() {
     conversationService
       .unreadCount()
       .then((n) => active && setUnread(n))
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       active = false;
     };
   }, [user, location.pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    const refresh = () => conversationService.unreadCount().then(setUnread).catch(() => { });
+    window.addEventListener("unread:changed", refresh);
+    return () => window.removeEventListener("unread:changed", refresh);
+  }, [user]);
 
   const links = [
     { to: "/explore", label: "Explore Gigs", show: true },

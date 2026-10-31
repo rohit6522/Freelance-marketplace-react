@@ -48,7 +48,7 @@ export default function CheckoutModal({ open, onClose, gig, tier }) {
       });
       toast.success(`Order ${order.orderNumber} placed (simulated payment)`);
       onClose();
-      navigate("/orders");
+      navigate(`/orders?order=${order._id}`);
     } catch (err) {
       setServerError(err.message);
     }
