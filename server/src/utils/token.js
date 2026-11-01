@@ -8,8 +8,8 @@ export const signToken = (id) =>
 
 const cookieOptions = () => ({
   httpOnly: true,
-  secure: env.nodeEnv === "production",
-  sameSite: "lax",
+  secure: env.nodeEnv === "production" || env.cookieSameSite === "none",
+  sameSite: env.cookieSameSite,
   path: "/",
 });
 

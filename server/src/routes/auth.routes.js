@@ -2,6 +2,7 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { protect } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
+import { env } from "../config/env.js";
 import {
   register, login, logout, getMe, forgotPassword, resetPassword, changePassword,
 } from "../controllers/auth.controller.js";
@@ -11,10 +12,9 @@ import {
 
 const router = Router();
 
-// Strict limit on sensitive endpoints: 20 attempts / 15 min per IP
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 20,
+  limit: env.authRateLimit,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: "Too many attempts. Please try again later." },

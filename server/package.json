@@ -6,9 +6,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "dev": "nodemon src/server.js",
+    "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "seed": "node src/seed/seed.js"
+    "seed": "node src/seed/seed.js",
+    "docs": "node scripts/generate-docs.js",
+    "smoke": "node scripts/smoke-test.js"
   },
   "keywords": [],
   "dependencies": {

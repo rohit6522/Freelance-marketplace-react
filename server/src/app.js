@@ -1,3 +1,5 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -6,6 +8,8 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import { env } from "./config/env.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import { sanitizeBody } from "./middleware/sanitize.js";
+
 import authRoutes from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import gigRoutes from "./routes/gig.routes.js";
@@ -20,17 +24,32 @@ import favoriteRoutes from "./routes/favorite.routes.js";
 import conversationRoutes from "./routes/conversation.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-app.use(helmet());
+// Behind a proxy (Render, Heroku, nginx) set TRUST_PROXY=1 so rate limits and secure cookies see the real client
+if (env.trustProxy) app.set("trust proxy", env.trustProxy);
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        // Allow the CDNs this app uses (merged with Helmet's safe defaults)
+        "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://placehold.co"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
+      },
+    },
+  })
+);
 app.use(cors({ origin: env.clientUrl, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(sanitizeBody);
 app.use(cookieParser());
 if (env.nodeEnv === "development") app.use(morgan("dev"));
 
-// General rate limit (stricter limits will be added on auth routes later)
-app.use("/api", rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
+app.use("/api", rateLimit({ windowMs: 15 * 60 * 1000, limit: env.apiRateLimit, standardHeaders: true, legacyHeaders: false }));
 
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "GigCraft API is running" });
@@ -49,6 +68,18 @@ app.use("/api/uploads", uploadRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+// Optional single-service deployment: Express also serves the built React app (same origin = simple cookies)
+if (env.serveClient) {
+  const dist = path.resolve(__dirname, "../../client/dist");
+  app.use(express.static(dist));
+  app.get(/^\/(?!api\/).*/, (req, res) => res.sendFile(path.join(dist, "index.html")));
+}
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "/api",
+  withCredentials: true, // httpOnly auth cookie
+});
 
 app.use(notFound);
 app.use(errorHandler);

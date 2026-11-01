@@ -29,10 +29,15 @@ export const errorHandler = (err, req, res, next) => {
     message = "Invalid or expired token";
   }
 
-    // Multer (upload) errors
+  // Multer (upload) errors
   if (err.name === "MulterError") {
     statusCode = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
     message = err.code === "LIMIT_FILE_SIZE" ? "File is too large" : err.message;
+  }
+
+  // Never leak internals of unexpected errors in production
+  if (!err.isOperational && statusCode === 500 && env.nodeEnv === "production") {
+    message = "Something went wrong";
   }
 
   res.status(statusCode).json({
