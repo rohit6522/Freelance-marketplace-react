@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import { uploadBuffer, deleteAsset } from "../services/upload.service.js";
+import { assertOwnedImages, ownedPublicIds } from "../utils/assets.js";
 
 const PROFILE_FIELDS = ["title", "bio", "location", "skills", "languages", "experienceYears", "hourlyRate", "workHistory"];
 const PORTFOLIO_FIELDS = ["title", "description", "industry", "metric", "durationWeeks", "deliverables", "images", "externalLink"];
@@ -42,23 +43,31 @@ export const myPortfolio = asyncHandler(async (req, res) => {
 
 // POST /api/portfolio
 export const createProject = asyncHandler(async (req, res) => {
-  const project = await PortfolioProject.create({ ...pick(req.body, PORTFOLIO_FIELDS), freelancer: req.user._id });
+  const data = pick(req.body, PORTFOLIO_FIELDS);
+  assertOwnedImages(data.images, req.user._id);
+  const project = await PortfolioProject.create({ ...data, freelancer: req.user._id });
   res.status(201).json({ success: true, project });
 });
 
-// PUT /api/portfolio/:id
 export const updateProject = asyncHandler(async (req, res) => {
   const project = await PortfolioProject.findOne({ _id: req.params.id, freelancer: req.user._id });
   if (!project) throw new ApiError(404, "Portfolio project not found");
-  project.set(pick(req.body, PORTFOLIO_FIELDS));
+
+  const data = pick(req.body, PORTFOLIO_FIELDS);
+  assertOwnedImages(data.images, req.user._id);
+  const before = ownedPublicIds(project.images, req.user._id);
+  project.set(data);
   await project.save();
+
+  const keep = new Set(ownedPublicIds(project.images, req.user._id));
+  await Promise.all(before.filter((id) => !keep.has(id)).map((id) => deleteAsset(id)));
   res.json({ success: true, project });
 });
 
-// DELETE /api/portfolio/:id
 export const deleteProject = asyncHandler(async (req, res) => {
   const project = await PortfolioProject.findOneAndDelete({ _id: req.params.id, freelancer: req.user._id });
   if (!project) throw new ApiError(404, "Portfolio project not found");
+  await Promise.all(ownedPublicIds(project.images, req.user._id).map((id) => deleteAsset(id)));
   res.json({ success: true, message: "Project deleted" });
 });
 

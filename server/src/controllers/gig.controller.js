@@ -3,6 +3,8 @@ import { Gig, Category, User, FreelancerProfile, Order, Favorite } from "../mode
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
+import { assertOwnedImages, ownedPublicIds } from "../utils/assets.js";
+import { deleteAsset } from "../services/upload.service.js";
 
 const ACTIVE_ORDER_STATUSES = ["pending", "in_progress", "delivered", "revision_requested"];
 const EDITABLE = ["title", "description", "category", "tags", "images", "packages"];
@@ -196,6 +198,7 @@ export const myGigs = asyncHandler(async (req, res) => {
 // ---------------------------------------------------------------------------
 export const createGig = asyncHandler(async (req, res) => {
   const data = pick(req.body, EDITABLE);
+  assertOwnedImages(data.images, req.user._id);
   await assertCategoryExists(data.category);
 
   const gig = new Gig({
@@ -203,22 +206,38 @@ export const createGig = asyncHandler(async (req, res) => {
     freelancer: req.user._id,
     status: req.body.status === "published" ? "published" : "draft",
   });
-  await gig.save(); // runs hooks: startingPrice, "publish needs an image"
+  await gig.save(); // hooks: startingPrice, "publish needs an image"
 
   res.status(201).json({ success: true, gig });
 });
 
-// ---------------------------------------------------------------------------
-// PUT /api/gigs/:id  (full update by owner)
-// ---------------------------------------------------------------------------
 export const updateGig = asyncHandler(async (req, res) => {
   const gig = await getOwnedGig(req.params.id, req.user._id);
   const data = pick(req.body, EDITABLE);
+  assertOwnedImages(data.images, req.user._id);
   if (data.category) await assertCategoryExists(data.category);
 
+  const before = ownedPublicIds(gig.images, req.user._id);
   gig.set(data);
   await gig.save();
+
+  // remove images the seller dropped from Cloudinary
+  const keep = new Set(ownedPublicIds(gig.images, req.user._id));
+  await Promise.all(before.filter((id) => !keep.has(id)).map((id) => deleteAsset(id)));
+
   res.json({ success: true, gig });
+});
+
+export const deleteGig = asyncHandler(async (req, res) => {
+  const gig = await getOwnedGig(req.params.id, req.user._id);
+
+  if (await Order.exists({ gig: gig._id })) {
+    throw new ApiError(409, "This gig has orders and cannot be deleted. Pause it instead.");
+  }
+  const publicIds = ownedPublicIds(gig.images, req.user._id);
+  await Promise.all([gig.deleteOne(), Favorite.deleteMany({ gig: gig._id })]);
+  await Promise.all(publicIds.map((id) => deleteAsset(id)));
+  res.json({ success: true, message: "Gig deleted" });
 });
 
 // ---------------------------------------------------------------------------
@@ -229,17 +248,4 @@ export const setGigStatus = asyncHandler(async (req, res) => {
   gig.status = req.body.status;
   await gig.save();
   res.json({ success: true, gig });
-});
-
-// ---------------------------------------------------------------------------
-// DELETE /api/gigs/:id
-// ---------------------------------------------------------------------------
-export const deleteGig = asyncHandler(async (req, res) => {
-  const gig = await getOwnedGig(req.params.id, req.user._id);
-
-  if (await Order.exists({ gig: gig._id })) {
-    throw new ApiError(409, "This gig has orders and cannot be deleted. Pause it instead.");
-  }
-  await Promise.all([gig.deleteOne(), Favorite.deleteMany({ gig: gig._id })]);
-  res.json({ success: true, message: "Gig deleted" });
 });

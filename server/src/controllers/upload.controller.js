@@ -9,7 +9,10 @@ const IMAGE_PURPOSES = {
 // POST /api/uploads/image?purpose=gig|portfolio   (multipart field: image)
 export const uploadImageFile = asyncHandler(async (req, res) => {
   const cfg = IMAGE_PURPOSES[req.query.purpose];
-  const result = await uploadBuffer(req.file.buffer, { folder: cfg.folder, transformation: cfg.transformation });
+  const result = await uploadBuffer(req.file.buffer, {
+    folder: `${cfg.folder}/${req.user._id}`,
+    transformation: cfg.transformation,
+  });
   res.status(201).json({ success: true, image: { url: result.secure_url, publicId: result.public_id } });
 });
 

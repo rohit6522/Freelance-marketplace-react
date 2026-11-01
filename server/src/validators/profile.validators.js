@@ -30,11 +30,12 @@ export const portfolioRules = [
   body("description").isString().trim().isLength({ min: 10, max: 2000 }).withMessage("Description must be 10-2000 characters"),
   body("industry").optional().isString().trim().isLength({ max: 60 }),
   body("metric").optional().isString().trim().isLength({ max: 100 }),
-  body("durationWeeks").optional().isInt({ min: 1, max: 520 }).withMessage("Invalid duration"),
+  body("durationWeeks").optional({ values: "null" }).isInt({ min: 1, max: 520 }).withMessage("Invalid duration"),
   body("deliverables").optional().isArray({ max: 10 }).withMessage("A maximum of 10 deliverables"),
   body("deliverables.*").isString().trim().isLength({ min: 1, max: 80 }),
   body("images").optional().isArray({ max: 6 }).withMessage("A maximum of 6 images"),
   body("images.*.url").isURL({ protocols: ["https"], require_protocol: true }).withMessage("Image URLs must be valid https URLs"),
+  body("images.*.publicId").optional().isString().isLength({ max: 200 }).withMessage("Invalid image reference"),
   body("externalLink").optional({ values: "falsy" }).isURL({ protocols: ["http", "https"], require_protocol: true })
     .withMessage("External link must be a valid URL"),
 ];

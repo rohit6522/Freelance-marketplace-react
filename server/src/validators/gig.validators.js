@@ -36,6 +36,7 @@ export const gigBodyRules = [
   body("images").optional().isArray({ max: 5 }).withMessage("A maximum of 5 images is allowed"),
   body("images.*.url").isURL({ protocols: ["https"], require_protocol: true })
     .withMessage("Image URLs must be valid https URLs"),
+  body("images.*.publicId").optional().isString().isLength({ max: 200 }).withMessage("Invalid image reference"),
   body("status").optional().isIn(["draft", "published"]).withMessage("Status must be draft or published"),
   ...tiers.flatMap(packageRules),
 ];

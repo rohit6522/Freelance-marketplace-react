@@ -20,6 +20,10 @@ import DashboardHome from "../pages/dashboard/DashboardHome";
 import SavedGigsPage from "../pages/dashboard/SavedGigsPage";
 import ReviewsPage from "../pages/dashboard/ReviewsPage";
 import SettingsPage from "../pages/dashboard/SettingsPage";
+import MyGigsPage from "../pages/dashboard/MyGigsPage";
+import GigFormPage from "../pages/dashboard/GigFormPage";
+import EarningsPage from "../pages/dashboard/EarningsPage";
+import PortfolioPage from "../pages/dashboard/PortfolioPage";
 
 export default function AppRoutes() {
   return (
@@ -41,11 +45,11 @@ export default function AppRoutes() {
             </Route>
 
             <Route element={<ProtectedRoute roles={["freelancer"]} />}>
-              <Route path="gigs" element={<ComingSoonPage title="My Gigs" />} />
-              <Route path="gigs/new" element={<ComingSoonPage title="Create Gig" />} />
-              <Route path="gigs/:id/edit" element={<ComingSoonPage title="Edit Gig" />} />
-              <Route path="earnings" element={<ComingSoonPage title="Earnings & Payouts" />} />
-              <Route path="portfolio" element={<ComingSoonPage title="Portfolio" />} />
+              <Route path="gigs" element={<MyGigsPage />} />
+              <Route path="gigs/new" element={<GigFormPage />} />
+              <Route path="gigs/:id/edit" element={<GigFormPage />} />
+              <Route path="earnings" element={<EarningsPage />} />
+              <Route path="portfolio" element={<PortfolioPage />} />
             </Route>
           </Route>
 

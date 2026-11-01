@@ -7,4 +7,11 @@ export const uploadService = {
     const { data } = await api.post("/uploads/file", form);
     return data.file; // { url, publicId, name, size }
   },
+
+    async image(file, purpose) {
+    const form = new FormData();
+    form.append("image", file);
+    const { data } = await api.post(`/uploads/image?purpose=${purpose}`, form);
+    return data.image; // { url, publicId }
+  },
 };

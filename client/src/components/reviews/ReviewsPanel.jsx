@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Icon from "../ui/Icon";
 import Avatar from "../ui/Avatar";
 import Pagination from "../ui/Pagination";
@@ -10,11 +10,13 @@ const SORTS = [["recent", "Recent"], ["highest", "Highest"], ["lowest", "Lowest"
 const BAR_COLORS = { 5: "bg-primary", 4: "bg-primary-fixed-dim", 3: "bg-secondary", 2: "bg-secondary", 1: "bg-error" };
 
 // scope: { gig: id } or { freelancer: userId }
-export default function ReviewsPanel({ scope, showGigTitle = false }) {
+export default function ReviewsPanel({ scope, showGigTitle = false, actions }) {
   const scopeKey = JSON.stringify(scope);
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ loading: true, error: "", data: null });
+  const [tick, setTick] = useState(0);
+  const reload = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => setPage(1), [scopeKey, sort]);
 
@@ -28,7 +30,7 @@ export default function ReviewsPanel({ scope, showGigTitle = false }) {
     return () => {
       active = false;
     };
-  }, [scopeKey, sort, page]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scopeKey, sort, page, tick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { loading, error, data } = state;
   if (error) return <p role="alert" className="text-error font-body-md">{error}</p>;
@@ -114,6 +116,7 @@ export default function ReviewsPanel({ scope, showGigTitle = false }) {
                 <p className="font-body-sm text-body-sm text-on-surface-variant">{r.reply.text}</p>
               </div>
             )}
+            {actions && <div className="mt-space-sm">{actions(r, reload)}</div>}
           </article>
         ))}
       </div>
