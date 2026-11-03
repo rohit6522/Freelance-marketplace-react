@@ -12,8 +12,8 @@ const packageRules = (tier) => {
       .withMessage(`${label} package title is required (2-80 characters)`),
     body(`${p}.description`).isString().trim().isLength({ min: 5, max: 500 })
       .withMessage(`${label} package description is required (5-500 characters)`),
-    body(`${p}.price`).isFloat({ min: 5, max: 100000 })
-      .withMessage(`${label} package price must be between $5 and $100,000`),
+    body(`${p}.price`).isFloat({ min: 50, max: 10000000 })
+      .withMessage(`${label} package price must be between ₹50 and ₹1,00,00,000`),
     body(`${p}.deliveryDays`).isInt({ min: 1, max: 180 })
       .withMessage(`${label} package delivery must be 1-180 days`),
     body(`${p}.revisions`).isInt({ min: -1, max: 100 })

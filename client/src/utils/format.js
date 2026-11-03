@@ -1,19 +1,69 @@
-export const money = (n) =>
-  `$${Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+// Reusable India-focused formatting utilities
+
+export const formatIndianNumber = (n, options = {}) => {
+  const num = Number(n || 0);
+  return num.toLocaleString("en-IN", {
+    maximumFractionDigits: 2,
+    ...options,
+  });
+};
+
+export const formatCurrency = (n, { includeDecimals = false } = {}) => {
+  const num = Number(n || 0);
+  const formatted = num.toLocaleString("en-IN", {
+    minimumFractionDigits: includeDecimals ? 2 : 0,
+    maximumFractionDigits: includeDecimals ? 2 : 2,
+  });
+  return `₹${formatted}`;
+};
+
+export const money = formatCurrency;
+
+export const formatPhoneNumber = (phone) => {
+  if (!phone) return "";
+  const cleaned = String(phone).trim();
+  const digits = cleaned.replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+  }
+  if (digits.length === 12 && digits.startsWith("91")) {
+    const mobile = digits.slice(2);
+    return `+91 ${mobile.slice(0, 5)} ${mobile.slice(5)}`;
+  }
+  return cleaned.startsWith("+91") ? cleaned : `+91 ${cleaned}`;
+};
 
 export const daysLabel = (n) => `${n} ${n === 1 ? "Day" : "Days"}`;
 
 export const revisionsLabel = (r) => (r === -1 ? "Unlimited" : `${r} ${r === 1 ? "Round" : "Rounds"}`);
 
-export const monthYear = (d) =>
-  d ? new Date(d).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "";
+// DD/MM/YYYY date formatting in IST (Asia/Kolkata) using en-IN locale
+export const formatIndianDate = (d) => {
+  if (!d) return "";
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Kolkata",
+  });
+};
 
-export const shortDate = (d) =>
-  d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+export const shortDate = (d) => formatIndianDate(d);
+
+export const monthYear = (d) =>
+  d
+    ? new Date(d).toLocaleDateString("en-IN", {
+        month: "long",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
+      })
+    : "";
 
 export const fullName = (u) => (u ? `${u.firstName} ${u.lastName}` : "");
 
-// "Marcus Vance" -> "Marcus V." (reviewer privacy)
+// "Rahul Sharma" -> "Rahul S." (reviewer privacy)
 export const publicName = (u) => (u ? `${u.firstName} ${u.lastName?.[0] || ""}.` : "");
 
 export const LEVELS = {
@@ -38,11 +88,31 @@ export const formatBytes = (n) => {
   return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
 };
 
-export const dateTime = (d) =>
-  d ? new Date(d).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+export const dateTime = (d) => {
+  if (!d) return "";
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return "";
+  return (
+    date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Kolkata",
+    }) + " IST"
+  );
+};
 
 export const dayMonth = (d) =>
-  d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+  d
+    ? new Date(d).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        timeZone: "Asia/Kolkata",
+      })
+    : "";
 
 export function dueText(due) {
   if (!due) return "";

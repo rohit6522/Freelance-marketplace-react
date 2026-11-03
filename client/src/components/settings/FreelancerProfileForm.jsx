@@ -78,7 +78,7 @@ export default function FreelancerProfileForm() {
           </div>
           <div>
             <label htmlFor="location" className={labelCls}>Location</label>
-            <input id="location" placeholder="Berlin, Germany" className={inputCls(errors.location)} {...register("location", { maxLength: { value: 100, message: "Maximum 100 characters" } })} />
+            <input id="location" placeholder="Bengaluru, Karnataka" className={inputCls(errors.location)} {...register("location", { maxLength: { value: 100, message: "Maximum 100 characters" } })} />
             <FieldError message={errors.location?.message} />
           </div>
           <div>
@@ -87,8 +87,8 @@ export default function FreelancerProfileForm() {
             <FieldError message={errors.experienceYears?.message} />
           </div>
           <div>
-            <label htmlFor="hourlyRate" className={labelCls}>Hourly rate (USD, optional)</label>
-            <input id="hourlyRate" type="number" min="0" max="10000" step="1" className={inputCls(errors.hourlyRate)} {...register("hourlyRate", { min: { value: 0, message: "Must be 0 or more" }, max: { value: 10000, message: "Maximum 10,000" } })} />
+            <label htmlFor="hourlyRate" className={labelCls}>Hourly rate (₹ INR, optional)</label>
+            <input id="hourlyRate" type="number" min="0" max="100000" step="1" className={inputCls(errors.hourlyRate)} {...register("hourlyRate", { min: { value: 0, message: "Must be 0 or more" }, max: { value: 100000, message: "Maximum ₹1,00,000" } })} />
             <FieldError message={errors.hourlyRate?.message} />
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function FreelancerProfileForm() {
             {languages.fields.map((f, i) => (
               <div key={f.id} className="flex gap-space-xs items-start">
                 <div className="flex-1">
-                  <input aria-label="Language" placeholder="English" className={inputCls(errors.languages?.[i]?.name)} {...register(`languages.${i}.name`, { required: "Language is required" })} />
+                  <input aria-label="Language" placeholder="English, Hindi, etc." className={inputCls(errors.languages?.[i]?.name)} {...register(`languages.${i}.name`, { required: "Language is required" })} />
                   <FieldError message={errors.languages?.[i]?.name?.message} />
                 </div>
                 <select aria-label="Level" className={`${inputCls(false)} w-40`} {...register(`languages.${i}.level`)}>
@@ -154,7 +154,7 @@ export default function FreelancerProfileForm() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-xs items-start">
-                  <input aria-label="Location" placeholder="Location" className={`${inputCls(false)} col-span-2`} {...register(`workHistory.${i}.location`)} />
+                  <input aria-label="Location" placeholder="Location (e.g. Mumbai, India)" className={`${inputCls(false)} col-span-2`} {...register(`workHistory.${i}.location`)} />
                   <div>
                     <input aria-label="Start year" type="number" placeholder="Start year" className={inputCls(errors.workHistory?.[i]?.startYear)} {...register(`workHistory.${i}.startYear`, { required: "Required", min: { value: 1970, message: "1970+" }, max: { value: 2100, message: "Invalid" } })} />
                     <FieldError message={errors.workHistory?.[i]?.startYear?.message} />

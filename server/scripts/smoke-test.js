@@ -46,8 +46,8 @@ const expectOneOf = (r, list) => assert.ok(list.includes(r.status), `expected on
 
 const anon = new Session();
 const client = new Session();
-const marcus = new Session();
-const elena = new Session();
+const rahul = new Session();
+const priya = new Session();
 const fresh = new Session();
 const ctx = {};
 
@@ -68,11 +68,11 @@ await step("gigs: pagination", async () => {
   assert.ok(r.data.pagination.total >= 6);
 });
 await step("gigs: price filter + ascending sort", async () => {
-  const r = await anon.get("/gigs?minPrice=100&maxPrice=300&sort=price_asc");
+  const r = await anon.get("/gigs?minPrice=2000&maxPrice=10000&sort=price_asc");
   expectStatus(r, 200);
   const prices = r.data.gigs.map((g) => g.startingPrice);
   assert.ok(prices.length > 0);
-  assert.ok(prices.every((p) => p >= 100 && p <= 300));
+  assert.ok(prices.every((p) => p >= 2000 && p <= 10000));
   assert.deepEqual(prices, [...prices].sort((a, b) => a - b));
 });
 await step("gigs: keyword search", async () => {
@@ -81,12 +81,12 @@ await step("gigs: keyword search", async () => {
   assert.ok(r.data.gigs.length >= 1);
 });
 await step("gigs: invalid filter is rejected (400)", async () => expectStatus(await anon.get("/gigs?minRating=9"), 400));
-await step("find Marcus's gig and read its packages", async () => {
+await step("find Rahul's gig and read its packages", async () => {
   const list = await anon.get("/gigs?limit=50");
-  const gig = list.data.gigs.find((g) => g.seller.firstName === "Marcus");
+  const gig = list.data.gigs.find((g) => g.seller.firstName === "Rahul");
   assert.ok(gig, "seed data missing: run `npm run seed` first");
   ctx.gigId = gig._id;
-  ctx.marcusId = gig.seller._id;
+  ctx.rahulId = gig.seller._id;
   const detail = await anon.get(`/gigs/${gig._id}`);
   expectStatus(detail, 200);
   ctx.basicPrice = detail.data.gig.packages.basic.price;
@@ -130,10 +130,10 @@ await step("register: new freelancer gets a session and a profile", async () => 
   assert.ok(me.data.profile, "freelancer profile should be created");
 });
 
-console.log("\nOrder lifecycle (client <-> Marcus, escrow simulated)");
-await step("Marcus and Elena log in", async () => {
-  expectStatus(await marcus.post("/auth/login", { email: "marcus@gigcraft.test", password: PASSWORD }), 200);
-  expectStatus(await elena.post("/auth/login", { email: "elena@gigcraft.test", password: PASSWORD }), 200);
+console.log("\nOrder lifecycle (client <-> Rahul, escrow simulated)");
+await step("Rahul and Priya log in", async () => {
+  expectStatus(await rahul.post("/auth/login", { email: "rahul@gigcraft.test", password: PASSWORD }), 200);
+  expectStatus(await priya.post("/auth/login", { email: "priya@gigcraft.test", password: PASSWORD }), 200);
 });
 await step("checkout ignores a tampered price and status", async () => {
   const r = await client.post("/orders", {
@@ -149,15 +149,15 @@ await step("checkout ignores a tampered price and status", async () => {
 });
 await step("invalid transition: complete while pending (409)", async () => expectStatus(await client.post(`/orders/${ctx.orderId}/complete`), 409));
 await step("wrong role: the client cannot accept (403)", async () => expectStatus(await client.post(`/orders/${ctx.orderId}/accept`), 403));
-await step("non-participants get 404 for the order", async () => expectStatus(await elena.get(`/orders/${ctx.orderId}`), 404));
-await step("Marcus accepts: in_progress with a due date", async () => {
-  const r = await marcus.post(`/orders/${ctx.orderId}/accept`);
+await step("non-participants get 404 for the order", async () => expectStatus(await priya.get(`/orders/${ctx.orderId}`), 404));
+await step("Rahul accepts: in_progress with a due date", async () => {
+  const r = await rahul.post(`/orders/${ctx.orderId}/accept`);
   expectStatus(r, 200);
   assert.equal(r.data.order.status, "in_progress");
   assert.ok(r.data.order.dueDate);
 });
-await step("Marcus delivers", async () => {
-  const r = await marcus.post(`/orders/${ctx.orderId}/deliver`, {
+await step("Rahul delivers", async () => {
+  const r = await rahul.post(`/orders/${ctx.orderId}/deliver`, {
     message: "First delivery attached.", files: [{ url: "https://example.com/v1.zip", name: "v1.zip", size: 1024 }],
   });
   expectStatus(r, 200);
@@ -169,8 +169,8 @@ await step("client requests a revision (uses one)", async () => {
   assert.equal(r.data.order.status, "revision_requested");
   assert.equal(r.data.order.revisionsUsed, 1);
 });
-await step("Marcus re-delivers", async () => {
-  const r = await marcus.post(`/orders/${ctx.orderId}/deliver`, { message: "Revised delivery attached." });
+await step("Rahul re-delivers", async () => {
+  const r = await rahul.post(`/orders/${ctx.orderId}/deliver`, { message: "Revised delivery attached." });
   expectStatus(r, 200);
   assert.equal(r.data.order.deliveries.length, 2);
 });
@@ -180,8 +180,8 @@ await step("client approves: completed and escrow released", async () => {
   assert.equal(r.data.order.status, "completed");
   assert.equal(r.data.payment.status, "released");
 });
-await step("Marcus's payment summary includes the payout", async () => {
-  const r = await marcus.get("/payments/mine");
+await step("Rahul's payment summary includes the payout", async () => {
+  const r = await rahul.get("/payments/mine");
   expectStatus(r, 200);
   assert.ok(r.data.summary.released >= ctx.basicPrice);
   assert.equal(r.data.isSimulated, true);
@@ -216,8 +216,8 @@ await step("gig rating is calculated from stored reviews", async () => {
 });
 await step("only the reviewed freelancer can reply", async () => {
   expectStatus(await client.post(`/reviews/${ctx.reviewId}/reply`, { text: "I should not be able to do this." }), 403);
-  expectStatus(await elena.post(`/reviews/${ctx.reviewId}/reply`, { text: "Not my review either, so no." }), 403);
-  const r = await marcus.post(`/reviews/${ctx.reviewId}/reply`, { text: "Thank you!" });
+  expectStatus(await priya.post(`/reviews/${ctx.reviewId}/reply`, { text: "Not my review either, so no." }), 403);
+  const r = await rahul.post(`/reviews/${ctx.reviewId}/reply`, { text: "Thank you!" });
   expectStatus(r, 200);
   assert.equal(r.data.review.reply.text, "Thank you!");
 });
@@ -231,17 +231,17 @@ await step("client opens the order conversation", async () => {
 await step("empty message is rejected (400)", async () =>
   expectStatus(await client.post(`/conversations/${ctx.convoId}/messages`, { text: "" }), 400));
 await step("client sends a message", async () =>
-  expectStatus(await client.post(`/conversations/${ctx.convoId}/messages`, { text: "Hi Marcus, quick question about the files." }), 201));
-await step("Marcus has unread messages; reading clears them", async () => {
-  let r = await marcus.get("/conversations");
+  expectStatus(await client.post(`/conversations/${ctx.convoId}/messages`, { text: "Hi Rahul, quick question about the files." }), 201));
+await step("Rahul has unread messages; reading clears them", async () => {
+  let r = await rahul.get("/conversations");
   expectStatus(r, 200);
   assert.ok(r.data.conversations.find((c) => c._id === ctx.convoId).unreadCount >= 1);
-  expectStatus(await marcus.post(`/conversations/${ctx.convoId}/read`), 200);
-  r = await marcus.get("/conversations");
+  expectStatus(await rahul.post(`/conversations/${ctx.convoId}/read`), 200);
+  r = await rahul.get("/conversations");
   assert.equal(r.data.conversations.find((c) => c._id === ctx.convoId).unreadCount, 0);
 });
 await step("non-participants cannot read the conversation (404)", async () =>
-  expectStatus(await elena.get(`/conversations/${ctx.convoId}/messages`), 404));
+  expectStatus(await priya.get(`/conversations/${ctx.convoId}/messages`), 404));
 
 console.log("\nFavorites");
 await step("save, list and remove a favorite", async () => {
@@ -254,9 +254,9 @@ await step("save, list and remove a favorite", async () => {
   assert.ok(!ids.data.ids.includes(ctx.gigId));
 });
 await step("cannot favorite your own gig (400)", async () =>
-  expectStatus(await marcus.post("/favorites", { gigId: ctx.gigId }), 400));
+  expectStatus(await rahul.post("/favorites", { gigId: ctx.gigId }), 400));
 
-console.log("\nGig management (Marcus)");
+console.log("\nGig management (Rahul)");
 const gigBody = {
   title: "I will run a smoke test gig lifecycle end to end",
   category: null,
@@ -264,24 +264,24 @@ const gigBody = {
   tags: ["smoke"],
   images: [],
   packages: {
-    basic: { title: "Basic", description: "Basic package", price: 50, deliveryDays: 2, revisions: 1, features: ["One thing"] },
-    standard: { title: "Standard", description: "Standard package", price: 100, deliveryDays: 4, revisions: 2, features: ["Two things"] },
-    premium: { title: "Premium", description: "Premium package", price: 200, deliveryDays: 7, revisions: -1, features: ["Three things"] },
+    basic: { title: "Basic", description: "Basic package", price: 1500, deliveryDays: 2, revisions: 1, features: ["One thing"] },
+    standard: { title: "Standard", description: "Standard package", price: 3500, deliveryDays: 4, revisions: 2, features: ["Two things"] },
+    premium: { title: "Premium", description: "Premium package", price: 8000, deliveryDays: 7, revisions: -1, features: ["Three things"] },
   },
 };
 await step("create a draft gig", async () => {
-  const r = await marcus.post("/gigs", { ...gigBody, category: ctx.categoryId });
+  const r = await rahul.post("/gigs", { ...gigBody, category: ctx.categoryId });
   expectStatus(r, 201);
   assert.equal(r.data.gig.status, "draft");
-  assert.equal(r.data.gig.startingPrice, 50);
+  assert.equal(r.data.gig.startingPrice, 1500);
   ctx.newGigId = r.data.gig._id;
 });
 await step("draft is hidden from the public (404)", async () => expectStatus(await anon.get(`/gigs/${ctx.newGigId}`), 404));
 await step("publishing without images fails (400)", async () =>
-  expectStatus(await marcus.patch(`/gigs/${ctx.newGigId}/status`, { status: "published" }), 400));
+  expectStatus(await rahul.patch(`/gigs/${ctx.newGigId}/status`, { status: "published" }), 400));
 await step("add an image, then publish", async () => {
-  expectStatus(await marcus.put(`/gigs/${ctx.newGigId}`, { ...gigBody, category: ctx.categoryId, images: [{ url: "https://placehold.co/800x500/png" }] }), 200);
-  const r = await marcus.patch(`/gigs/${ctx.newGigId}/status`, { status: "published" });
+  expectStatus(await rahul.put(`/gigs/${ctx.newGigId}`, { ...gigBody, category: ctx.categoryId, images: [{ url: "https://placehold.co/800x500/png" }] }), 200);
+  const r = await rahul.patch(`/gigs/${ctx.newGigId}/status`, { status: "published" });
   expectStatus(r, 200);
   assert.equal(r.data.gig.status, "published");
 });
@@ -290,19 +290,19 @@ await step("published gig is listed in the marketplace", async () => {
   assert.ok(r.data.gigs.some((g) => g._id === ctx.newGigId));
 });
 await step("another freelancer cannot edit it (403)", async () =>
-  expectStatus(await elena.put(`/gigs/${ctx.newGigId}`, { ...gigBody, category: ctx.categoryId }), 403));
+  expectStatus(await priya.put(`/gigs/${ctx.newGigId}`, { ...gigBody, category: ctx.categoryId }), 403));
 await step("pausing hides it", async () => {
-  expectStatus(await marcus.patch(`/gigs/${ctx.newGigId}/status`, { status: "paused" }), 200);
+  expectStatus(await rahul.patch(`/gigs/${ctx.newGigId}/status`, { status: "paused" }), 200);
   const r = await anon.get("/gigs?sort=newest&limit=50");
   assert.ok(!r.data.gigs.some((g) => g._id === ctx.newGigId));
   expectStatus(await anon.get(`/gigs/${ctx.newGigId}`), 404);
 });
-await step("a gig with orders cannot be deleted (409)", async () => expectStatus(await marcus.del(`/gigs/${ctx.gigId}`), 409));
-await step("delete the test gig", async () => expectStatus(await marcus.del(`/gigs/${ctx.newGigId}`), 200));
+await step("a gig with orders cannot be deleted (409)", async () => expectStatus(await rahul.del(`/gigs/${ctx.gigId}`), 409));
+await step("delete the test gig", async () => expectStatus(await rahul.del(`/gigs/${ctx.newGigId}`), 200));
 
 console.log("\nDashboards");
 await step("freelancer dashboard shows real earnings", async () => {
-  const r = await marcus.get("/dashboard/freelancer");
+  const r = await rahul.get("/dashboard/freelancer");
   expectStatus(r, 200);
   assert.ok(r.data.stats.completedOrders >= 1);
   assert.ok(r.data.stats.earnings.released >= ctx.basicPrice);

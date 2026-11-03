@@ -9,6 +9,7 @@ export async function createSimulatedPayment({ order, session }) {
     payer: order.client,
     payee: order.freelancer,
     amount: order.price,
+    currency: "INR",
     status: "held",
     provider: "simulated",
     isSimulated: true,

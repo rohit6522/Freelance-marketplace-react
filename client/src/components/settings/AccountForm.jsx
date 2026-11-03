@@ -6,7 +6,7 @@ import FieldError from "../ui/FieldError";
 import { inputCls, labelCls, primaryBtn } from "../ui/formStyles";
 import { useAuth } from "../../hooks/useAuth";
 import { profileService } from "../../services/profileService";
-import { monthYear } from "../../utils/format";
+import { monthYear, formatPhoneNumber } from "../../utils/format";
 
 export default function AccountForm() {
   const { user, setUser } = useAuth();
@@ -16,8 +16,11 @@ export default function AccountForm() {
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
     defaultValues: {
-      firstName: user.firstName, lastName: user.lastName,
-      companyName: user.companyName || "", domainFocus: user.domainFocus || "",
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone ? formatPhoneNumber(user.phone) : "",
+      companyName: user.companyName || "",
+      domainFocus: user.domainFocus || "",
     },
   });
 
@@ -27,11 +30,18 @@ export default function AccountForm() {
       const updated = await profileService.updateAccount({
         firstName: v.firstName.trim(),
         lastName: v.lastName.trim(),
+        phone: v.phone ? v.phone.trim() : "",
         companyName: v.companyName.trim(),
         domainFocus: v.domainFocus.trim(),
       });
       setUser(updated);
-      reset({ ...v });
+      reset({
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+        phone: updated.phone ? formatPhoneNumber(updated.phone) : "",
+        companyName: updated.companyName || "",
+        domainFocus: updated.domainFocus || "",
+      });
       toast.success("Account updated");
     } catch (err) {
       setServerError(err.message);
@@ -63,6 +73,27 @@ export default function AccountForm() {
           <label htmlFor="email" className={labelCls}>Email</label>
           <input id="email" value={user.email} readOnly disabled className={`${inputCls(false)} bg-surface-container-low text-on-surface-variant`} />
           <p className="font-code-sm text-code-sm text-on-surface-variant mt-1">Email can't be changed in this version.</p>
+        </div>
+        <div>
+          <label htmlFor="phone" className={labelCls}>Phone number (+91 Indian Mobile)</label>
+          <input
+            id="phone"
+            type="tel"
+            placeholder="+91 98765 43210"
+            className={inputCls(errors.phone)}
+            {...register("phone", {
+              validate: (val) => {
+                if (!val || !val.trim()) return true;
+                const digits = val.replace(/\D/g, "");
+                return (
+                  (digits.length === 10 && /^[6-9]/.test(digits)) ||
+                  (digits.length === 12 && digits.startsWith("91") && /^[6-9]/.test(digits.slice(2))) ||
+                  "Enter a valid 10-digit Indian mobile number (e.g. +91 98765 43210)"
+                );
+              },
+            })}
+          />
+          <FieldError message={errors.phone?.message} />
         </div>
         {user.role === "client" && (
           <div>

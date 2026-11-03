@@ -143,8 +143,8 @@ Query parameters:
 {
   "q": "figma",
   "category": "graphics-and-design",
-  "minPrice": 50,
-  "maxPrice": 600,
+  "minPrice": 1000,
+  "maxPrice": 30000,
   "maxDelivery": 7,
   "minRating": 4.5,
   "levels": "pro,top_rated",
@@ -178,7 +178,7 @@ Example body:
     "basic": {
       "title": "Starter",
       "description": "Starter package",
-      "price": 60,
+      "price": 3500,
       "deliveryDays": 2,
       "revisions": 1,
       "features": [
@@ -188,7 +188,7 @@ Example body:
     "standard": {
       "title": "Growth",
       "description": "Growth package",
-      "price": 120,
+      "price": 8500,
       "deliveryDays": 4,
       "revisions": 2,
       "features": [
@@ -198,7 +198,7 @@ Example body:
     "premium": {
       "title": "Scale",
       "description": "Scale package",
-      "price": 240,
+      "price": 22000,
       "deliveryDays": 7,
       "revisions": -1,
       "features": [
@@ -232,7 +232,7 @@ Example body:
     "basic": {
       "title": "Starter",
       "description": "Starter package",
-      "price": 60,
+      "price": 3500,
       "deliveryDays": 2,
       "revisions": 1,
       "features": [
@@ -242,7 +242,7 @@ Example body:
     "standard": {
       "title": "Growth",
       "description": "Growth package",
-      "price": 120,
+      "price": 8500,
       "deliveryDays": 4,
       "revisions": 2,
       "features": [
@@ -252,7 +252,7 @@ Example body:
     "premium": {
       "title": "Scale",
       "description": "Scale package",
-      "price": 240,
+      "price": 22000,
       "deliveryDays": 7,
       "revisions": -1,
       "features": [

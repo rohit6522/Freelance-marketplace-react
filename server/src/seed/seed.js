@@ -33,110 +33,110 @@ const categoryNames = [
 
 const freelancers = [
   {
-    key: "elena", firstName: "Elena", lastName: "Rostova", email: "elena@gigcraft.test",
-    title: "Senior Product & UI/UX Systems Designer", location: "Berlin, Germany",
+    key: "priya", firstName: "Priya", lastName: "Verma", email: "priya@gigcraft.test", phone: "+91 98111 22334",
+    title: "Lead UI/UX Designer & Design Systems Architect", location: "Bengaluru, Karnataka",
     skills: ["Figma", "Design Systems", "UX Research", "Prototyping", "SaaS UI", "Tailwind CSS"],
-    languages: [{ name: "German", level: "native" }, { name: "English", level: "fluent" }, { name: "Spanish", level: "conversational" }],
-    experienceYears: 8, hourlyRate: 95, sellerLevel: "top_rated", category: "Graphics & Design",
+    languages: [{ name: "Hindi", level: "native" }, { name: "English", level: "fluent" }, { name: "Kannada", level: "conversational" }],
+    experienceYears: 8, hourlyRate: 2500, sellerLevel: "top_rated", category: "Graphics & Design",
     gig: {
       title: "I will design a conversion-focused SaaS dashboard and responsive web app in Figma",
       tags: ["figma", "saas", "ui/ux"],
       packages: {
-        basic: pkg("Basic Prototype Suite", 120, 3, 2, ["1-3 Custom SaaS Dashboard Screens", "Source File Included (.fig)"]),
-        standard: pkg("Standard Core Suite", 280, 5, 4, ["6 Custom SaaS Dashboard Screens", "Interactive Clickable Prototype", "Source File + Export Assets Kit"]),
-        premium: pkg("Enterprise Design System", 550, 10, -1, ["15+ Advanced Views", "Complete Design Tokens (JSON)", "Production Handoff Redlines"]),
+        basic: pkg("Starter UI Wireframe Suite", 3500, 3, 2, ["1-3 Custom Dashboard Screens", "Figma Source File (.fig)"]),
+        standard: pkg("Core Design System Suite", 8500, 5, 4, ["6 Custom SaaS Screens", "Clickable Interactive Prototype", "Asset Export Kit"]),
+        premium: pkg("Enterprise Scale Design System", 22000, 10, -1, ["15+ Advanced Responsive Views", "Complete Design Tokens (JSON)", "Developer Handoff Redlines"]),
       },
     },
   },
   {
-    key: "marcus", firstName: "Marcus", lastName: "Chen", email: "marcus@gigcraft.test",
-    title: "Full-Stack Next.js Engineer", location: "Singapore",
-    skills: ["React", "Next.js", "Node.js", "TypeScript", "Tailwind CSS"],
-    languages: [{ name: "English", level: "fluent" }, { name: "Mandarin", level: "native" }],
-    experienceYears: 6, hourlyRate: 80, sellerLevel: "pro", category: "Web Development",
+    key: "rahul", firstName: "Rahul", lastName: "Sharma", email: "rahul@gigcraft.test", phone: "+91 98222 33445",
+    title: "Senior Full-Stack MERN & Next.js Engineer", location: "Gurugram, Haryana",
+    skills: ["React", "Next.js", "Node.js", "TypeScript", "Tailwind CSS", "MongoDB"],
+    languages: [{ name: "Hindi", level: "native" }, { name: "English", level: "fluent" }],
+    experienceYears: 6, hourlyRate: 2000, sellerLevel: "pro", category: "Web Development",
     gig: {
       title: "I will build full-stack responsive web applications using Next.js and Node",
       tags: ["react", "next.js", "frontend"],
       packages: {
-        basic: pkg("Landing Page", 350, 4, 2, ["Responsive layout", "Basic SEO"]),
-        standard: pkg("Full Web App", 700, 10, 3, ["Auth + dashboard", "REST API integration"]),
-        premium: pkg("Production SaaS", 1400, 21, -1, ["Full-stack build", "Deployment + CI"]),
+        basic: pkg("High-Speed Landing Page", 6500, 4, 2, ["Responsive Layout", "On-Page SEO", "Tailwind Styling"]),
+        standard: pkg("Full Stack Web Application", 18000, 10, 3, ["JWT Auth + Dashboard", "REST API & MongoDB", "State Management"]),
+        premium: pkg("Production SaaS Platform", 45000, 21, -1, ["End-to-End SaaS Build", "Payment Webhooks", "CI/CD & Cloud Deployment"]),
       },
     },
   },
   {
-    key: "sarah", firstName: "Sarah", lastName: "Jenkins", email: "sarah@gigcraft.test",
-    title: "Brand Identity Designer", location: "London, UK",
-    skills: ["Branding", "Vector", "Identity", "Typography"],
-    languages: [{ name: "English", level: "native" }],
-    experienceYears: 5, hourlyRate: 60, sellerLevel: "pro", category: "Graphics & Design",
+    key: "ananya", firstName: "Ananya", lastName: "Singh", email: "ananya@gigcraft.test", phone: "+91 98333 44556",
+    title: "Brand Identity Specialist & Art Director", location: "Mumbai, Maharashtra",
+    skills: ["Branding", "Vector Design", "Typography", "Visual Identity", "Illustrator"],
+    languages: [{ name: "Hindi", level: "native" }, { name: "English", level: "fluent" }, { name: "Marathi", level: "conversational" }],
+    experienceYears: 5, hourlyRate: 1500, sellerLevel: "pro", category: "Graphics & Design",
     gig: {
       title: "I will craft modern brand identity guidelines and logo systems",
       tags: ["branding", "vector", "identity"],
       packages: {
-        basic: pkg("Logo Starter", 120, 3, 2, ["2 logo concepts", "Vector files"]),
-        standard: pkg("Brand Kit", 260, 6, 3, ["Logo + color palette", "Typography guide"]),
-        premium: pkg("Full Identity", 480, 10, -1, ["Complete brand guidelines", "Social media kit"]),
+        basic: pkg("Logo Starter Kit", 2500, 3, 2, ["2 Creative Concepts", "Vector & High-Res PNG Exports"]),
+        standard: pkg("Comprehensive Brand Kit", 7500, 6, 3, ["Primary & Secondary Logos", "Color Palette + Typography Rules", "Brand Guidelines PDF"]),
+        premium: pkg("Complete Enterprise Brand Suite", 16000, 10, -1, ["Full Brand Identity System", "Social Media & Stationery Kit", "Copyright Transfer & Source Files"]),
       },
     },
   },
   {
-    key: "david", firstName: "David", lastName: "Miller", email: "david@gigcraft.test",
-    title: "Mobile App UI Designer", location: "Austin, USA",
-    skills: ["Mobile", "iOS", "Flutter", "Figma"],
-    languages: [{ name: "English", level: "native" }],
-    experienceYears: 4, hourlyRate: 70, sellerLevel: "top_rated", category: "Graphics & Design",
+    key: "arjun", firstName: "Arjun", lastName: "Patel", email: "arjun@gigcraft.test", phone: "+91 98444 55667",
+    title: "Mobile App UI/UX & Flutter Engineer", location: "Ahmedabad, Gujarat",
+    skills: ["Flutter", "iOS", "Android", "Mobile UI", "Figma", "Dart"],
+    languages: [{ name: "Gujarati", level: "native" }, { name: "Hindi", level: "fluent" }, { name: "English", level: "fluent" }],
+    experienceYears: 4, hourlyRate: 1800, sellerLevel: "top_rated", category: "Graphics & Design",
     gig: {
       title: "I will design intuitive mobile app UI for iOS and Android",
       tags: ["mobile", "ios", "flutter"],
       packages: {
-        basic: pkg("Basic Screens", 220, 1, 1, ["3 mobile screens", "Figma source"]),
-        standard: pkg("App Flow", 450, 4, 3, ["10 mobile screens", "Clickable prototype"]),
-        premium: pkg("Complete App UI", 900, 8, -1, ["25+ screens", "Design system"]),
+        basic: pkg("Essential Mobile Screens", 4500, 2, 2, ["3 Mobile App Screens", "Figma Components", "iOS/Android Guidelines"]),
+        standard: pkg("Complete Feature Flow", 12000, 5, 3, ["8-10 Mobile Screens", "Clickable Interactive Prototype", "Design Handoff Guide"]),
+        premium: pkg("Full Mobile App Experience", 28000, 12, -1, ["20+ Custom Screens", "Design Token Library", "Component States & Micro-interactions"]),
       },
     },
   },
   {
-    key: "amina", firstName: "Amina", lastName: "Al-Mansour", email: "amina@gigcraft.test",
-    title: "Technical Writer & SEO Specialist", location: "Dubai, UAE",
-    skills: ["Tech Writing", "SEO", "Articles"],
-    languages: [{ name: "English", level: "fluent" }, { name: "Arabic", level: "native" }],
-    experienceYears: 3, hourlyRate: 40, sellerLevel: "rising", category: "Writing & Translation",
+    key: "sneha", firstName: "Sneha", lastName: "Gupta", email: "sneha@gigcraft.test", phone: "+91 98555 66778",
+    title: "Technical Content Strategist & SEO Specialist", location: "New Delhi",
+    skills: ["Technical Writing", "SEO Optimization", "Content Strategy", "Developer Docs"],
+    languages: [{ name: "Hindi", level: "native" }, { name: "English", level: "fluent" }],
+    experienceYears: 4, hourlyRate: 1200, sellerLevel: "rising", category: "Writing & Translation",
     gig: {
       title: "I will write SEO-optimized technical blog posts and articles",
       tags: ["tech writing", "seo", "articles"],
       packages: {
-        basic: pkg("Single Article", 85, 3, 1, ["1000 words", "Keyword research"]),
-        standard: pkg("Article Bundle", 160, 5, 2, ["3 articles", "Meta descriptions"]),
-        premium: pkg("Content Plan", 300, 10, 3, ["6 articles", "Editorial calendar"]),
+        basic: pkg("Single Deep-Dive Article", 1500, 3, 1, ["1,000 Words", "Keyword & Competitor Research", "Code Snippets Included"]),
+        standard: pkg("High-Authority Article Bundle", 4000, 5, 2, ["3 Technical Articles (1,200 words each)", "Meta Tags & SEO Formatting", "Diagrams & References"]),
+        premium: pkg("Monthly Tech Content Strategy", 9500, 10, 3, ["6 Comprehensive Articles", "Keyword Strategy & Topic Cluster", "Editorial Calendar"]),
       },
     },
   },
   {
-    key: "lucas", firstName: "Lucas", lastName: "Vance", email: "lucas@gigcraft.test",
-    title: "3D & Motion Designer", location: "Toronto, Canada",
-    skills: ["3D", "Blender", "Motion"],
-    languages: [{ name: "English", level: "native" }, { name: "French", level: "conversational" }],
-    experienceYears: 7, hourlyRate: 90, sellerLevel: "pro", category: "Video & Animation",
+    key: "rohit", firstName: "Rohit", lastName: "Yadav", email: "rohit@gigcraft.test", phone: "+91 98666 77889",
+    title: "3D Visualizer & Motion Graphics Artist", location: "Pune, Maharashtra",
+    skills: ["3D Modeling", "Blender", "After Effects", "Motion Design", "Cinema 4D"],
+    languages: [{ name: "Hindi", level: "native" }, { name: "English", level: "fluent" }, { name: "Marathi", level: "conversational" }],
+    experienceYears: 7, hourlyRate: 2200, sellerLevel: "pro", category: "Video & Animation",
     gig: {
       title: "I will create 3D product animations and interactive web experiences",
       tags: ["3d", "blender", "motion"],
       packages: {
-        basic: pkg("Single Render", 450, 5, 1, ["1 product render", "4K export"]),
-        standard: pkg("Animated Spot", 900, 10, 2, ["15s animation", "Sound design"]),
-        premium: pkg("Product Campaign", 1800, 21, 3, ["30s hero animation", "Social cutdowns"]),
+        basic: pkg("3D Product Render", 5000, 4, 1, ["1 Photorealistic Render", "4K Ultra-HD Export", "Transparent & Studio Background"]),
+        standard: pkg("Commercial 3D Animation", 15000, 8, 2, ["15-Second Motion Video", "Sound Effects & Background Audio", "Full HD MP4 Export"]),
+        premium: pkg("Flagship 3D Product Campaign", 35000, 16, 3, ["30-Second Hero Animation", "Multiple Aspect Ratios for Socials", "Interactive WebGL Assets Included"]),
       },
     },
   },
 ];
 
 const reviewTexts = [
-  "Outstanding work. Clear communication and delivered exactly what was scoped.",
-  "Precise, fast, and professional. Would hire again for the next sprint.",
-  "Great quality overall, with a couple of small revisions handled quickly.",
-  "Excellent attention to detail and well-organized deliverables.",
-  "Delivered ahead of schedule with zero unnecessary back-and-forth.",
-  "Strong results. Minor delay, but communication was great throughout.",
+  "Outstanding work! Delivered crisp Figma screens on time with great attention to detail.",
+  "Precise, clean, and professional full-stack implementation. Our team will definitely hire again.",
+  "Great design sensibilities and seamless communication on WhatsApp and Slack. Handled all iterations smoothly.",
+  "Excellent mobile UX flow and pixel-perfect components. Highly recommend for any mobile project.",
+  "Delivered well ahead of schedule with zero unnecessary back-and-forth. Thoroughly researched article.",
+  "Exceptional 3D render quality and motion dynamics. Truly elevated our product showcase.",
 ];
 const ratings = [5, 5, 4, 5, 5, 4];
 
@@ -154,10 +154,11 @@ async function run() {
   );
   const catByName = Object.fromEntries(categories.map((c) => [c.name, c]));
 
-  // Client (buyer)
+  // Client (buyer) - Indian business identity
   const client = await User.create({
-    firstName: "Jordan", lastName: "Lee", email: "client@gigcraft.test",
-    password: PASSWORD, role: "client", companyName: "Apex Cloud Labs",
+    firstName: "Aman", lastName: "Kumar", email: "client@gigcraft.test",
+    phone: "+91 98765 43210",
+    password: PASSWORD, role: "client", companyName: "Apex Cloud Labs India",
   });
 
   // Freelancers, profiles, gigs
@@ -165,15 +166,16 @@ async function run() {
   for (const f of freelancers) {
     const user = await User.create({
       firstName: f.firstName, lastName: f.lastName, email: f.email,
+      phone: f.phone,
       password: PASSWORD, role: "freelancer", domainFocus: f.title,
     });
     await FreelancerProfile.create({
       user: user._id, title: f.title, location: f.location, skills: f.skills,
       languages: f.languages, experienceYears: f.experienceYears, hourlyRate: f.hourlyRate,
       sellerLevel: f.sellerLevel,
-      bio: `${f.title} with ${f.experienceYears}+ years of experience delivering production-grade work for product teams.`,
+      bio: `${f.title} based in ${f.location} with ${f.experienceYears}+ years of experience delivering high-quality work for fast-growing startups and enterprises across India.`,
       workHistory: [
-        { title: f.title, company: "Independent", location: f.location, startYear: 2021, endYear: null },
+        { title: f.title, company: "Independent Specialist", location: f.location, startYear: 2021, endYear: null },
       ],
     });
     const gig = await Gig.create({
@@ -189,8 +191,8 @@ async function run() {
     await PortfolioProject.create({
       freelancer: user._id,
       title: `${f.firstName}'s featured case study`,
-      description: "A representative project showing scope, process, and measurable outcomes.",
-      industry: "SaaS", metric: "+40% conversion", durationWeeks: 8,
+      description: "A representative project showing scope, process, and measurable outcomes for an Indian digital platform.",
+      industry: "Fintech & SaaS", metric: "+40% conversion", durationWeeks: 8,
       deliverables: f.skills.slice(0, 3), images: [img("Case study")],
       externalLink: "https://example.com",
     });
@@ -216,6 +218,7 @@ async function run() {
     });
     await Payment.create({
       order: order._id, payer: client._id, payee: user._id, amount: order.price,
+      currency: "INR",
       status: "released", transactionRef: `SIM-${order.orderNumber}`, releasedAt: new Date(),
     });
     await Review.create({
@@ -224,20 +227,21 @@ async function run() {
     });
   }
 
-  // One active order (Elena, Standard) like the Orders screen
-  const { gig: elenaGig, user: elena } = gigs[0];
-  const sp = elenaGig.packages.standard;
+  // One active order (Priya Verma, Standard) like the Orders screen
+  const { gig: priyaGig, user: priya } = gigs[0];
+  const sp = priyaGig.packages.standard;
   const active = await Order.create({
-    gig: elenaGig._id, client: client._id, freelancer: elena._id, packageTier: "standard",
+    gig: priyaGig._id, client: client._id, freelancer: priya._id, packageTier: "standard",
     packageSnapshot: { title: sp.title, price: sp.price, deliveryDays: sp.deliveryDays, revisions: sp.revisions, features: sp.features },
     price: sp.price,
     requirements: "Production-ready multi-tenant admin dashboard with dark/light design tokens and responsive navigation.",
     status: "in_progress",
     dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-    statusHistory: [{ status: "pending", by: client._id }, { status: "in_progress", by: elena._id }],
+    statusHistory: [{ status: "pending", by: client._id }, { status: "in_progress", by: priya._id }],
   });
   await Payment.create({
-    order: active._id, payer: client._id, payee: elena._id, amount: active.price,
+    order: active._id, payer: client._id, payee: priya._id, amount: active.price,
+    currency: "INR",
     status: "held", transactionRef: `SIM-${active.orderNumber}`,
   });
 
@@ -254,8 +258,8 @@ async function run() {
   console.log(`Orders:     ${await Order.countDocuments()}`);
   console.log(`Reviews:    ${await Review.countDocuments()}`);
   console.log("\nTest accounts (password for all: " + PASSWORD + ")");
-  console.log("  Client:     client@gigcraft.test");
-  freelancers.forEach((f) => console.log(`  Freelancer: ${f.email}`));
+  console.log("  Client:     client@gigcraft.test (Aman Kumar)");
+  freelancers.forEach((f) => console.log(`  Freelancer: ${f.email} (${f.firstName} ${f.lastName} - ${f.location})`));
 
   await mongoose.disconnect();
 }

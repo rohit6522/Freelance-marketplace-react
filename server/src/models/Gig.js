@@ -4,7 +4,7 @@ const packageSchema = new mongoose.Schema(
   {
     title: { type: String, required: [true, "Package title is required"], trim: true, maxlength: 80 },
     description: { type: String, required: [true, "Package description is required"], trim: true, maxlength: 500 },
-    price: { type: Number, required: [true, "Package price is required"], min: [5, "Minimum price is $5"] },
+    price: { type: Number, required: [true, "Package price is required"], min: [50, "Minimum price is ₹50"] },
     deliveryDays: { type: Number, required: true, min: 1, max: 180 },
     revisions: { type: Number, required: true, min: -1, default: 1 }, // -1 = unlimited
     features: [{ type: String, trim: true, maxlength: 120 }],

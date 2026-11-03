@@ -430,7 +430,7 @@ export default function RegisterPage() {
               </div>
               <div className="bg-surface-container-lowest border border-outline-variant p-2.5">
                 <span className="font-code-sm text-code-sm text-on-surface-variant block">ESCROW VOLUME</span>
-                <span className="font-headline-sm text-headline-sm text-on-surface font-bold block mt-0.5">$24.2M</span>
+                <span className="font-headline-sm text-headline-sm text-on-surface font-bold block mt-0.5">₹24.2 Cr</span>
                 <span className="font-code-sm text-[10px] text-on-surface-variant block mt-0.5">Q1 VERIFIED</span>
               </div>
             </div>
@@ -457,10 +457,10 @@ export default function RegisterPage() {
               <div className="w-12 h-12 bg-surface-container-high border border-outline flex items-center justify-center font-headline-sm text-on-surface font-bold">AK</div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-label-md text-label-md text-on-surface truncate">Alex K.</span>
+                  <span className="font-label-md text-label-md text-on-surface truncate">Aman K.</span>
                   <span className="px-1.5 bg-primary-fixed text-on-primary-fixed font-code-sm text-[10px] border border-primary">STAFF ARCHITECT</span>
                 </div>
-                <p className="font-body-sm text-body-sm text-on-surface-variant truncate">Distributed Systems &amp; Rust</p>
+                <p className="font-body-sm text-body-sm text-on-surface-variant truncate">Full-Stack Architect, Bengaluru</p>
               </div>
             </div>
             <div className="mt-space-sm pt-space-xs border-t border-outline-variant">
@@ -481,7 +481,7 @@ export default function RegisterPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-space-md">
           {[
             ["gavel", "Deterministic Escrow", "Zero upfront platform commission until milestone delivery passes static code analysis and buyer verification."],
-            ["security", "SOC-2 Type II Custody", "Enterprise payroll, tax compliance (1099/W8-BEN), and bank disbursements across 140+ countries."],
+            ["security", "SOC-2 Type II Custody", "GST & TDS compliant invoicing, milestone escrow, and direct payouts via NEFT, UPI & IMPS across India."],
             ["verified", "Pre-Screened Talent", "Only the top 3% of technical applicants pass algorithmic repo evaluations and live architecture screens."],
           ].map(([icon, title, text]) => (
             <div key={title} className="flex items-start gap-space-sm">

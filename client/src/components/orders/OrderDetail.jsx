@@ -97,7 +97,7 @@ export default function OrderDetail({ data, role, onChanged }) {
           </div>
           <div>
             <span className="font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant block mb-1">Vault Commitment</span>
-            <div className="font-headline-sm text-headline-sm text-primary font-bold leading-tight">{money(order.price)} USD</div>
+            <div className="font-headline-sm text-headline-sm text-primary font-bold leading-tight">{money(order.price)}</div>
             <span className="font-code-sm text-code-sm text-primary uppercase font-bold flex items-center gap-1">
               <Icon name={payIcon} className="text-body-sm" /> {payText}
             </span>

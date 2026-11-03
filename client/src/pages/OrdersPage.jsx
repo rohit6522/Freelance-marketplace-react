@@ -9,7 +9,7 @@ import { useAuth } from "../hooks/useAuth";
 import { orderService } from "../services/orderService";
 import { dashboardService } from "../services/dashboardService";
 import { downloadCsv } from "../utils/csv";
-import { fullName, statusLabel } from "../utils/format";
+import { fullName, statusLabel, formatIndianDate } from "../utils/format";
 
 const PAGE_SIZE = 8;
 
@@ -99,15 +99,15 @@ export default function OrdersPage() {
 
   const exportCsv = () => {
     const rows = [
-      ["Order", "Status", "Gig", "Counterparty", "Price (USD)", "Due", "Created"],
+      ["Order", "Status", "Gig", "Counterparty", "Price (INR)", "Due", "Created"],
       ...list.orders.map((o) => [
         o.orderNumber,
         statusLabel(o.status, role),
         o.gig?.title || o.packageSnapshot?.title,
         role === "client" ? fullName(o.freelancer) : o.client?.companyName || fullName(o.client),
         o.price,
-        o.dueDate ? new Date(o.dueDate).toISOString().slice(0, 10) : "",
-        new Date(o.createdAt).toISOString().slice(0, 10),
+        o.dueDate ? formatIndianDate(o.dueDate) : "",
+        formatIndianDate(o.createdAt),
       ]),
     ];
     downloadCsv("gigcraft-orders.csv", rows);

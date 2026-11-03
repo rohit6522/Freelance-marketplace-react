@@ -4,6 +4,14 @@ export const accountRules = [
   body("firstName").optional().isString().trim().isLength({ min: 1, max: 50 }).withMessage("First name must be 1-50 characters"),
   body("lastName").optional().isString().trim().isLength({ min: 1, max: 50 }).withMessage("Last name must be 1-50 characters"),
   body("companyName").optional().isString().trim().isLength({ max: 100 }).withMessage("Company name is too long"),
+  body("phone").optional({ values: "falsy" }).isString().trim().custom((val) => {
+    if (!val) return true;
+    const digits = val.replace(/\D/g, "");
+    if (!((digits.length === 10 && /^[6-9]/.test(digits)) || (digits.length === 12 && digits.startsWith("91") && /^[6-9]/.test(digits.slice(2))))) {
+      throw new Error("Please provide a valid 10-digit Indian mobile number (e.g. +91 98765 43210)");
+    }
+    return true;
+  }),
   body("domainFocus").optional().isString().trim().isLength({ max: 100 }).withMessage("Domain focus is too long"),
 ];
 
@@ -17,7 +25,7 @@ export const freelancerProfileRules = [
   body("languages.*.name").isString().trim().notEmpty().withMessage("Language name is required"),
   body("languages.*.level").isIn(["basic", "conversational", "fluent", "native"]).withMessage("Invalid language level"),
   body("experienceYears").optional().isInt({ min: 0, max: 60 }).withMessage("Experience must be 0-60 years"),
-  body("hourlyRate").optional().isFloat({ min: 0, max: 10000 }).withMessage("Invalid hourly rate"),
+  body("hourlyRate").optional().isFloat({ min: 0, max: 100000 }).withMessage("Invalid hourly rate"),
   body("workHistory").optional().isArray({ max: 20 }).withMessage("A maximum of 20 work history entries"),
   body("workHistory.*.title").isString().trim().notEmpty().withMessage("Work title is required"),
   body("workHistory.*.company").isString().trim().notEmpty().withMessage("Company is required"),

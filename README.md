@@ -71,8 +71,8 @@ In Atlas, add your IP under **Network Access**.
 | Role | Email |
 |---|---|
 | Client | client@gigcraft.test |
-| Freelancer | elena@gigcraft.test (UI/UX, has an order in progress) |
-| Freelancer | marcus@gigcraft.test, sarah@gigcraft.test, david@gigcraft.test, amina@gigcraft.test, lucas@gigcraft.test |
+| Freelancer | priya@gigcraft.test (UI/UX - Bengaluru, has an order in progress) |
+| Freelancer | rahul@gigcraft.test (MERN/Next.js - Gurugram), ananya@gigcraft.test (Branding - Mumbai), arjun@gigcraft.test (Flutter - Ahmedabad), sneha@gigcraft.test (Tech Writing - New Delhi), rohit@gigcraft.test (3D/Motion - Pune) |
 
 ## Environment variables
 

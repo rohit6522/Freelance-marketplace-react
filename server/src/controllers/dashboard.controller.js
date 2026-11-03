@@ -115,7 +115,7 @@ export const freelancerDashboard = asyncHandler(async (req, res) => {
     const d = new Date(Date.UTC(since.getUTCFullYear(), since.getUTCMonth() + i, 1));
     const row = monthRows.find((r) => r._id.y === d.getUTCFullYear() && r._id.m === d.getUTCMonth() + 1);
     monthly.push({
-      month: d.toLocaleString("en-US", { month: "short", timeZone: "UTC" }),
+      month: d.toLocaleString("en-IN", { month: "short", timeZone: "Asia/Kolkata" }),
       year: d.getUTCFullYear(),
       amount: row ? row.amount : 0,
     });

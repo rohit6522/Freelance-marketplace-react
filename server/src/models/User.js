@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: [true, "Password is required"], minlength: 8, select: false },
     role: { type: String, enum: ["client", "freelancer"], required: true },
     companyName: { type: String, trim: true, maxlength: 100 },
+    phone: { type: String, trim: true },
     avatar: { url: String, publicId: String },
     domainFocus: { type: String, trim: true },
     marketingOptIn: { type: Boolean, default: false },

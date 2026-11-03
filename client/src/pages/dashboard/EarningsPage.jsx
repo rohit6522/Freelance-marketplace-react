@@ -28,9 +28,9 @@ export default function EarningsPage() {
 
   const exportCsv = () =>
     downloadCsv("gigcraft-payouts.csv", [
-      ["Date", "Order", "Gig", "Reference", "Status", "Amount (USD)"],
+      ["Date", "Order", "Gig", "Reference", "Status", "Amount (INR)"],
       ...pay.data.payments.map((p) => [
-        new Date(p.releasedAt || p.createdAt).toISOString().slice(0, 10),
+        shortDate(p.releasedAt || p.createdAt),
         p.order?.orderNumber, p.order?.gig?.title, p.transactionRef, STATUS[p.status]?.[0], p.amount,
       ]),
     ]);

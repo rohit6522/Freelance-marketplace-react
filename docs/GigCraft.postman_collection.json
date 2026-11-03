@@ -301,12 +301,12 @@
                 },
                 {
                   "key": "minPrice",
-                  "value": "50",
+                  "value": "1000",
                   "disabled": true
                 },
                 {
                   "key": "maxPrice",
-                  "value": "600",
+                  "value": "30000",
                   "disabled": true
                 },
                 {
@@ -428,7 +428,7 @@
             "description": "Create a gig (draft or published)\n\nAccess: Freelancer only",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"I will build a clean responsive landing page\",\n  \"category\": \"{{categoryId}}\",\n  \"description\": \"I will design and build a fast, accessible landing page with clear sections, strong typography and clean handoff files for your team.\",\n  \"tags\": [\n    \"landing\",\n    \"figma\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://placehold.co/800x500/png\"\n    }\n  ],\n  \"packages\": {\n    \"basic\": {\n      \"title\": \"Starter\",\n      \"description\": \"Starter package\",\n      \"price\": 60,\n      \"deliveryDays\": 2,\n      \"revisions\": 1,\n      \"features\": [\n        \"1 page\"\n      ]\n    },\n    \"standard\": {\n      \"title\": \"Growth\",\n      \"description\": \"Growth package\",\n      \"price\": 120,\n      \"deliveryDays\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"3 sections\"\n      ]\n    },\n    \"premium\": {\n      \"title\": \"Scale\",\n      \"description\": \"Scale package\",\n      \"price\": 240,\n      \"deliveryDays\": 7,\n      \"revisions\": -1,\n      \"features\": [\n        \"5 pages\"\n      ]\n    }\n  },\n  \"status\": \"draft\"\n}",
+              "raw": "{\n  \"title\": \"I will build a clean responsive landing page\",\n  \"category\": \"{{categoryId}}\",\n  \"description\": \"I will design and build a fast, accessible landing page with clear sections, strong typography and clean handoff files for your team.\",\n  \"tags\": [\n    \"landing\",\n    \"figma\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://placehold.co/800x500/png\"\n    }\n  ],\n  \"packages\": {\n    \"basic\": {\n      \"title\": \"Starter\",\n      \"description\": \"Starter package\",\n      \"price\": 3500,\n      \"deliveryDays\": 2,\n      \"revisions\": 1,\n      \"features\": [\n        \"1 page\"\n      ]\n    },\n    \"standard\": {\n      \"title\": \"Growth\",\n      \"description\": \"Growth package\",\n      \"price\": 8500,\n      \"deliveryDays\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"3 sections\"\n      ]\n    },\n    \"premium\": {\n      \"title\": \"Scale\",\n      \"description\": \"Scale package\",\n      \"price\": 22000,\n      \"deliveryDays\": 7,\n      \"revisions\": -1,\n      \"features\": [\n        \"5 pages\"\n      ]\n    }\n  },\n  \"status\": \"draft\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -473,7 +473,7 @@
             "description": "Update your gig\n\nAccess: Freelancer only",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"I will build a clean responsive landing page\",\n  \"category\": \"{{categoryId}}\",\n  \"description\": \"I will design and build a fast, accessible landing page with clear sections, strong typography and clean handoff files for your team.\",\n  \"tags\": [\n    \"landing\",\n    \"figma\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://placehold.co/800x500/png\"\n    }\n  ],\n  \"packages\": {\n    \"basic\": {\n      \"title\": \"Starter\",\n      \"description\": \"Starter package\",\n      \"price\": 60,\n      \"deliveryDays\": 2,\n      \"revisions\": 1,\n      \"features\": [\n        \"1 page\"\n      ]\n    },\n    \"standard\": {\n      \"title\": \"Growth\",\n      \"description\": \"Growth package\",\n      \"price\": 120,\n      \"deliveryDays\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"3 sections\"\n      ]\n    },\n    \"premium\": {\n      \"title\": \"Scale\",\n      \"description\": \"Scale package\",\n      \"price\": 240,\n      \"deliveryDays\": 7,\n      \"revisions\": -1,\n      \"features\": [\n        \"5 pages\"\n      ]\n    }\n  },\n  \"status\": \"draft\"\n}",
+              "raw": "{\n  \"title\": \"I will build a clean responsive landing page\",\n  \"category\": \"{{categoryId}}\",\n  \"description\": \"I will design and build a fast, accessible landing page with clear sections, strong typography and clean handoff files for your team.\",\n  \"tags\": [\n    \"landing\",\n    \"figma\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://placehold.co/800x500/png\"\n    }\n  ],\n  \"packages\": {\n    \"basic\": {\n      \"title\": \"Starter\",\n      \"description\": \"Starter package\",\n      \"price\": 3500,\n      \"deliveryDays\": 2,\n      \"revisions\": 1,\n      \"features\": [\n        \"1 page\"\n      ]\n    },\n    \"standard\": {\n      \"title\": \"Growth\",\n      \"description\": \"Growth package\",\n      \"price\": 8500,\n      \"deliveryDays\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"3 sections\"\n      ]\n    },\n    \"premium\": {\n      \"title\": \"Scale\",\n      \"description\": \"Scale package\",\n      \"price\": 22000,\n      \"deliveryDays\": 7,\n      \"revisions\": -1,\n      \"features\": [\n        \"5 pages\"\n      ]\n    }\n  },\n  \"status\": \"draft\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

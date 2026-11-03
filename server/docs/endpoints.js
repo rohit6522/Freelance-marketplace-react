@@ -9,9 +9,9 @@ const gigBody = {
   tags: ["landing", "figma"],
   images: [{ url: "https://placehold.co/800x500/png" }],
   packages: {
-    basic: pkg("Starter", 60, 2, 1, ["1 page"]),
-    standard: pkg("Growth", 120, 4, 2, ["3 sections"]),
-    premium: pkg("Scale", 240, 7, -1, ["5 pages"]),
+    basic: pkg("Starter", 3500, 2, 1, ["1 page"]),
+    standard: pkg("Growth", 8500, 4, 2, ["3 sections"]),
+    premium: pkg("Scale", 22000, 7, -1, ["5 pages"]),
   },
   status: "draft",
 };
@@ -37,7 +37,7 @@ export const groups = [
   ]},
   { name: "Gigs", items: [
     { method: "GET", path: "/gigs", auth: "public", summary: "Search, filter, sort and paginate published gigs (server-side)",
-      query: { q: "figma", category: "graphics-and-design", minPrice: 50, maxPrice: 600, maxDelivery: 7, minRating: 4.5, levels: "pro,top_rated", minExperience: 2, tags: "figma", sort: "relevance", page: 1, limit: 12 },
+      query: { q: "figma", category: "graphics-and-design", minPrice: 1000, maxPrice: 30000, maxDelivery: 7, minRating: 4.5, levels: "pro,top_rated", minExperience: 2, tags: "figma", sort: "relevance", page: 1, limit: 12 },
       notes: "sort: relevance | newest | price_asc | price_desc | rating | popular",
       save: [["gigId", "gigs.0._id"], ["freelancerId", "gigs.0.seller._id"]] },
     { method: "GET", path: "/gigs/mine", auth: "freelancer", summary: "Your own gigs with order stats" },

@@ -282,7 +282,7 @@ export default function LoginPage() {
                 <div>
                   <span className="font-code-sm text-code-sm uppercase text-on-surface-variant">Active Escrow Liquidity</span>
                   <div className="font-headline-lg text-headline-lg text-on-surface font-bold mt-1 tracking-tight">
-                    $1,842,500.00
+                    ₹1,84,25,000.00
                   </div>
                 </div>
                 <div className="p-2 bg-surface-container text-primary border border-outline-variant">
@@ -329,11 +329,11 @@ export default function LoginPage() {
               </p>
               <div className="mt-space-md pt-space-sm border-t border-outline-variant flex items-center justify-between">
                 <div>
-                  <div className="font-label-md text-label-md text-on-surface font-semibold">Marcus Vance</div>
-                  <div className="font-code-sm text-code-sm text-on-surface-variant">VP Infrastructure @ HyperLayer Corp</div>
+                  <div className="font-label-md text-label-md text-on-surface font-semibold">Rahul Sharma</div>
+                  <div className="font-code-sm text-code-sm text-on-surface-variant">VP Technology @ TechNova Labs, Bengaluru</div>
                 </div>
                 <span className="px-2 py-0.5 bg-surface-container font-code-sm text-code-sm text-primary border border-outline-variant">
-                  $340k+ Transacted
+                  ₹25,00,000+ Transacted
                 </span>
               </div>
             </div>

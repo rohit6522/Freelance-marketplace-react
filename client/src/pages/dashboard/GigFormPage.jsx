@@ -73,8 +73,8 @@ function PackageFields({ tier, register, errors }) {
       </div>
       <div className="grid grid-cols-2 gap-space-sm">
         <div>
-          <label htmlFor={name("price")} className={labelCls}>Price (USD)</label>
-          <input id={name("price")} type="number" step="1" min="5" className={inputCls(e.price)} {...register(name("price"), { required: "Required", min: { value: 5, message: "Minimum $5" }, max: { value: 100000, message: "Maximum $100,000" } })} />
+          <label htmlFor={name("price")} className={labelCls}>Price (₹ INR)</label>
+          <input id={name("price")} type="number" step="1" min="50" className={inputCls(e.price)} {...register(name("price"), { required: "Required", min: { value: 50, message: "Minimum ₹50" }, max: { value: 10000000, message: "Maximum ₹1,00,00,000" } })} />
           <FieldError message={e.price?.message} />
         </div>
         <div>

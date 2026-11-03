@@ -6,10 +6,10 @@ import { LEVELS } from "../../utils/format";
 const box = "w-[18px] h-[18px] border border-on-surface rounded-none";
 const labelCls = "flex items-center gap-space-xs cursor-pointer group py-0.5";
 const QUICK_RANGES = [
-  ["Under $50", "", "50"],
-  ["$50 - $150", "50", "150"],
-  ["$150 - $500", "150", "500"],
-  ["$500+", "500", ""],
+  ["Under ₹1,000", "", "1000"],
+  ["₹1,000 - ₹5,000", "1000", "5000"],
+  ["₹5,000 - ₹20,000", "5000", "20000"],
+  ["₹20,000+", "20000", ""],
 ];
 
 function Section({ title, index, last, children }) {
@@ -84,13 +84,13 @@ export default function GigFilters({ categories, applied, activeCount, onApply, 
           ))}
         </Section>
 
-        <Section title="Budget (USD)" index="03">
+        <Section title="Budget (₹ INR)" index="03">
           <div className="grid grid-cols-2 gap-space-xs mb-space-sm">
             {[["minPrice", "Min"], ["maxPrice", "Max"]].map(([key, label]) => (
               <div key={key}>
                 <label htmlFor={key} className="block font-label-sm text-label-sm text-secondary uppercase mb-1">{label}</label>
                 <div className="flex items-center border border-outline bg-surface-container-lowest">
-                  <span className="px-2 font-code-sm text-code-sm bg-surface-container-high text-on-surface border-r border-outline font-bold">$</span>
+                  <span className="px-2 font-code-sm text-code-sm bg-surface-container-high text-on-surface border-r border-outline font-bold">₹</span>
                   <input
                     id={key} type="number" min="0" inputMode="numeric" value={draft[key]}
                     onChange={(e) => set(key, e.target.value)}
