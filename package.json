@@ -1,0 +1,10 @@
+{
+  "name": "freelance-marketplace-react",
+  "private": true,
+  "engines": { "node": ">=20.19" },
+  "scripts": {
+    "install:all": "npm install --include=dev --prefix client && npm install --prefix server",
+    "build": "npm run install:all && npm run build --prefix client",
+    "start": "npm start --prefix server"
+  }
+}

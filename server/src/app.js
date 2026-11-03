@@ -9,7 +9,6 @@ import rateLimit from "express-rate-limit";
 import { env } from "./config/env.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import { sanitizeBody } from "./middleware/sanitize.js";
-
 import authRoutes from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import gigRoutes from "./routes/gig.routes.js";
@@ -34,14 +33,16 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        // Allow the CDNs this app uses (merged with Helmet's safe defaults)
         "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://placehold.co"],
         "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
+        "upgrade-insecure-requests": env.nodeEnv === "production" ? [] : null,
       },
     },
   })
 );
+
+
 app.use(cors({ origin: env.clientUrl, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -76,10 +77,10 @@ if (env.serveClient) {
   app.get(/^\/(?!api\/).*/, (req, res) => res.sendFile(path.join(dist, "index.html")));
 }
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
-  withCredentials: true, // httpOnly auth cookie
-});
+// const api = axios.create({
+//   baseURL: import.meta.env.VITE_API_URL || "/api",
+//   withCredentials: true, // httpOnly auth cookie
+// });
 
 app.use(notFound);
 app.use(errorHandler);

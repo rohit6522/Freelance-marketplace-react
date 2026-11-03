@@ -1,0 +1,1699 @@
+{
+  "info": {
+    "name": "GigCraft API",
+    "description": "Generated from server/docs/endpoints.js. Log in first; Postman stores the auth cookie. Ids are saved into collection variables automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ],
+              "query": []
+            },
+            "description": "Server health check\n\nAccess: Public"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "description": "Create an account and sign in (sets the httpOnly cookie)\n\nAccess: Public",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Secret123\",\n  \"role\": \"freelancer\",\n  \"domainFocus\": \"Fullstack\",\n  \"marketingOptIn\": false,\n  \"acceptTerms\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": "Sign in (remember=false gives a session cookie)\n\nAccess: Public",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"client@gigcraft.test\",\n  \"password\": \"Password123!\",\n  \"remember\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ],
+              "query": []
+            },
+            "description": "Clear the auth cookie\n\nAccess: Public"
+          }
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ],
+              "query": []
+            },
+            "description": "Current user (used to restore the session)\n\nAccess: Logged in"
+          }
+        },
+        {
+          "name": "POST /auth/forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ],
+              "query": []
+            },
+            "description": "Request a reset link (printed in the server console in this project)\n\nAccess: Public",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"client@gigcraft.test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /auth/reset-password/:resetToken",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password/{{resetToken}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password",
+                "{{resetToken}}"
+              ],
+              "query": []
+            },
+            "description": "Set a new password using the token from the reset link\n\nAccess: Public",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"NewPass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /auth/change-password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ],
+              "query": []
+            },
+            "description": "Change password (signs out other devices)\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "GET /categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ],
+              "query": []
+            },
+            "description": "All categories with published gig counts\n\nAccess: Public"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"categories.0._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"categoryId\", v); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gigs",
+      "item": [
+        {
+          "name": "GET /gigs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gigs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gigs"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "figma",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "graphics-and-design",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "50",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "600",
+                  "disabled": true
+                },
+                {
+                  "key": "maxDelivery",
+                  "value": "7",
+                  "disabled": true
+                },
+                {
+                  "key": "minRating",
+                  "value": "4.5",
+                  "disabled": true
+                },
+                {
+                  "key": "levels",
+                  "value": "pro,top_rated",
+                  "disabled": true
+                },
+                {
+                  "key": "minExperience",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "tags",
+                  "value": "figma",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "relevance",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "12",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Search, filter, sort and paginate published gigs (server-side)\n\nAccess: Public\n\nsort: relevance | newest | price_asc | price_desc | rating | popular"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"gigs.0._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"gigId\", v); }",
+                  "{ const v = \"gigs.0.seller._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"freelancerId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /gigs/mine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gigs/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gigs",
+                "mine"
+              ],
+              "query": []
+            },
+            "description": "Your own gigs with order stats\n\nAccess: Freelancer only"
+          }
+        },
+        {
+          "name": "GET /gigs/:gigId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gigs/{{gigId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gigs",
+                "{{gigId}}"
+              ],
+              "query": []
+            },
+            "description": "Gig detail with seller profile. Drafts are visible only to the owner\n\nAccess: Public"
+          }
+        },
+        {
+          "name": "POST /gigs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/gigs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gigs"
+              ],
+              "query": []
+            },
+            "description": "Create a gig (draft or published)\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"I will build a clean responsive landing page\",\n  \"category\": \"{{categoryId}}\",\n  \"description\": \"I will design and build a fast, accessible landing page with clear sections, strong typography and clean handoff files for your team.\",\n  \"tags\": [\n    \"landing\",\n    \"figma\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://placehold.co/800x500/png\"\n    }\n  ],\n  \"packages\": {\n    \"basic\": {\n      \"title\": \"Starter\",\n      \"description\": \"Starter package\",\n      \"price\": 60,\n      \"deliveryDays\": 2,\n      \"revisions\": 1,\n      \"features\": [\n        \"1 page\"\n      ]\n    },\n    \"standard\": {\n      \"title\": \"Growth\",\n      \"description\": \"Growth package\",\n      \"price\": 120,\n      \"deliveryDays\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"3 sections\"\n      ]\n    },\n    \"premium\": {\n      \"title\": \"Scale\",\n      \"description\": \"Scale package\",\n      \"price\": 240,\n      \"deliveryDays\": 7,\n      \"revisions\": -1,\n      \"features\": [\n        \"5 pages\"\n      ]\n    }\n  },\n  \"status\": \"draft\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"gig._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"gigId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /gigs/:gigId",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/gigs/{{gigId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gigs",
+                "{{gigId}}"
+              ],
+              "query": []
+            },
+            "description": "Update your gig\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"I will build a clean responsive landing page\",\n  \"category\": \"{{categoryId}}\",\n  \"description\": \"I will design and build a fast, accessible landing page with clear sections, strong typography and clean handoff files for your team.\",\n  \"tags\": [\n    \"landing\",\n    \"figma\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://placehold.co/800x500/png\"\n    }\n  ],\n  \"packages\": {\n    \"basic\": {\n      \"title\": \"Starter\",\n      \"description\": \"Starter package\",\n      \"price\": 60,\n      \"deliveryDays\": 2,\n      \"revisions\": 1,\n      \"features\": [\n        \"1 page\"\n      ]\n    },\n    \"standard\": {\n      \"title\": \"Growth\",\n      \"description\": \"Growth package\",\n      \"price\": 120,\n      \"deliveryDays\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"3 sections\"\n      ]\n    },\n    \"premium\": {\n      \"title\": \"Scale\",\n      \"description\": \"Scale package\",\n      \"price\": 240,\n      \"deliveryDays\": 7,\n      \"revisions\": -1,\n      \"features\": [\n        \"5 pages\"\n      ]\n    }\n  },\n  \"status\": \"draft\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH /gigs/:gigId/status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/gigs/{{gigId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gigs",
+                "{{gigId}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Publish, pause or return to draft\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"published\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /gigs/:gigId",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gigs/{{gigId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gigs",
+                "{{gigId}}"
+              ],
+              "query": []
+            },
+            "description": "Delete your gig (409 if it has orders)\n\nAccess: Freelancer only"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Freelancers",
+      "item": [
+        {
+          "name": "GET /freelancers/:freelancerId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/freelancers/{{freelancerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "freelancers",
+                "{{freelancerId}}"
+              ],
+              "query": []
+            },
+            "description": "Public profile with published gigs and portfolio\n\nAccess: Public"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "GET /profile/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profile/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "me"
+              ],
+              "query": []
+            },
+            "description": "Your user record and freelancer profile\n\nAccess: Logged in"
+          }
+        },
+        {
+          "name": "PUT /profile/account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile/account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "account"
+              ],
+              "query": []
+            },
+            "description": "Update name, company and focus\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"companyName\": \"Acme\",\n  \"domainFocus\": \"Fullstack\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /profile/freelancer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile/freelancer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "freelancer"
+              ],
+              "query": []
+            },
+            "description": "Update the public freelancer profile\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Full-stack engineer\",\n  \"bio\": \"I build web apps.\",\n  \"location\": \"Berlin, Germany\",\n  \"experienceYears\": 5,\n  \"hourlyRate\": 80,\n  \"skills\": [\n    \"React\",\n    \"Node.js\"\n  ],\n  \"languages\": [\n    {\n      \"name\": \"English\",\n      \"level\": \"fluent\"\n    }\n  ],\n  \"workHistory\": [\n    {\n      \"title\": \"Engineer\",\n      \"company\": \"Acme\",\n      \"startYear\": 2020,\n      \"endYear\": null\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /profile/avatar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profile/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "avatar"
+              ],
+              "query": []
+            },
+            "description": "Upload a profile photo (multipart field: image)\n\nAccess: Logged in",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Portfolio",
+      "item": [
+        {
+          "name": "GET /portfolio/mine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portfolio/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portfolio",
+                "mine"
+              ],
+              "query": []
+            },
+            "description": "Your portfolio projects\n\nAccess: Freelancer only"
+          }
+        },
+        {
+          "name": "POST /portfolio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/portfolio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portfolio"
+              ],
+              "query": []
+            },
+            "description": "Add a project\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My project\",\n  \"description\": \"A short description of this project.\",\n  \"industry\": \"SaaS\",\n  \"metric\": \"+40% conversion\",\n  \"durationWeeks\": 8,\n  \"deliverables\": [\n    \"Design system\"\n  ],\n  \"externalLink\": \"https://example.com\",\n  \"images\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"project._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"projectId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /portfolio/:projectId",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/portfolio/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portfolio",
+                "{{projectId}}"
+              ],
+              "query": []
+            },
+            "description": "Update a project\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My project v2\",\n  \"description\": \"An updated description of this project.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /portfolio/:projectId",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portfolio/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portfolio",
+                "{{projectId}}"
+              ],
+              "query": []
+            },
+            "description": "Delete a project\n\nAccess: Freelancer only"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "POST /uploads/image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/uploads/image?purpose=gig",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "uploads",
+                "image"
+              ],
+              "query": [
+                {
+                  "key": "purpose",
+                  "value": "gig"
+                }
+              ]
+            },
+            "description": "Upload an image to Cloudinary (purpose: gig | portfolio; field: image; max 5 MB)\n\nAccess: Logged in",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /uploads/file",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/uploads/file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "uploads",
+                "file"
+              ],
+              "query": []
+            },
+            "description": "Upload a deliverable or attachment (field: file; max 25 MB)\n\nAccess: Logged in",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "POST /orders",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ],
+              "query": []
+            },
+            "description": "Checkout. The price comes from the gig package, never from the request\n\nAccess: Client only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gigId\": \"{{gigId}}\",\n  \"tier\": \"standard\",\n  \"requirements\": \"Please build a responsive landing page with a pricing section.\",\n  \"attachments\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"order._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"orderId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "in_progress,delivered",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "GC-",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Your orders (as client or freelancer) with status counts\n\nAccess: Logged in"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"orders.0._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"orderId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /orders/:orderId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}"
+              ],
+              "query": []
+            },
+            "description": "Order detail, payment, review and your permitted next actions (404 for non-participants)\n\nAccess: Logged in"
+          }
+        },
+        {
+          "name": "POST /orders/:orderId/accept",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}",
+                "accept"
+              ],
+              "query": []
+            },
+            "description": "pending -> in_progress\n\nAccess: Freelancer only"
+          }
+        },
+        {
+          "name": "POST /orders/:orderId/deliver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/deliver",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}",
+                "deliver"
+              ],
+              "query": []
+            },
+            "description": "in_progress | revision_requested -> delivered\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"First delivery attached.\",\n  \"files\": [\n    {\n      \"url\": \"https://example.com/v1.zip\",\n      \"name\": \"v1.zip\",\n      \"size\": 1024\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /orders/:orderId/revision",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/revision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}",
+                "revision"
+              ],
+              "query": []
+            },
+            "description": "delivered -> revision_requested (uses one revision)\n\nAccess: Client only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Please adjust the hero spacing.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /orders/:orderId/complete",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}",
+                "complete"
+              ],
+              "query": []
+            },
+            "description": "delivered -> completed and release the simulated escrow\n\nAccess: Client only"
+          }
+        },
+        {
+          "name": "POST /orders/:orderId/cancel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}",
+                "cancel"
+              ],
+              "query": []
+            },
+            "description": "Cancel and refund. Client only while pending; freelancer while pending, in progress or revision\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind about scope.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "GET /payments/mine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "mine"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Simulated payment records and escrow/earnings summary\n\nAccess: Logged in"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "GET /reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews?gig={{gigId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "gig",
+                  "value": "{{gigId}}"
+                },
+                {
+                  "key": "sort",
+                  "value": "recent",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Reviews and rating summary for a gig (or use ?freelancer=<userId>)\n\nAccess: Public"
+          }
+        },
+        {
+          "name": "GET /reviews/mine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "mine"
+              ],
+              "query": []
+            },
+            "description": "Reviews you wrote and completed orders still waiting for one\n\nAccess: Client only"
+          }
+        },
+        {
+          "name": "POST /reviews",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews"
+              ],
+              "query": []
+            },
+            "description": "Review a completed order (one review per order)\n\nAccess: Client only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 5,\n  \"comment\": \"Solid work and clear communication.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"review._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"reviewId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /reviews/:reviewId/reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{reviewId}}/reply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}",
+                "reply"
+              ],
+              "query": []
+            },
+            "description": "Reply to a review of your work\n\nAccess: Freelancer only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Thank you for the kind words!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /reviews/:reviewId/report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{reviewId}}/report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}",
+                "report"
+              ],
+              "query": []
+            },
+            "description": "Report an inappropriate review (stored for moderation)\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Contains abusive language.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "item": [
+        {
+          "name": "GET /favorites/ids",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/ids",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites",
+                "ids"
+              ],
+              "query": []
+            },
+            "description": "Ids of saved gigs (to paint the hearts)\n\nAccess: Logged in"
+          }
+        },
+        {
+          "name": "GET /favorites",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "12",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Saved gigs, paginated\n\nAccess: Logged in"
+          }
+        },
+        {
+          "name": "POST /favorites",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites"
+              ],
+              "query": []
+            },
+            "description": "Save a gig (idempotent)\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gigId\": \"{{gigId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /favorites/:gigId",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/{{gigId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "favorites",
+                "{{gigId}}"
+              ],
+              "query": []
+            },
+            "description": "Remove a saved gig\n\nAccess: Logged in"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "POST /conversations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversations"
+              ],
+              "query": []
+            },
+            "description": "Start or reopen a conversation. Provide exactly one of orderId, gigId (clients) or freelancerId (clients)\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"conversation._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"conversationId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversations"
+              ],
+              "query": []
+            },
+            "description": "Your conversations with unread counts\n\nAccess: Logged in"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"conversations.0._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"conversationId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /conversations/unread-count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/conversations/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversations",
+                "unread-count"
+              ],
+              "query": []
+            },
+            "description": "Total unread messages (navbar badge)\n\nAccess: Logged in"
+          }
+        },
+        {
+          "name": "GET /conversations/:conversationId/messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/conversations/{{conversationId}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversationId}}",
+                "messages"
+              ],
+              "query": []
+            },
+            "description": "Messages, oldest to newest. Use ?before=<messageId>&limit=30 for earlier ones\n\nAccess: Logged in"
+          }
+        },
+        {
+          "name": "POST /conversations/:conversationId/messages",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/conversations/{{conversationId}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversationId}}",
+                "messages"
+              ],
+              "query": []
+            },
+            "description": "Send a message (rate limited)\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello!\",\n  \"attachments\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /conversations/:conversationId/read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/conversations/{{conversationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversations",
+                "{{conversationId}}",
+                "read"
+              ],
+              "query": []
+            },
+            "description": "Mark the conversation as read\n\nAccess: Logged in"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "GET /dashboard/client",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/client",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "client"
+              ],
+              "query": []
+            },
+            "description": "Client stats computed from real data\n\nAccess: Client only"
+          }
+        },
+        {
+          "name": "GET /dashboard/freelancer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/freelancer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "freelancer"
+              ],
+              "query": []
+            },
+            "description": "Freelancer stats, 6-month earnings and top gigs\n\nAccess: Freelancer only"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "resetToken",
+      "value": ""
+    },
+    {
+      "key": "gigId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "freelancerId",
+      "value": ""
+    },
+    {
+      "key": "projectId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "reviewId",
+      "value": ""
+    },
+    {
+      "key": "conversationId",
+      "value": ""
+    }
+  ]
+}
