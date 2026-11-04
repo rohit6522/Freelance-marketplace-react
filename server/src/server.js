@@ -9,4 +9,7 @@ const start = async () => {
   });
 };
 
-start();
+start().catch((err) => {
+  console.error("Startup failed:", err.message);
+  process.exitCode = 1; // lets the log flush before the process ends
+});
