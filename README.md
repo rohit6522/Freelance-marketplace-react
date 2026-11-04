@@ -2,6 +2,8 @@
 
 A full-stack marketplace where freelancers sell digital services and clients discover, order, message and review them. Built with React, Express and MongoDB.
 
+**Live demo:** https://freelance-marketplace-react.onrender.com (free hosting; the first load after idle can take about a minute)
+
 > **Payments are simulated.** Checkout holds the amount in a demo escrow and releases it on approval. No real money is ever charged. Some marketing panels on the login and register pages are labelled **DEMO DATA**.
 
 ## Features
