@@ -6,6 +6,7 @@ import {
   PortfolioProject, Favorite, Conversation, Message,
 } from "../models/index.js";
 import { recalcGigStats, recalcFreelancerStats } from "../services/rating.service.js";
+import { ensureCategories } from "./categories.js";
 
 if (env.nodeEnv === "production") {
   console.error("Refusing to seed in production.");
@@ -13,23 +14,14 @@ if (env.nodeEnv === "production") {
 }
 
 const PASSWORD = "Password123!";
-const slugify = (s) => s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
 const img = (text) => ({ url: `https://placehold.co/800x500/e5eeff/0b1c30?text=${encodeURIComponent(text)}` });
 const pkg = (title, price, deliveryDays, revisions, features) => ({
   title, price, deliveryDays, revisions, features,
   description: `${title}: delivered in ${deliveryDays} day(s) with ${revisions === -1 ? "unlimited" : revisions} revision(s).`,
 });
 
-const categoryNames = [
-  ["Web Development", "code"],
-  ["Graphics & Design", "palette"],
-  ["Writing & Translation", "edit_note"],
-  ["Digital Marketing", "campaign"],
-  ["Video & Animation", "movie"],
-  ["Data & AI", "neurology"],
-  ["Programming & Technology", "terminal"],
-  ["Business", "business_center"],
-];
+
 
 const freelancers = [
   {
@@ -142,16 +134,27 @@ const ratings = [5, 5, 4, 5, 5, 4];
 
 async function run() {
   await connectDB();
+
+  const realUsers = await User.countDocuments({
+    email: { $not: /@gigcraft\.test$/i }
+  });
+
+  if (realUsers > 0 && !process.argv.includes("--force")) {
+    console.error(`Refusing to seed: this database has ${realUsers} real user(s) and seeding wipes everything.`);
+    console.error("Use a different database, or pass --force if you really mean it.");
+    await mongoose.disconnect();
+    process.exit(1);
+  }
+
   console.log("Clearing existing data...");
+
   await Promise.all(
     [User, FreelancerProfile, Category, Gig, Order, Payment, Review, PortfolioProject, Favorite, Conversation, Message]
       .map((M) => M.deleteMany({}))
   );
 
   // Categories
-  const categories = await Category.insertMany(
-    categoryNames.map(([name, icon], i) => ({ name, icon, slug: slugify(name), sortOrder: i }))
-  );
+  const categories = await ensureCategories();
   const catByName = Object.fromEntries(categories.map((c) => [c.name, c]));
 
   // Client (buyer) - Indian business identity
