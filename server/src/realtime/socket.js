@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import { parse } from "cookie";
+import cookie from "cookie";
 import { env } from "../config/env.js";
 import { User } from "../models/index.js";
 import { COOKIE_NAME } from "../utils/token.js";
@@ -19,7 +19,7 @@ export function initSocket(httpServer) {
   // Same checks as the REST `protect` middleware, using the httpOnly cookie
   io.use(async (socket, next) => {
     try {
-      const token = parse(socket.handshake.headers.cookie || "")[COOKIE_NAME];
+      const token = cookie.parse(socket.handshake.headers.cookie || "")[COOKIE_NAME];
       if (!token) return next(new Error("unauthorized"));
       const decoded = jwt.verify(token, env.jwtSecret);
       const user = await User.findById(decoded.id).select("+passwordChangedAt");
