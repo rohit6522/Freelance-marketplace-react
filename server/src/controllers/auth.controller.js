@@ -4,6 +4,8 @@ import { User, FreelancerProfile } from "../models/index.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendTokenCookie, clearTokenCookie } from "../utils/token.js";
+import { sendEmail } from "../services/email.service.js";
+import { passwordResetEmail, passwordChangedEmail } from "../services/emailTemplates.js";
 
 const hashToken = (t) => crypto.createHash("sha256").update(t).digest("hex");
 
@@ -54,20 +56,26 @@ export const getMe = (req, res) => {
 };
 
 // POST /api/auth/forgot-password
+const RESET_MINUTES = 15;
+const RESEND_COOLDOWN_MS = 60 * 1000;
+
 export const forgotPassword = asyncHandler(async (req, res) => {
   const genericMessage = "If an account exists for that email, a reset link has been sent.";
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email }).select("+passwordResetExpires");
 
   if (user && user.isActive) {
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    user.passwordResetToken = hashToken(rawToken); // only the hash is stored
-    user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000);
-    await user.save({ validateBeforeSave: false });
+    // At most one email per minute per account (prevents mail-bombing someone)
+    const issuedAt = user.passwordResetExpires ? user.passwordResetExpires.getTime() - RESET_MINUTES * 60 * 1000 : 0;
+    if (Date.now() - issuedAt >= RESEND_COOLDOWN_MS) {
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      user.passwordResetToken = hashToken(rawToken); // only the hash is stored
+      user.passwordResetExpires = new Date(Date.now() + RESET_MINUTES * 60 * 1000);
+      await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `${env.clientUrl}/reset-password/${rawToken}`;
-    // No email service in this college project: the link is printed in the server console.
-    // Later you can swap this for Nodemailer/Resend without changing the API.
-    console.log(`\n[DEV] Password reset link for ${user.email}:\n${resetUrl}\n`);
+      const url = `${env.clientUrl}/reset-password/${rawToken}`;
+      // Deliberately not awaited: the response time must not reveal whether the account exists
+      sendEmail({ to: user.email, ...passwordResetEmail({ name: user.firstName, url, minutes: RESET_MINUTES }) });
+    }
   }
 
   res.json({ success: true, message: genericMessage });
@@ -86,7 +94,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
-
+  sendEmail({ to: user.email, ...passwordChangedEmail({ name: user.firstName }) });
   sendTokenCookie(res, user._id);
   res.json({ success: true, message: "Password updated", user });
 });
@@ -103,7 +111,7 @@ export const changePassword = asyncHandler(async (req, res) => {
   }
   user.password = req.body.newPassword;
   await user.save(); // also invalidates all older tokens via passwordChangedAt
-
+  sendEmail({ to: user.email, ...passwordChangedEmail({ name: user.firstName }) });
   sendTokenCookie(res, user._id); // keep this device logged in
   res.json({ success: true, message: "Password updated" });
 });

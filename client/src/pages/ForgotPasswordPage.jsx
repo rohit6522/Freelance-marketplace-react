@@ -38,7 +38,8 @@ export default function ForgotPasswordPage() {
           </div>
           {import.meta.env.DEV && (
             <p className="mt-space-sm font-code-sm text-code-sm text-on-surface-variant">
-              Dev mode: no email service is connected, so the reset link is printed in the server terminal.
+              The email can take a minute to arrive. Check your spam folder too.
+              {import.meta.env.DEV && " (Dev mode without an email key: the link is printed in the server terminal.)"}
             </p>
           )}
         </div>
