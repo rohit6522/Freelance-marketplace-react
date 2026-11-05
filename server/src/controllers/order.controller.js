@@ -56,7 +56,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     const payment = await createSimulatedPayment({ order, session });
     return { order, payment };
   });
-    notifyOrderUpdated(order);
+  notifyOrderUpdated(order);
 
   res.status(201).json({
     success: true,
@@ -154,9 +154,11 @@ const act = (handler, after) =>
       return order;
     });
     if (after) await after(order);
+        notifyOrderUpdated(order);
+
     res.json({ success: true, order });
   });
-    notifyOrderUpdated(order);
+
 
 // POST /api/orders/:id/accept  (freelancer)
 export const acceptOrder = act(({ order, role, req }) => {
