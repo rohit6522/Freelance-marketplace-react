@@ -5,6 +5,7 @@ import Icon from "../components/ui/Icon";
 import MessageThread from "../components/messaging/MessageThread";
 import { conversationService } from "../services/conversationService";
 import { dateTime, fullName } from "../utils/format";
+import { useSocketEvent } from "../hooks/useSocketEvent";
 
 export default function MessagesPage() {
   const [params, setParams] = useSearchParams();
@@ -20,10 +21,12 @@ export default function MessagesPage() {
 
   useEffect(() => {
     load();
+    
     const t = setInterval(() => !document.hidden && load(), 20000);
     return () => clearInterval(t);
   }, [load]);
 
+    useSocketEvent("message:new", load);
   const select = (id) => setParams(id ? { conversation: id } : {});
 
   // On wide screens open the first conversation automatically

@@ -37,6 +37,7 @@ app.use(
         "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
         "upgrade-insecure-requests": env.nodeEnv === "production" ? [] : null,
+        "connect-src": ["'self'", env.clientUrl.replace(/^http/, "ws")],
       },
     },
   })

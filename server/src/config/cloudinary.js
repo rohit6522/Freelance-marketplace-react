@@ -13,5 +13,4 @@ if (isCloudinaryConfigured) {
     secure: true,
   });
 }
-
 export default cloudinary;

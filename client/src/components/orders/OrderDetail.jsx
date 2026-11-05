@@ -10,6 +10,7 @@ import OrderActions from "./OrderActions";
 import OrderReview from "./OrderReview";
 import { conversationService } from "../../services/conversationService";
 import { ORDER_STATUS, fullName, money } from "../../utils/format";
+import { useRealtime } from "../../hooks/useRealtime";
 
 const PAYMENT_LINE = {
   held: ["lock", "Held in simulated escrow"],
@@ -25,6 +26,7 @@ export default function OrderDetail({ data, role, onChanged }) {
   const client = order.client;
   const [conversationId, setConversationId] = useState(null);
   const [convoError, setConvoError] = useState("");
+    const { connected } = useRealtime();
 
   useEffect(() => {
     let active = true;
@@ -115,7 +117,7 @@ export default function OrderDetail({ data, role, onChanged }) {
           <h3 className="font-headline-sm text-headline-sm uppercase tracking-wider text-on-surface">Contract Audit & Direct Messaging</h3>
           <div className="flex items-center gap-space-xs">
             <span className="w-2 h-2 bg-primary" />
-            <span className="font-code-sm text-code-sm text-primary font-bold">AUTO-REFRESH 10S</span>
+                       <span className="font-code-sm text-code-sm text-primary font-bold">{connected ? "LIVE" : "AUTO-REFRESH 10S"}</span>
           </div>
         </div>
         {convoError ? (

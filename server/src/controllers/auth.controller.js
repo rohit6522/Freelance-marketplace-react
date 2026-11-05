@@ -6,6 +6,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendTokenCookie, clearTokenCookie } from "../utils/token.js";
 import { sendEmail } from "../services/email.service.js";
 import { passwordResetEmail, passwordChangedEmail } from "../services/emailTemplates.js";
+import { disconnectUser } from "../realtime/socket.js";
 
 const hashToken = (t) => crypto.createHash("sha256").update(t).digest("hex");
 
@@ -94,6 +95,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
+  disconnectUser(user._id);
   sendEmail({ to: user.email, ...passwordChangedEmail({ name: user.firstName }) });
   sendTokenCookie(res, user._id);
   res.json({ success: true, message: "Password updated", user });
@@ -111,6 +113,7 @@ export const changePassword = asyncHandler(async (req, res) => {
   }
   user.password = req.body.newPassword;
   await user.save(); // also invalidates all older tokens via passwordChangedAt
+  disconnectUser(user._id);
   sendEmail({ to: user.email, ...passwordChangedEmail({ name: user.firstName }) });
   sendTokenCookie(res, user._id); // keep this device logged in
   res.json({ success: true, message: "Password updated" });

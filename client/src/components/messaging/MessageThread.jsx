@@ -6,6 +6,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { conversationService } from "../../services/conversationService";
 import { uploadService } from "../../services/uploadService";
 import { dateTime, fullName } from "../../utils/format";
+import { useRealtime } from "../../hooks/useRealtime";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const POLL_MS = 10000;
 
@@ -31,6 +33,7 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
   const stickRef = useRef(true);
   const activityRef = useRef(onActivity);
   activityRef.current = onActivity;
+    const { connected } = useRealtime();
 
   const markRead = useCallback(() => {
     conversationService
@@ -65,10 +68,35 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
     };
   }, [conversationId, markRead]);
 
+    // Live delivery
+  useSocketEvent("message:new", (payload) => {
+    if (payload.conversationId !== String(conversationId)) return;
+    setMessages((prev) => mergeMessages(prev, [payload.message]));
+    if (String(payload.message.sender) !== String(user._id) && !document.hidden) markRead();
+    activityRef.current?.();
+  });
+
+  // After a reconnect, fetch anything missed while offline
+  useSocketEvent("connect", async () => {
+    try {
+      const d = await conversationService.messages(conversationId, { limit: 30 });
+      setMessages((prev) => mergeMessages(prev, d.messages));
+    } catch {
+      /* ignore */
+    }
+  });
+
+  // Mark as read when you come back to this tab
+  useEffect(() => {
+    const onVisible = () => !document.hidden && markRead();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [markRead]);
+
   // Polling (swap for Socket.IO later using the server-side messageEvents hook)
   useEffect(() => {
     const timer = setInterval(async () => {
-      if (document.hidden) return;
+            if (document.hidden || connected) return;
       try {
         const d = await conversationService.messages(conversationId, { limit: 30 });
         setMessages((prev) => {
@@ -83,7 +111,7 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [conversationId, markRead, user._id]);
+  }, [conversationId, markRead, user._id, connected]);
 
   const timeline = useMemo(() => {
     const msgs = messages.map((m) => ({ kind: "msg", key: m._id, at: m.createdAt, m }));

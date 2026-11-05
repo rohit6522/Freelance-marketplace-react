@@ -10,6 +10,7 @@ import { orderService } from "../services/orderService";
 import { dashboardService } from "../services/dashboardService";
 import { downloadCsv } from "../utils/csv";
 import { fullName, statusLabel, formatIndianDate } from "../utils/format";
+import { useSocketEvent } from "../hooks/useSocketEvent";
 
 const PAGE_SIZE = 8;
 
@@ -96,6 +97,7 @@ export default function OrdersPage() {
   }, [selectedId, refreshKey]);
 
   const onChanged = useCallback(() => setRefreshKey((k) => k + 1), []);
+    useSocketEvent("order:updated", onChanged);
 
   const exportCsv = () => {
     const rows = [

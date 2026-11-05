@@ -6,6 +6,7 @@ import { runInTransaction } from "../utils/transaction.js";
 import { createSimulatedPayment, releasePayment, refundPayment } from "../services/payment.service.js";
 import { applyTransition, revisionsLeft, nextStatusesFor } from "../services/order.service.js";
 import { recalcGigStats, recalcFreelancerStats } from "../services/rating.service.js";
+import { notifyOrderUpdated } from "../realtime/socket.js";
 
 const csv = (v) => (typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : []);
 
@@ -55,6 +56,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     const payment = await createSimulatedPayment({ order, session });
     return { order, payment };
   });
+    notifyOrderUpdated(order);
 
   res.status(201).json({
     success: true,
@@ -154,6 +156,7 @@ const act = (handler, after) =>
     if (after) await after(order);
     res.json({ success: true, order });
   });
+    notifyOrderUpdated(order);
 
 // POST /api/orders/:id/accept  (freelancer)
 export const acceptOrder = act(({ order, role, req }) => {

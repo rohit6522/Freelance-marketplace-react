@@ -7,6 +7,7 @@ import UserMenu from "./UserMenu";
 import { useAuth } from "../../hooks/useAuth";
 import { useCategories } from "../../hooks/useCategories";
 import { conversationService } from "../../services/conversationService";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const navClass = ({ isActive }) =>
   `font-label-md text-label-md transition-colors py-1 ${isActive
@@ -39,6 +40,10 @@ export default function Navbar() {
       active = false;
     };
   }, [user, location.pathname]);
+
+  useSocketEvent("message:new", () => {
+    if (user) conversationService.unreadCount().then(setUnread).catch(() => { });
+  });
 
   useEffect(() => {
     if (!user) return;
