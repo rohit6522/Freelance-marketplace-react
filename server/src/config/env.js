@@ -16,6 +16,18 @@ if (!["lax", "strict", "none"].includes(sameSite)) {
   throw new Error("COOKIE_SAME_SITE must be lax, strict or none");
 }
 
+// CLIENT_URL must be ONE address. A comma-separated list, spaces or a trailing slash would silently break
+// CORS, reset-email links and the CSP, so normalise and validate it here.
+const rawClientUrl = (process.env.CLIENT_URL || "http://localhost:5173").trim().replace(/\/+$/, "");
+let clientOrigin;
+try {
+  const u = new URL(rawClientUrl);
+  if (!["http:", "https:"].includes(u.protocol) || /[\s,;]/.test(rawClientUrl) || u.pathname !== "/") throw new Error("bad");
+  clientOrigin = u.origin;
+} catch {
+  throw new Error(`CLIENT_URL must be a single site address like https://your-app.onrender.com (no commas, spaces or paths). Got: "${rawClientUrl}"`);
+}
+
 export const env = {
   port: process.env.PORT || 5000,
   nodeEnv,
@@ -24,7 +36,8 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   cookieDays: Number(process.env.JWT_COOKIE_DAYS) || 7,
   cookieSameSite: sameSite,
-  clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  clientUrl: clientOrigin,
+  clientWsUrl: clientOrigin.replace(/^http/, "ws"),
   trustProxy: Number(process.env.TRUST_PROXY) || 0,
   authRateLimit: Number(process.env.AUTH_RATE_LIMIT) || 20,
   apiRateLimit: Number(process.env.API_RATE_LIMIT) || 300,
