@@ -25,6 +25,14 @@ const SELLER_NAV = [
   ["/dashboard/settings", "Account Settings", "settings"],
 ];
 
+const ADMIN_NAV = [
+  ["/dashboard", "Overview", "dashboard"],
+  ["/dashboard/moderation", "Reported Reviews", "flag"],
+  ["/dashboard/users", "Users", "group"],
+  ["/dashboard/activity", "Activity Log", "history"],
+  ["/dashboard/settings", "Account Settings", "settings"],
+];
+
 function isActive(to, path) {
   if (to === "/dashboard") return path === "/dashboard";
   if (to === "/dashboard/gigs") return path === to || (path.startsWith("/dashboard/gigs/") && path !== "/dashboard/gigs/new");
@@ -34,7 +42,7 @@ function isActive(to, path) {
 export default function DashboardLayout() {
   const { user } = useAuth();
   const { pathname } = useLocation();
-  const nav = user.role === "client" ? CLIENT_NAV : SELLER_NAV;
+  const nav = user.role === "client" ? CLIENT_NAV : user.role === "admin" ? ADMIN_NAV : SELLER_NAV;
 
   return (
     <div className="max-w-7xl mx-auto px-margin-sm lg:px-margin py-space-lg">
@@ -45,7 +53,7 @@ export default function DashboardLayout() {
             <div className="min-w-0">
               <div className="font-headline-sm text-headline-sm text-on-surface font-bold truncate">{fullName(user)}</div>
               <span className="font-label-sm text-label-sm uppercase bg-surface-container px-space-xs text-primary font-bold">
-                {user.role === "client" ? "Client" : "Freelancer"}
+                {user.role === "client" ? "Client" : user.role === "admin" ? "Admin" : "Freelancer"}
               </span>
             </div>
           </div>
@@ -55,11 +63,10 @@ export default function DashboardLayout() {
               return (
                 <Link
                   key={to} to={to} aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-space-sm px-space-md py-space-sm font-label-md text-label-md whitespace-nowrap border-b-2 lg:border-b-0 lg:border-l-4 transition-colors ${
-                    active
+                  className={`flex items-center gap-space-sm px-space-md py-space-sm font-label-md text-label-md whitespace-nowrap border-b-2 lg:border-b-0 lg:border-l-4 transition-colors ${active
                       ? "bg-surface-container-low text-primary font-bold border-primary"
                       : "text-on-surface-variant border-transparent hover:bg-surface-container-low hover:text-on-surface"
-                  }`}
+                    }`}
                 >
                   <Icon name={icon} className="text-body-md" />
                   {label}

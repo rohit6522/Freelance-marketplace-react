@@ -109,4 +109,13 @@ export const groups = [
     { method: "GET", path: "/dashboard/client", auth: "client", summary: "Client stats computed from real data" },
     { method: "GET", path: "/dashboard/freelancer", auth: "freelancer", summary: "Freelancer stats, 6-month earnings and top gigs" },
   ]},
+    { name: "Admin", items: [
+    { method: "GET", path: "/admin/stats", auth: "admin", summary: "Platform counts and moderation queue size" },
+    { method: "GET", path: "/admin/reviews", auth: "admin", summary: "Reviews by moderation state", query: { filter: "reported", page: 1, limit: 8 }, notes: "filter: reported | hidden | all", save: [["reviewId", "reviews.0._id"]] },
+    { method: "PATCH", path: "/admin/reviews/{{reviewId}}/visibility", auth: "admin", summary: "Hide or restore a review (ratings are recalculated). A reason of 5+ characters is required to hide", body: { hidden: true, reason: "Contains abusive language." } },
+    { method: "POST", path: "/admin/reviews/{{reviewId}}/dismiss-reports", auth: "admin", summary: "Clear the reports on a review", body: { reason: "Reports reviewed, no violation." } },
+    { method: "GET", path: "/admin/users", auth: "admin", summary: "Search users", query: { q: "elena", role: "freelancer", status: "suspended", page: 1, limit: 15 }, save: [["targetUserId", "users.0._id"]] },
+    { method: "PATCH", path: "/admin/users/{{targetUserId}}/status", auth: "admin", summary: "Suspend or reactivate a user. Suspending pauses their published gigs. A reason is required to suspend", body: { isActive: false, reason: "Repeated policy violations." } },
+    { method: "GET", path: "/admin/log", auth: "admin", summary: "Moderation activity log", query: { page: 1, limit: 20 } },
+  ]},
 ];

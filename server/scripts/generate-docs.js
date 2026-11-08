@@ -7,7 +7,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, "../../docs");
 fs.mkdirSync(outDir, { recursive: true });
 
-const AUTH = { public: "Public", user: "Logged in", client: "Client only", freelancer: "Freelancer only" };
+const AUTH = {
+  public: "Public",
+  user: "Logged in",
+  client: "Client only",
+  freelancer: "Freelancer only",
+  admin: "Admin only",
+};
 const docPath = (p) => p.replace(/\{\{(\w+)\}\}/g, ":$1");
 const asList = (v) => (v == null ? [] : Array.isArray(v[0]) ? v : [v]);
 

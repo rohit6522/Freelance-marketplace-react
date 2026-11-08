@@ -13,7 +13,8 @@
     "smoke": "node scripts/smoke-test.js",
     "seed:categories": "node src/seed/seedCategories.js",
     "db:clean:demo": "node src/seed/cleanup.js --mode=demo",
-    "db:clean:all": "node src/seed/cleanup.js --mode=all"
+    "db:clean:all": "node src/seed/cleanup.js --mode=all",
+    "make-admin": "node scripts/make-admin.js"
   },
   "keywords": [],
   "dependencies": {

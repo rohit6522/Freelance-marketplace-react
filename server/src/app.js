@@ -22,6 +22,7 @@ import uploadRoutes from "./routes/upload.routes.js";
 import favoriteRoutes from "./routes/favorite.routes.js";
 import conversationRoutes from "./routes/conversation.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -70,6 +71,7 @@ app.use("/api/uploads", uploadRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Optional single-service deployment: Express also serves the built React app (same origin = simple cookies)
 if (env.serveClient) {

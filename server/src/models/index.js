@@ -9,3 +9,4 @@ export { Review } from "./Review.js";
 export { Favorite } from "./Favorite.js";
 export { Conversation } from "./Conversation.js";
 export { Message } from "./Message.js";
+export { ModerationLog } from "./ModerationLog.js";

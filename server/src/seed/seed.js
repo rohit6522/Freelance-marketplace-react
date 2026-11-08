@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 import { env } from "../config/env.js";
 import { connectDB } from "../config/db.js";
+
 import {
   User, FreelancerProfile, Category, Gig, Order, Payment, Review,
-  PortfolioProject, Favorite, Conversation, Message,
+  PortfolioProject, Favorite, Conversation, Message, ModerationLog,
 } from "../models/index.js";
+
 import { recalcGigStats, recalcFreelancerStats } from "../services/rating.service.js";
 import { ensureCategories } from "./categories.js";
 
@@ -148,10 +150,12 @@ async function run() {
 
   console.log("Clearing existing data...");
 
+
   await Promise.all(
-    [User, FreelancerProfile, Category, Gig, Order, Payment, Review, PortfolioProject, Favorite, Conversation, Message]
+    [User, FreelancerProfile, Category, Gig, Order, Payment, Review, PortfolioProject, Favorite, Conversation, Message, ModerationLog]
       .map((M) => M.deleteMany({}))
   );
+
 
   // Categories
   const categories = await ensureCategories();
@@ -162,6 +166,11 @@ async function run() {
     firstName: "Aman", lastName: "Kumar", email: "client@gigcraft.test",
     phone: "+91 98765 43210",
     password: PASSWORD, role: "client", companyName: "Apex Cloud Labs India",
+  });
+
+  await User.create({
+    firstName: "Site", lastName: "Admin", email: "admin@gigcraft.test",
+    password: PASSWORD, role: "admin",
   });
 
   // Freelancers, profiles, gigs

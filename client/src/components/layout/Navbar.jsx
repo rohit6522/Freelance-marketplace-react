@@ -52,11 +52,13 @@ export default function Navbar() {
     return () => window.removeEventListener("unread:changed", refresh);
   }, [user]);
 
+  const isAdmin = user?.role === "admin";
   const links = [
     { to: "/explore", label: "Explore Gigs", show: true },
-    { to: "/orders", label: "My Orders", show: Boolean(user) },
-    { to: "/messages", label: "Messages", show: Boolean(user) },
+    { to: "/orders", label: "My Orders", show: Boolean(user) && !isAdmin },
+    { to: "/messages", label: "Messages", show: Boolean(user) && !isAdmin },
     { to: "/dashboard", label: "Switch to Selling", show: user?.role === "freelancer" },
+    { to: "/dashboard", label: "Admin Panel", show: isAdmin },
   ].filter((l) => l.show);
 
   return (

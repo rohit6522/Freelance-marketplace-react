@@ -2,9 +2,11 @@ import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import mongoose from "mongoose";
 import { connectDB } from "../config/db.js";
+
 import {
-  User, FreelancerProfile, PortfolioProject, Gig, Order, Payment, Review, Favorite, Conversation, Message,
+  User, FreelancerProfile, PortfolioProject, Gig, Order, Payment, Review, Favorite, Conversation, Message,ModerationLog
 } from "../models/index.js";
+
 import { recalcGigStats, recalcFreelancerStats } from "../services/rating.service.js";
 import { ensureCategories } from "./categories.js";
 
@@ -36,7 +38,19 @@ if (answer.trim() !== dbName) {
 
 if (mode === "all") {
   await Promise.all(
-    [User, FreelancerProfile, PortfolioProject, Gig, Order, Payment, Review, Favorite, Conversation, Message].map((M) => M.deleteMany({}))
+    [
+      User,
+      FreelancerProfile,
+      PortfolioProject,
+      Gig,
+      Order,
+      Payment,
+      Review,
+      Favorite,
+      Conversation,
+      Message,
+      ModerationLog,
+    ].map((M) => M.deleteMany({}))
   );
   await ensureCategories();
   console.log("\nDone. Everything removed and the 8 categories restored.");
@@ -81,6 +95,7 @@ if (mode === "all") {
     await PortfolioProject.deleteMany({ freelancer: { $in: uids } });
     await FreelancerProfile.deleteMany({ user: { $in: uids } });
     await Gig.deleteMany({ _id: { $in: gigIds } });
+    await ModerationLog.deleteMany({ admin: { $in: uids } });
     await User.deleteMany({ _id: { $in: uids } });
 
     for (const id of affectedGigs) await recalcGigStats(id);
