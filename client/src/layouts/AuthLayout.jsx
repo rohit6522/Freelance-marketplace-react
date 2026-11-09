@@ -1,7 +1,12 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import Logo from "../components/ui/Logo";
+import { Suspense } from "react";
+import ErrorBoundary from "../components/ui/ErrorBoundary";
+import PageLoader from "../components/ui/PageLoader";
+
 
 export default function AuthLayout() {
+  const { pathname } = useLocation();
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-outline-variant">
@@ -18,7 +23,11 @@ export default function AuthLayout() {
 
       <main className="w-full pt-16 bg-background min-h-screen">
         <div className="w-full max-w-7xl mx-auto px-margin-sm lg:px-margin py-space-xl">
-          <Outlet />
+          <ErrorBoundary resetKey={pathname}>
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </main>
 

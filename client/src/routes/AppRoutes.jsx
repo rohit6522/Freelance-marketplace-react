@@ -4,27 +4,29 @@ import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import GuestRoute from "./GuestRoute";
-import LoginPage from "../pages/LoginPage";
-import RegisterPage from "../pages/RegisterPage";
-import ForgotPasswordPage from "../pages/ForgotPasswordPage";
-import ResetPasswordPage from "../pages/ResetPasswordPage";
-import ExplorePage from "../pages/ExplorePage";
-import GigDetailPage from "../pages/GigDetailPage";
-import FreelancerProfilePage from "../pages/FreelancerProfilePage";
-import OrdersPage from "../pages/OrdersPage";
-import MessagesPage from "../pages/MessagesPage";
-import NotFoundPage from "../pages/NotFoundPage";
-import DashboardHome from "../pages/dashboard/DashboardHome";
-import SavedGigsPage from "../pages/dashboard/SavedGigsPage";
-import ReviewsPage from "../pages/dashboard/ReviewsPage";
-import SettingsPage from "../pages/dashboard/SettingsPage";
-import MyGigsPage from "../pages/dashboard/MyGigsPage";
-import GigFormPage from "../pages/dashboard/GigFormPage";
-import EarningsPage from "../pages/dashboard/EarningsPage";
-import PortfolioPage from "../pages/dashboard/PortfolioPage";
-import ModerationPage from "../pages/dashboard/ModerationPage";
-import AdminUsersPage from "../pages/dashboard/AdminUsersPage";
-import AdminLogPage from "../pages/dashboard/AdminLogPage";
+import ExplorePage from "../pages/ExplorePage"; // the landing page stays in the main bundle
+import { lazyPage } from "../utils/lazyPage";
+
+const LoginPage = lazyPage(() => import("../pages/LoginPage"));
+const RegisterPage = lazyPage(() => import("../pages/RegisterPage"));
+const ForgotPasswordPage = lazyPage(() => import("../pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazyPage(() => import("../pages/ResetPasswordPage"));
+const GigDetailPage = lazyPage(() => import("../pages/GigDetailPage"));
+const FreelancerProfilePage = lazyPage(() => import("../pages/FreelancerProfilePage"));
+const OrdersPage = lazyPage(() => import("../pages/OrdersPage"));
+const MessagesPage = lazyPage(() => import("../pages/MessagesPage"));
+const NotFoundPage = lazyPage(() => import("../pages/NotFoundPage"));
+const DashboardHome = lazyPage(() => import("../pages/dashboard/DashboardHome"));
+const SavedGigsPage = lazyPage(() => import("../pages/dashboard/SavedGigsPage"));
+const ReviewsPage = lazyPage(() => import("../pages/dashboard/ReviewsPage"));
+const SettingsPage = lazyPage(() => import("../pages/dashboard/SettingsPage"));
+const MyGigsPage = lazyPage(() => import("../pages/dashboard/MyGigsPage"));
+const GigFormPage = lazyPage(() => import("../pages/dashboard/GigFormPage"));
+const EarningsPage = lazyPage(() => import("../pages/dashboard/EarningsPage"));
+const PortfolioPage = lazyPage(() => import("../pages/dashboard/PortfolioPage"));
+const ModerationPage = lazyPage(() => import("../pages/dashboard/ModerationPage"));
+const AdminUsersPage = lazyPage(() => import("../pages/dashboard/AdminUsersPage"));
+const AdminLogPage = lazyPage(() => import("../pages/dashboard/AdminLogPage"));
 
 export default function AppRoutes() {
   return (

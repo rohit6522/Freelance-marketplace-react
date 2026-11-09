@@ -23,6 +23,7 @@ import favoriteRoutes from "./routes/favorite.routes.js";
 import conversationRoutes from "./routes/conversation.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import compression from "compression";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -43,6 +44,7 @@ app.use(
     },
   })
 );
+app.use(compression()); // gzip responses (the JS bundle shrinks to roughly a third)
 
 
 app.use(cors({ origin: env.clientUrl, credentials: true }));
@@ -76,7 +78,10 @@ app.use("/api/admin", adminRoutes);
 // Optional single-service deployment: Express also serves the built React app (same origin = simple cookies)
 if (env.serveClient) {
   const dist = path.resolve(__dirname, "../../client/dist");
-  app.use(express.static(dist));
+  // Vite puts a content hash in every file name under /assets, so these can be cached for a year.
+  // fallthrough:false makes a missing file a real 404 (never the index.html page, which would break script loading).
+  app.use("/assets", express.static(path.join(dist, "assets"), { maxAge: "1y", immutable: true, fallthrough: false }));
+  app.use(express.static(dist)); // index.html and other files are revalidated on every load
   app.get(/^\/(?!api\/).*/, (req, res) => res.sendFile(path.join(dist, "index.html")));
 }
 

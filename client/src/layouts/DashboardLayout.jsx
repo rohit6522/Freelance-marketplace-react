@@ -3,6 +3,9 @@ import Avatar from "../components/ui/Avatar";
 import Icon from "../components/ui/Icon";
 import { useAuth } from "../hooks/useAuth";
 import { fullName } from "../utils/format";
+import { Suspense } from "react";
+import ErrorBoundary from "../components/ui/ErrorBoundary";
+import PageLoader from "../components/ui/PageLoader";
 
 const CLIENT_NAV = [
   ["/dashboard", "Overview", "dashboard"],
@@ -64,8 +67,8 @@ export default function DashboardLayout() {
                 <Link
                   key={to} to={to} aria-current={active ? "page" : undefined}
                   className={`flex items-center gap-space-sm px-space-md py-space-sm font-label-md text-label-md whitespace-nowrap border-b-2 lg:border-b-0 lg:border-l-4 transition-colors ${active
-                      ? "bg-surface-container-low text-primary font-bold border-primary"
-                      : "text-on-surface-variant border-transparent hover:bg-surface-container-low hover:text-on-surface"
+                    ? "bg-surface-container-low text-primary font-bold border-primary"
+                    : "text-on-surface-variant border-transparent hover:bg-surface-container-low hover:text-on-surface"
                     }`}
                 >
                   <Icon name={icon} className="text-body-md" />
@@ -77,7 +80,11 @@ export default function DashboardLayout() {
         </aside>
 
         <main className="lg:col-span-9 min-w-0">
-          <Outlet />
+          <ErrorBoundary resetKey={pathname}>
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
     </div>
