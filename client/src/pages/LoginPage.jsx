@@ -38,7 +38,6 @@ export default function LoginPage() {
       await login({ email: values.email.trim(), password: values.password, remember: values.remember });
       setVerified(true);
       toast.success("Signed in successfully");
-      // GuestRoute redirects automatically once the user is set
     } catch (err) {
       setServerError(err.message);
     }
@@ -214,11 +213,10 @@ export default function LoginPage() {
             {(isSubmitting || verified || serverError) && (
               <div
                 role={serverError ? "alert" : "status"}
-                className={`mt-space-md p-space-sm border ${
-                  serverError
+                className={`mt-space-md p-space-sm border ${serverError
                     ? "bg-error-container border-error text-on-error-container"
                     : "bg-surface-container border-outline-variant"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   {serverError ? (

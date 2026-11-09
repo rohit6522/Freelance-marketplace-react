@@ -22,7 +22,11 @@ const setup = () => {
   };
 };
 
-beforeEach(() => login.mockReset());
+// Clear call history only, then give every test a fresh default
+beforeEach(() => {
+  login.mockClear();
+  login.mockResolvedValue({});
+});
 
 describe("LoginPage", () => {
   it("shows validation errors for an empty form and does not call the API", async () => {
@@ -52,14 +56,21 @@ describe("LoginPage", () => {
     expect(login).toHaveBeenCalledWith({ email: "me@example.com", password: "Secret123", remember: true });
   });
 
-  it("shows the server's error message", async () => {
-    login.mockRejectedValue({ message: "Invalid email or password" });
-    const { user, email, password, submit } = setup();
-    await user.type(email, "me@example.com");
-    await user.type(password, "wrong-password");
-    await user.click(submit);
-    expect(await screen.findByText("Invalid email or password")).toBeInTheDocument();
-  });
+
+it("shows the server's error message", async () => {
+  login.mockRejectedValue(new Error("Invalid email or password"));
+
+  const { user, email, password, submit } = setup();
+
+  await user.type(email, "me@example.com");
+  await user.type(password, "wrong-password");
+  await user.click(submit);
+
+  expect(
+    await screen.findByText("Invalid email or password")
+  ).toBeInTheDocument();
+});
+
 
   it("can show and hide the password", async () => {
     const { user, password } = setup();
