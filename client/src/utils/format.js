@@ -116,11 +116,16 @@ export const dayMonth = (d) =>
 
 export function dueText(due) {
   if (!due) return "";
-  const days = Math.ceil((new Date(due) - Date.now()) / 86400000);
-  if (days > 1) return `Due in ${days} days (${dayMonth(due)})`;
+  const DAY = 86400000;
+  const diff = new Date(due) - Date.now();
+  if (diff < 0) {
+    const late = Math.floor(-diff / DAY);
+    return late >= 1 ? `Overdue ${late}d (${dayMonth(due)})` : `Overdue (${dayMonth(due)})`;
+  }
+  const days = Math.floor(diff / DAY);
+  if (days >= 2) return `Due in ${days} days (${dayMonth(due)})`;
   if (days === 1) return `Due tomorrow (${dayMonth(due)})`;
-  if (days === 0) return "Due today";
-  return `Overdue ${Math.abs(days)}d (${dayMonth(due)})`;
+  return `Due today (${dayMonth(due)})`; // less than 24 hours left
 }
 
 export const ORDER_STATUS = {

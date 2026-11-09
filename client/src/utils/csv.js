@@ -4,9 +4,12 @@ const safe = (v) => {
   return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
 };
 
+export function toCsv(rows) {
+  return rows.map((r) => r.map((c) => `"${safe(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+}
+
 export function downloadCsv(filename, rows) {
-  const csv = rows.map((r) => r.map((c) => `"${safe(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+  const url = URL.createObjectURL(new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;

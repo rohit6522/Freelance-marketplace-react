@@ -5,7 +5,6 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed": "node src/seed/seed.js",
@@ -14,7 +13,8 @@
     "seed:categories": "node src/seed/seedCategories.js",
     "db:clean:demo": "node src/seed/cleanup.js --mode=demo",
     "db:clean:all": "node src/seed/cleanup.js --mode=all",
-    "make-admin": "node scripts/make-admin.js"
+    "make-admin": "node scripts/make-admin.js",
+    "test": "node --test tests/*.test.js"
   },
   "keywords": [],
   "dependencies": {

@@ -1,9 +1,14 @@
 import { ApiError } from "./ApiError.js";
 
-// Uploads are stored under gigcraft/<purpose>/<userId>/..., so a publicId proves who uploaded it.
-const isOwn = (publicId, userId) => typeof publicId === "string" && publicId.startsWith("gigcraft/") && publicId.includes(`/${userId}/`);
+// Uploads are stored as gigcraft/<gigs|portfolio>/<userId>/<random-name>, so the path proves who uploaded them.
+// Exact pattern: no extra path segments, no "." or ".." names, no other folders.
+const isOwn = (publicId, userId) => {
+  const uid = String(userId);
+  if (typeof publicId !== "string" || !/^[a-f0-9]{24}$/i.test(uid)) return false;
+  return new RegExp(`^gigcraft/(?:gigs|portfolio)/${uid}/(?!\\.)[\\w.-]+$`).test(publicId);
+};
 
-// Reject images that reference someone else's Cloudinary assets (images without publicId, e.g. external URLs, are allowed)
+// Reject images that reference someone else's Cloudinary assets (external URLs without a publicId are allowed)
 export function assertOwnedImages(images = [], userId) {
   for (const img of images) {
     if (img.publicId && !isOwn(img.publicId, userId)) throw new ApiError(400, "Invalid image reference");
