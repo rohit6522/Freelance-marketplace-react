@@ -123,7 +123,7 @@ export const PAGES = {
     notice: "Plain-language terms for a demonstration project. This is not legal advice.",
     sections: [
       { id: "demo", heading: "1. This is a demo", paragraphs: ["GigCraft is a learning project. Services listed on it are not real commercial offers, and payments are simulated."] },
-      { id: "accounts", heading: "2. Accounts", paragraphs: ["Give accurate information and keep your password private. You are responsible for activity on your account. You must be old enough to agree to these terms where you live."] },
+      { id: "accounts", heading: "2. Accounts", paragraphs: ["Give accurate information and keep your password private. You are responsible for activity on your account. You must be old enough to agree to these terms where you live. You can delete your account at any time from Account Settings."] },
       { id: "orders", heading: "3. Orders and simulated payments", paragraphs: ["Placing an order creates a demo payment record held in simulated escrow and released when the client approves. No card is charged and no money changes hands."] },
       { id: "content", heading: "4. Your content", paragraphs: ["You keep the rights to what you post (gigs, portfolio items, messages, files and reviews). You allow GigCraft to store and display it as part of running the site. Don't post anything unlawful or that you have no right to share."] },
       { id: "use", heading: "5. Acceptable use", paragraphs: ["Follow the Community Guidelines. Don't attack, scrape or overload the site, and don't use it to harm others."] },
@@ -169,7 +169,18 @@ export const PAGES = {
       },
       { id: "email", heading: "Emails", paragraphs: ["We send emails only for account security: password reset links and notices that your password changed. No marketing emails are sent in this version."] },
       { id: "security", heading: "Security", paragraphs: ["Passwords are hashed with bcrypt, traffic uses HTTPS, and every private request is checked on the server. No system is perfectly secure, so use a password you don't use elsewhere."] },
-      { id: "deletion", heading: "Deleting your data", paragraphs: ["There is no self-service account deletion in this version. To have your account and data removed, contact us using the details below."] },
+      {
+        id: "deletion",
+        heading: "Deleting your account",
+        paragraphs: [
+          "You can delete your account yourself under Account Settings. You will need your password, and you can't delete it while you have active orders.",
+        ],
+        items: [
+          "Deleted: your profile, portfolio, saved gigs, profile photo, and gigs that never had an order. Your name and email address are removed from the account.",
+          "Kept: orders, messages and reviews involving you stay, because the other person needs their order history and ratings must stay accurate. They are shown as from \"Deleted User\", and gigs that have orders are hidden from the marketplace.",
+          "Files: attachments and deliveries inside orders and messages stay available to the other person.",
+        ],
+      },
       { id: "contact", heading: "Contact", paragraphs: [contact] },
     ],
   },

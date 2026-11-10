@@ -110,6 +110,9 @@ export const listMessages = asyncHandler(async (req, res) => {
 // POST /api/conversations/:id/messages
 export const postMessage = asyncHandler(async (req, res) => {
   const convo = await getConversationForUser(req.params.id, req.user._id);
+  const otherId = convo.participants.find((p) => String(p) !== String(req.user._id));
+  const other = await User.findById(otherId).select("isActive");
+  if (!other?.isActive) throw new ApiError(409, "This person's account is no longer active, so you can't send them messages.");
   const message = await sendMessage({
     conversation: convo,
     senderId: req.user._id,

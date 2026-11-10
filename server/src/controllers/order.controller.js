@@ -1,4 +1,4 @@
-import { Order, Gig, Payment, Review, ORDER_STATUSES } from "../models/index.js";
+import { Order, Gig, Payment, Review, ORDER_STATUSES,User  } from "../models/index.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
@@ -29,6 +29,8 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   const gig = await Gig.findById(gigId);
   if (!gig || gig.status !== "published") throw new ApiError(404, "Gig not found or unavailable");
+    const seller = await User.findById(gig.freelancer).select("isActive");
+  if (!seller?.isActive) throw new ApiError(404, "Gig not found or unavailable");
   if (String(gig.freelancer) === String(req.user._id)) throw new ApiError(400, "You cannot order your own gig");
 
   const p = gig.packages[tier];

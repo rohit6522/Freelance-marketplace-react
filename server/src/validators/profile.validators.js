@@ -47,3 +47,8 @@ export const portfolioRules = [
   body("externalLink").optional({ values: "falsy" }).isURL({ protocols: ["http", "https"], require_protocol: true })
     .withMessage("External link must be a valid URL"),
 ];
+
+export const deleteAccountRules = [
+  body("password").isString().notEmpty().withMessage("Password is required"),
+  body("confirm").equals("DELETE").withMessage("Type DELETE to confirm"),
+];

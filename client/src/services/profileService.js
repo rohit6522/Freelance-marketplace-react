@@ -19,4 +19,7 @@ export const profileService = {
     const { data } = await api.post("/profile/avatar", form);
     return data.user;
   },
+    async deleteAccount(payload) {
+    await api.delete("/profile/account", { data: payload });
+  },
 };

@@ -17,13 +17,13 @@ const record = (admin, action, targetType, target, reason) =>
 // GET /api/admin/stats
 export const getStats = asyncHandler(async (req, res) => {
   const [roles, gigs, orders, total, withReports, hidden, suspended] = await Promise.all([
-    countBy(User, "role"),
+    User.aggregate([{ $match: { deletedAt: null } }, { $group: { _id: "$role", n: { $sum: 1 } } }]),
     countBy(Gig, "status"),
     countBy(Order, "status"),
     Review.countDocuments(),
     Review.countDocuments({ "reports.0": { $exists: true }, isHidden: false }),
     Review.countDocuments({ isHidden: true }),
-    User.countDocuments({ isActive: false }),
+    User.countDocuments({ isActive: false, deletedAt: null }),
   ]);
   res.json({
     success: true,
@@ -92,7 +92,9 @@ export const listUsers = asyncHandler(async (req, res) => {
   const { page, limit } = paging(req.query, 15);
   const match = {};
   if (req.query.role) match.role = req.query.role;
-  if (req.query.status === "suspended") match.isActive = false;
+
+  if (req.query.status === "suspended") { match.isActive = false; match.deletedAt = null; }
+
   const q = (req.query.q || "").trim();
   if (q) {
     const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
@@ -101,7 +103,7 @@ export const listUsers = asyncHandler(async (req, res) => {
 
   const [users, total] = await Promise.all([
     User.find(match)
-      .select("firstName lastName email role isActive createdAt avatar")
+      .select("firstName lastName email role isActive deletedAt createdAt avatar")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -113,8 +115,10 @@ export const listUsers = asyncHandler(async (req, res) => {
 
 // PATCH /api/admin/users/:id/status   { isActive, reason }
 export const setUserStatus = asyncHandler(async (req, res) => {
-  const target = await User.findById(req.params.id).select("role isActive");
+
+  const target = await User.findById(req.params.id).select("role isActive deletedAt");
   if (!target) throw new ApiError(404, "User not found");
+    if (target.deletedAt) throw new ApiError(400, "Deleted accounts can't be changed");
   if (String(target._id) === String(req.user._id)) throw new ApiError(400, "You can't change your own status");
   if (target.role === "admin") throw new ApiError(403, "Admin accounts can't be suspended here");
 

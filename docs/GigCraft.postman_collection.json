@@ -677,6 +677,39 @@
               ]
             }
           }
+        },
+        {
+          "name": "DELETE /profile/account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile/account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "account"
+              ],
+              "query": []
+            },
+            "description": "Delete your account: anonymises it and removes personal data. Blocked while you have active orders. Admins can't use it\n\nAccess: Logged in",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Secret123\",\n  \"confirm\": \"DELETE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     },

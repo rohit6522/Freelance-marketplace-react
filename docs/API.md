@@ -288,6 +288,7 @@ Example body:
 | `PUT` | `/profile/account` | Logged in | Update name, company and focus |
 | `PUT` | `/profile/freelancer` | Freelancer only | Update the public freelancer profile |
 | `POST` | `/profile/avatar` | Logged in | Upload a profile photo (multipart field: image) |
+| `DELETE` | `/profile/account` | Logged in | Delete your account: anonymises it and removes personal data. Blocked while you have active orders. Admins can't use it |
 
 **`PUT /profile/account`**
 
@@ -331,6 +332,17 @@ Example body:
       "endYear": null
     }
   ]
+}
+```
+
+**`DELETE /profile/account`**
+
+Example body:
+
+```json
+{
+  "password": "Secret123",
+  "confirm": "DELETE"
 }
 ```
 

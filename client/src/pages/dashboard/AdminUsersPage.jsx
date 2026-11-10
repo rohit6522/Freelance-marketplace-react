@@ -76,7 +76,7 @@ export default function AdminUsersPage() {
             </thead>
             <tbody>
               {data.users.map((u) => {
-                const protectedAccount = u.role === "admin" || u._id === me._id;
+                const protectedAccount = u.role === "admin" || u._id === me._id || Boolean(u.deletedAt);
                 return (
                   <tr key={u._id} className="border-t border-outline-variant">
                     <td className="p-space-sm">
@@ -91,9 +91,12 @@ export default function AdminUsersPage() {
                     <td className="p-space-sm uppercase font-label-sm">{u.role}</td>
                     <td className="p-space-sm whitespace-nowrap">{shortDate(u.createdAt)}</td>
                     <td className="p-space-sm">
-                      <span className={`font-label-sm text-label-sm px-space-xs py-0.5 uppercase font-bold ${u.isActive ? "bg-primary-container text-on-primary-container" : "bg-error-container text-on-error-container"}`}>
-                        {u.isActive ? "Active" : "Suspended"}
+
+                      <span className={`font-label-sm text-label-sm px-space-xs py-0.5 uppercase font-bold ${u.deletedAt ? "bg-surface-dim text-on-surface-variant" : u.isActive ? "bg-primary-container text-on-primary-container" : "bg-error-container text-on-error-container"
+                        }`}>
+                        {u.deletedAt ? "Deleted" : u.isActive ? "Active" : "Suspended"}
                       </span>
+
                     </td>
                     <td className="p-space-sm text-right">
                       <button

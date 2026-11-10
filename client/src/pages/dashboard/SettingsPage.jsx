@@ -4,7 +4,7 @@ import AccountForm from "../../components/settings/AccountForm";
 import FreelancerProfileForm from "../../components/settings/FreelancerProfileForm";
 import PasswordForm from "../../components/settings/PasswordForm";
 import { useAuth } from "../../hooks/useAuth";
-
+import DeleteAccountCard from "../../components/settings/DeleteAccountCard";
 export default function SettingsPage() {
   const { user } = useAuth();
   return (
@@ -14,6 +14,7 @@ export default function SettingsPage() {
       <AccountForm />
       {user.role === "freelancer" && <FreelancerProfileForm />}
       <PasswordForm />
+      {user.role !== "admin" && <DeleteAccountCard />}
     </div>
   );
 }

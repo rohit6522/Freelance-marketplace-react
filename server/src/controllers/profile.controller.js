@@ -4,6 +4,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import { uploadBuffer, deleteAsset } from "../services/upload.service.js";
 import { assertOwnedImages, ownedPublicIds } from "../utils/assets.js";
+import { deleteAccountData, countActiveOrders } from "../services/account.service.js";
+import { clearTokenCookie } from "../utils/token.js";
+import { disconnectUser } from "../realtime/socket.js";
 
 const PROFILE_FIELDS = ["title", "bio", "location", "skills", "languages", "experienceYears", "hourlyRate", "workHistory"];
 const PORTFOLIO_FIELDS = ["title", "description", "industry", "metric", "durationWeeks", "deliverables", "images", "externalLink"];
@@ -85,4 +88,26 @@ export const updateAvatar = asyncHandler(async (req, res) => {
   );
   await deleteAsset(oldPublicId); // remove the previous avatar from Cloudinary
   res.json({ success: true, user });
+});
+
+// DELETE /api/profile/account   { password, confirm: "DELETE" }
+export const deleteAccount = asyncHandler(async (req, res) => {
+  if (req.user.role === "admin") throw new ApiError(403, "Admin accounts can't be deleted here");
+
+  const user = await User.findById(req.user._id).select("+password");
+  if (!(await user.comparePassword(req.body.password))) throw new ApiError(400, "Password is incorrect");
+
+  const active = await countActiveOrders(user._id);
+  if (active) {
+    throw new ApiError(
+      409,
+      `You have ${active} active order${active === 1 ? "" : "s"}. Complete or cancel ${active === 1 ? "it" : "them"} before deleting your account.`
+    );
+  }
+
+  const assetIds = await deleteAccountData(user._id);
+  await Promise.all(assetIds.map((id) => deleteAsset(id))); // best effort, never throws
+  disconnectUser(user._id);
+  clearTokenCookie(res);
+  res.json({ success: true, message: "Account deleted" });
 });

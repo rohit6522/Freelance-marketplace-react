@@ -1098,6 +1098,61 @@ await step("public stats are real aggregates and leak nothing private", async ()
   }
 });
 
+
+console.log("\nAccount deletion");
+const stamp = Date.now();
+const gonerEmail = `goner_${stamp}@example.com`;
+const goner = new Session();
+const del = (s, body) => s.call("DELETE", "/profile/account", body);
+
+await step("a seller with a draft gig and a portfolio project registers", async () => {
+  expectStatus(await goner.post("/auth/register", { firstName: "Goner", lastName: "Seller", email: gonerEmail, password: "Secret123", role: "freelancer", acceptTerms: true }), 201);
+  expectStatus(await goner.post("/gigs", { ...gigBody, category: ctx.categoryId }), 201);
+  expectStatus(await goner.post("/portfolio", { title: "My project", description: "A short description of this project." }), 201);
+  ctx.gonerId = (await goner.get("/auth/me")).data.user._id;
+});
+await step("anonymous users and admins cannot delete accounts", async () => {
+  expectStatus(await del(anon, { password: "x", confirm: "DELETE" }), 401);
+  expectStatus(await del(admin, { password: PASSWORD, confirm: "DELETE" }), 403);
+});
+await step("deletion needs the right password and the word DELETE", async () => {
+  expectStatus(await del(goner, { password: "wrong-password", confirm: "DELETE" }), 400);
+  expectStatus(await del(goner, { password: "Secret123", confirm: "delete" }), 400);
+  expectStatus(await del(goner, { password: "Secret123" }), 400);
+  expectStatus(await goner.get("/auth/me"), 200); // still signed in
+});
+await step("a valid deletion removes access and public traces", async () => {
+  expectStatus(await del(goner, { password: "Secret123", confirm: "DELETE" }), 200);
+  expectStatus(await goner.get("/auth/me"), 401);
+  expectStatus(await new Session().post("/auth/login", { email: gonerEmail, password: "Secret123" }), 401);
+  expectStatus(await anon.get(`/freelancers/${ctx.gonerId}`), 404);
+});
+await step("the same email can register again after deletion", async () => {
+  expectStatus(await new Session().post("/auth/register", { firstName: "Back", lastName: "Again", email: gonerEmail, password: "Secret123", role: "client", acceptTerms: true }), 201);
+});
+
+const buyer2 = new Session();
+const buyerEmail = `buyer_${stamp}@example.com`;
+await step("active orders block deletion; once cancelled, deletion works and the order stays anonymised", async () => {
+  expectStatus(await buyer2.post("/auth/register", { firstName: "Soon", lastName: "Gone", email: buyerEmail, password: "Secret123", role: "client", acceptTerms: true }), 201);
+  const o = await buyer2.post("/orders", { gigId: ctx.gigId, tier: "basic", requirements: "An order that will outlive its buyer's account, for the smoke test." });
+  expectStatus(o, 201);
+  expectStatus(await del(buyer2, { password: "Secret123", confirm: "DELETE" }), 409);
+  expectStatus(await buyer2.post(`/orders/${o.data.order._id}/cancel`, { reason: "Cancelling before I delete my account." }), 200);
+  expectStatus(await del(buyer2, { password: "Secret123", confirm: "DELETE" }), 200);
+  const seen = await marcus.get(`/orders/${o.data.order._id}`);
+  expectStatus(seen, 200);
+  assert.equal(seen.data.order.client.firstName, "Deleted");
+  assert.ok(!JSON.stringify(seen.data.order.client).includes(buyerEmail), "the old email must be gone");
+});
+await step("admins see deleted accounts but cannot change them", async () => {
+  const r = await admin.get("/admin/users?q=deleted-&limit=50");
+  expectStatus(r, 200);
+  const deleted = r.data.users.find((u) => u.deletedAt);
+  assert.ok(deleted, "a deleted account should appear in the user list");
+  expectStatus(await admin.patch(`/admin/users/${deleted._id}/status`, { isActive: true }), 400);
+});
+
 // =====================================================
 // FINAL SUMMARY
 // =====================================================
