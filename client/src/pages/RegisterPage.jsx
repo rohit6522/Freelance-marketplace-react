@@ -8,6 +8,7 @@ import { GithubIcon, GoogleIcon } from "../components/ui/BrandIcons";
 import { useAuth } from "../hooks/useAuth";
 import { DOMAINS } from "../constants/domains";
 import { assessPassword } from "../utils/passwordStrength";
+import PlatformStatsPanel from "../components/auth/PlatformStatsPanel";
 
 const EMAIL_RX = /^\S+@\S+\.\S+$/;
 const FORM_FIELDS = ["firstName", "lastName", "email", "password", "acceptTerms"];
@@ -21,23 +22,22 @@ const ROLES = {
   client: {
     icon: "business_center",
     tag: "Hire Talent",
-    title: "Client / Engineering Lead",
-    text: "Post technical gigs, escrow milestone contracts, and hire vetted engineers & architects with automated deliverables verification.",
-    footLeft: "Buyer Escrow Mode",
-    footRight: "0% Upfront Post",
-    cta: "Create Client Account & Hire Engineers",
+    title: "Client",
+    text: "Browse gigs, order a package with your requirements, track the work, and approve the delivery before the payment is released.",
+    footLeft: "Escrow-held payments",
+    footRight: "No platform fee",
+    cta: "Create Client Account",
   },
   freelancer: {
     icon: "terminal",
     tag: "Work & Sell",
-    title: "Freelancer / Specialist",
-    text: "Publish pre-scoped technical services, pass verified code audits, and unlock immediate milestone settlement upon PR approvals.",
-    footLeft: "Builder Workspace",
-    footRight: "Direct Settlement",
-    cta: "Create Developer Profile & Get Booked",
+    title: "Freelancer",
+    text: "Publish services with Basic, Standard and Premium packages, deliver your work, and get paid when the client approves.",
+    footLeft: "Seller workspace",
+    footRight: "Paid on approval",
+    cta: "Create Freelancer Account",
   },
 };
-
 function RoleCard({ id, active, onSelect }) {
   const r = ROLES[id];
   return (
@@ -45,11 +45,10 @@ function RoleCard({ id, active, onSelect }) {
       type="button"
       onClick={() => onSelect(id)}
       aria-pressed={active}
-      className={`text-left p-space-md relative flex flex-col justify-between transition-none ${
-        active
-          ? "bg-surface-container-low border-2 border-primary"
-          : "bg-surface-container-lowest border border-outline-variant hover:border-on-surface"
-      }`}
+      className={`text-left p-space-md relative flex flex-col justify-between transition-none ${active
+        ? "bg-surface-container-low border-2 border-primary"
+        : "bg-surface-container-lowest border border-outline-variant hover:border-on-surface"
+        }`}
     >
       <div>
         <div className="flex items-center justify-between mb-space-sm">
@@ -58,9 +57,8 @@ function RoleCard({ id, active, onSelect }) {
             <span className="font-label-md text-label-md text-on-surface uppercase">{r.tag}</span>
           </div>
           <span
-            className={`w-4 h-4 flex items-center justify-center ${
-              active ? "bg-primary text-on-primary" : "border border-outline-variant text-transparent"
-            }`}
+            className={`w-4 h-4 flex items-center justify-center ${active ? "bg-primary text-on-primary" : "border border-outline-variant text-transparent"
+              }`}
           >
             <Icon name="check" className="text-xs" />
           </span>
@@ -84,9 +82,8 @@ function CustomCheckbox({ checked, error, children, registration, id }) {
       <label className="flex items-start gap-space-sm cursor-pointer select-none">
         <input id={id} type="checkbox" className="peer sr-only" {...registration} />
         <div
-          className={`w-4 h-4 mt-0.5 border flex items-center justify-center flex-shrink-0 peer-focus-visible:ring-2 peer-focus-visible:ring-primary ${
-            checked ? "bg-primary border-primary text-on-primary" : "bg-surface-container-lowest border-on-surface text-transparent"
-          }`}
+          className={`w-4 h-4 mt-0.5 border flex items-center justify-center flex-shrink-0 peer-focus-visible:ring-2 peer-focus-visible:ring-primary ${checked ? "bg-primary border-primary text-on-primary" : "bg-surface-container-lowest border-on-surface text-transparent"
+            }`}
         >
           <Icon name="check" className="text-xs" />
         </div>
@@ -349,19 +346,13 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-space-sm pt-space-xs">
-              <CustomCheckbox
-                id="acceptTerms"
-                checked={acceptTerms}
-                error={errors.acceptTerms?.message}
-                registration={register("acceptTerms", { required: "You must accept the Terms of Service" })}
-              >
-                I agree to the{" "}
-                <a href="#" className="text-on-surface font-bold underline hover:text-primary">GigCraft Escrow Terms of Service</a>,{" "}
-                <a href="#" className="text-on-surface font-bold underline hover:text-primary">Deterministic Dispute Policy</a>, and{" "}
-                <a href="#" className="text-on-surface font-bold underline hover:text-primary">Code Review Standards</a>.
-              </CustomCheckbox>
+              I agree to the{" "}
+              <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-on-surface font-bold underline hover:text-primary">Terms of Service</Link>,{" "}
+              <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="text-on-surface font-bold underline hover:text-primary">Privacy Policy</Link>, and{" "}
+              <Link to="/guidelines" target="_blank" rel="noopener noreferrer" className="text-on-surface font-bold underline hover:text-primary">Community Guidelines</Link>.
+
               <CustomCheckbox id="marketingOptIn" checked={marketingOptIn} registration={register("marketingOptIn")}>
-                Send me weekly curated technical gig digests, benchmark contract rate indexes, and core engineering telemetry updates.
+                Allow occasional product update emails (optional).
               </CustomCheckbox>
             </div>
 
@@ -395,14 +386,13 @@ export default function RegisterPage() {
         <div className="lg:col-span-4 space-y-space-md">
           <div className="bg-surface-container-lowest border border-outline-variant p-space-md shadow-[2px_2px_0px_#0b1c30]">
             <div className="flex items-center justify-between pb-space-xs border-b border-outline-variant mb-space-sm">
-              <span className="font-label-sm text-label-sm uppercase text-on-surface font-bold tracking-wider">Protocol Guarantee</span>
-              <span className="font-code-sm text-code-sm bg-primary-fixed text-on-primary-fixed px-1.5 py-0.5 border border-primary">ACTIVE</span>
+              <span className="font-label-sm text-label-sm uppercase text-on-surface font-bold tracking-wider">How it works</span>
             </div>
             <div className="space-y-space-sm">
               {[
-                ["verified_user", "100% Escrow Milestone Vault", "Contract funds locked in neutral cryptographic escrow before any coding commences."],
-                ["sync_saved_locally", "Instant GitHub Portfolio Sync", "Auto-benchmark PR merge rates, commit volume, and test coverage to auto-tier your profile."],
-                ["payments", "Zero Upfront Hiring Fee", "Browse, interview, and initiate technical tests without retainer requirements or subscription gating."],
+                ["verified_user", "Payments held in escrow", "When you order, the amount is held in a demo escrow and released only when you approve the delivery."],
+                ["work", "Packages you can compare", "Every gig has Basic, Standard and Premium packages with clear delivery times and revisions."],
+                ["payments", "No platform fee", "This demo doesn't charge any fees, and no real money is ever used."],
               ].map(([icon, title, text]) => (
                 <div key={title} className="flex items-start gap-space-sm">
                   <div className="w-7 h-7 bg-surface-container flex items-center justify-center flex-shrink-0 border border-outline-variant">
@@ -418,71 +408,19 @@ export default function RegisterPage() {
           </div>
 
           <div className="bg-surface-container-low border border-outline-variant p-space-md">
-            <div className="flex items-center justify-between mb-space-sm">
-              <span className="font-label-sm text-label-sm uppercase text-on-surface-variant">Current Network Telemetry</span>
-              <span className="font-code-sm text-[10px] bg-primary text-on-primary px-1.5 py-0.5">DEMO DATA</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-surface-container-lowest border border-outline-variant p-2.5">
-                <span className="font-code-sm text-code-sm text-on-surface-variant block">AVG FILL TIME</span>
-                <span className="font-headline-sm text-headline-sm text-on-surface font-bold block mt-0.5">3.8 hrs</span>
-                <span className="font-code-sm text-[10px] text-primary block mt-0.5">▲ 14% FASTER</span>
-              </div>
-              <div className="bg-surface-container-lowest border border-outline-variant p-2.5">
-                <span className="font-code-sm text-code-sm text-on-surface-variant block">ESCROW VOLUME</span>
-                <span className="font-headline-sm text-headline-sm text-on-surface font-bold block mt-0.5">₹24.2 Cr</span>
-                <span className="font-code-sm text-[10px] text-on-surface-variant block mt-0.5">Q1 VERIFIED</span>
-              </div>
-            </div>
-            <div className="mt-space-sm bg-surface-container-lowest border border-outline-variant p-2.5">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-label-sm text-label-sm text-on-surface">Milestone Dispute Rate</span>
-                <span className="font-code-sm text-code-sm text-primary font-bold">0.08%</span>
-              </div>
-              <div className="w-full h-10 flex items-end">
-                <svg className="w-full h-8 overflow-visible" fill="none" viewBox="0 0 160 30" aria-hidden="true">
-                  <polyline points="0,25 25,22 50,26 75,18 100,19 125,12 150,8 160,6" stroke="#005d42" strokeLinecap="square" strokeWidth="2" />
-                  <circle cx="160" cy="6" fill="#047857" r="2.5" />
-                  <line stroke="#bdc9c1" strokeDasharray="2 2" strokeWidth="1" x1="0" x2="160" y1="28" y2="28" />
-                </svg>
-              </div>
-              <div className="flex justify-between font-code-sm text-[9px] text-on-surface-variant mt-1 border-t border-outline-variant pt-1">
-                <span>OCT</span><span>NOV</span><span>DEC</span><span>JAN</span><span>LIVE</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-surface-container-lowest border border-outline-variant p-space-md">
-            <div className="flex items-center gap-space-sm">
-              <div className="w-12 h-12 bg-surface-container-high border border-outline flex items-center justify-center font-headline-sm text-on-surface font-bold">AK</div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-label-md text-label-md text-on-surface truncate">Aman K.</span>
-                  <span className="px-1.5 bg-primary-fixed text-on-primary-fixed font-code-sm text-[10px] border border-primary">STAFF ARCHITECT</span>
-                </div>
-                <p className="font-body-sm text-body-sm text-on-surface-variant truncate">Full-Stack Architect, Bengaluru</p>
-              </div>
-            </div>
-            <div className="mt-space-sm pt-space-xs border-t border-outline-variant">
-              <p className="font-body-sm text-body-sm text-on-surface-variant italic">
-                “GigCraft’s escrow code milestone checks removed invoice chasing entirely. First gig landed within 24 hours of GitHub verification.”
-              </p>
-              <div className="mt-2 flex items-center justify-between text-on-surface-variant font-code-sm text-code-sm">
-                <span>38 COMPLETED CONTRACTS</span>
-                <span className="text-primary font-bold">★ 5.0 RATING</span>
-              </div>
-            </div>
+            <PlatformStatsPanel compact />
           </div>
         </div>
+
       </div>
 
       {/* Trust ribbon */}
       <div className="mt-space-xl bg-surface-container-low border border-outline-variant p-space-md lg:p-space-lg">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-space-md">
           {[
-            ["gavel", "Deterministic Escrow", "Zero upfront platform commission until milestone delivery passes static code analysis and buyer verification."],
-            ["security", "SOC-2 Type II Custody", "GST & TDS compliant invoicing, milestone escrow, and direct payouts via NEFT, UPI & IMPS across India."],
-            ["verified", "Pre-Screened Talent", "Only the top 3% of technical applicants pass algorithmic repo evaluations and live architecture screens."],
+            ["gavel", "Approval-based payouts", "The seller is paid only after the client approves the delivery. Cancelled orders are refunded (simulated)."],
+            ["lock", "Protected accounts", "Passwords are hashed with bcrypt and sessions use httpOnly cookies. Every private action is checked on the server."],
+            ["reviews", "Honest reviews", "Only clients with a completed order can review, once per order. Reported reviews are checked by an admin."],
           ].map(([icon, title, text]) => (
             <div key={title} className="flex items-start gap-space-sm">
               <div className="p-2 bg-surface-container-lowest border border-outline-variant text-primary flex-shrink-0">

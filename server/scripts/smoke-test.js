@@ -1083,6 +1083,21 @@ await step("activity log recorded the actions", async () => {
   assert.ok(r.data.logs.every((l) => l.targetLabel));
 });
 
+
+console.log("\nPublic stats");
+await step("public stats are real aggregates and leak nothing private", async () => {
+  const r = await anon.get("/public/stats");
+  expectStatus(r, 200);
+  const s = r.data.stats;
+  assert.ok(s.gigs >= 1 && s.freelancers >= 1 && s.completedOrders >= 1);
+  assert.equal(typeof s.simulatedVolume, "number");
+  if (s.latestReview) {
+    assert.deepEqual(Object.keys(s.latestReview).sort(), ["author", "comment", "gigTitle", "rating"]);
+    assert.ok(s.latestReview.comment.length <= 201);
+    assert.ok(!JSON.stringify(s).includes("@"), "no email addresses in public stats");
+  }
+});
+
 // =====================================================
 // FINAL SUMMARY
 // =====================================================

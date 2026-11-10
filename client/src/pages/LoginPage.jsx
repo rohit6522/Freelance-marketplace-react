@@ -6,6 +6,7 @@ import Icon from "../components/ui/Icon";
 import FieldError from "../components/ui/FieldError";
 import { GithubIcon, GoogleIcon } from "../components/ui/BrandIcons";
 import { useAuth } from "../hooks/useAuth";
+import PlatformStatsPanel from "../components/auth/PlatformStatsPanel";
 
 const EMAIL_RX = /^\S+@\S+\.\S+$/;
 
@@ -14,9 +15,9 @@ const inputBase =
 const addon = "inline-flex items-center px-3.5 bg-surface-container-low border border-outline-variant text-on-surface-variant";
 
 const trustCards = [
-  { icon: "verified", title: "SOC-2 Type II Certified", text: "Continuous third-party audits ensure complete financial and credential protection." },
-  { icon: "account_balance_wallet", title: "Multi-Sig Escrow Vault", text: "Funds are held neutral until acceptance criteria and code deliverable verification meet specs." },
-  { icon: "enhanced_encryption", title: "256-Bit Hardware Encryption", text: "Strict hardware token integration with encrypted payload transmission and session pinning." },
+  { icon: "lock", title: "Secure sessions", text: "Passwords are hashed with bcrypt. Sign-in uses an httpOnly cookie that scripts can't read." },
+  { icon: "account_balance_wallet", title: "Simulated escrow", text: "Order payments are held in a demo escrow and released when the client approves the delivery. No real money moves." },
+  { icon: "reviews", title: "Reviews from real orders", text: "Only clients with a completed order can leave a review, one per order." },
 ];
 
 export default function LoginPage() {
@@ -53,19 +54,19 @@ export default function LoginPage() {
         <div className="flex items-center gap-space-sm">
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-surface-container text-primary font-code-sm text-code-sm font-semibold border border-outline-variant">
             <span className="w-2 h-2 bg-primary" />
-            AUTH-GATEWAY // NODE-04: SECURE
+            SECURE SIGN-IN
           </span>
           <span className="font-code-sm text-code-sm text-on-surface-variant hidden sm:inline">
-            PROTOCOL: TLS 1.3 / E2EE VERIFIED
+            HTTPS // HTTPONLY SESSION COOKIE
           </span>
         </div>
         <div className="flex items-center gap-space-md text-on-surface-variant font-code-sm text-code-sm">
           <span className="flex items-center gap-1">
-            <Icon name="verified_user" className="text-base text-primary" /> SOC-2 TYPE II
+            <Icon name="verified_user" className="text-base text-primary" /> BCRYPT PASSWORDS
           </span>
           <span className="hidden md:inline text-outline-variant">|</span>
           <span className="hidden md:flex items-center gap-1">
-            <Icon name="lock" className="text-base text-primary" /> MULTI-SIG ESCROW ACTIVE
+            <Icon name="lock" className="text-base text-primary" /> SIMULATED ESCROW
           </span>
         </div>
       </div>
@@ -195,7 +196,7 @@ export default function LoginPage() {
                 </label>
                 <span className="inline-flex items-center gap-1 font-code-sm text-code-sm text-primary px-2 py-0.5 bg-surface-container-low border border-outline-variant font-medium">
                   <Icon name="shield" className="text-xs" />
-                  Hardware 2FA Prompted
+                  HTTPS session
                 </span>
               </div>
 
@@ -214,8 +215,8 @@ export default function LoginPage() {
               <div
                 role={serverError ? "alert" : "status"}
                 className={`mt-space-md p-space-sm border ${serverError
-                    ? "bg-error-container border-error text-on-error-container"
-                    : "bg-surface-container border-outline-variant"
+                  ? "bg-error-container border-error text-on-error-container"
+                  : "bg-surface-container border-outline-variant"
                   }`}
               >
                 <div className="flex items-center gap-2">
@@ -265,90 +266,9 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right: demo ledger panel */}
-        <div className="lg:col-span-5 bg-surface-container-low p-space-md sm:p-space-lg lg:p-space-xl flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-outline-variant pb-space-sm mb-space-lg">
-              <span className="font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant font-semibold">
-                PLATFORM LEDGER &amp; METRICS
-              </span>
-              <span className="px-2 py-0.5 bg-primary text-on-primary font-code-sm text-code-sm">DEMO DATA</span>
-            </div>
-
-            <div className="bg-surface-container-lowest border border-outline-variant p-space-md mb-space-md">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-code-sm text-code-sm uppercase text-on-surface-variant">Active Escrow Liquidity</span>
-                  <div className="font-headline-lg text-headline-lg text-on-surface font-bold mt-1 tracking-tight">
-                    ₹1,84,25,000.00
-                  </div>
-                </div>
-                <div className="p-2 bg-surface-container text-primary border border-outline-variant">
-                  <Icon name="account_balance" className="text-2xl" />
-                </div>
-              </div>
-              <div className="mt-space-md pt-space-sm border-t border-outline-variant">
-                <div className="flex justify-between font-code-sm text-code-sm text-on-surface-variant mb-1.5">
-                  <span>Disbursement Allocation</span>
-                  <span className="font-semibold text-on-surface">94.8% SLA Clearance</span>
-                </div>
-                <div className="w-full h-2 bg-surface-container border border-outline-variant">
-                  <div className="h-full bg-primary" style={{ width: "94.8%" }} />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest border border-outline-variant p-space-md mb-space-md">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-code-sm text-code-sm uppercase text-on-surface-variant">Candidate Acceptance Rate</span>
-                  <div className="font-headline-md text-headline-md text-on-surface font-bold mt-1">Top 1.4% Verified</div>
-                </div>
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-container text-primary font-label-sm text-label-sm font-semibold border border-outline-variant">
-                  <Icon name="check_circle" className="text-xs" />
-                  ASSESSED
-                </span>
-              </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-sm">
-                Strict algorithmic code assessments, system design interviews, and identity KYC.
-              </p>
-            </div>
-
-            <div className="bg-surface-container-lowest border border-outline-variant p-space-md">
-              <div className="flex items-center gap-1 text-primary mb-space-sm">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Icon key={i} name="star" filled className="text-sm" />
-                ))}
-                <span className="font-code-sm text-code-sm text-on-surface-variant ml-1 font-semibold">VERIFIED BUYER</span>
-              </div>
-              <p className="font-body-sm text-body-sm text-on-surface italic leading-relaxed">
-                "We migrated all 24 external distributed systems contracts to GigCraft. The multi-sig milestone escrow
-                eliminates payment disputes entirely."
-              </p>
-              <div className="mt-space-md pt-space-sm border-t border-outline-variant flex items-center justify-between">
-                <div>
-                  <div className="font-label-md text-label-md text-on-surface font-semibold">Rahul Sharma</div>
-                  <div className="font-code-sm text-code-sm text-on-surface-variant">VP Technology @ TechNova Labs, Bengaluru</div>
-                </div>
-                <span className="px-2 py-0.5 bg-surface-container font-code-sm text-code-sm text-primary border border-outline-variant">
-                  ₹25,00,000+ Transacted
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-space-lg pt-space-md border-t border-outline-variant space-y-2">
-            {[
-              ["Zero-Knowledge Token Proof", "ACTIVE", "text-primary"],
-              ["Hardware Security Module (HSM)", "FIPS 140-2 LEVEL 3", "text-primary"],
-              ["Instant Automated Escrow Release", "UPON GIT COMMIT VERIFY", "text-on-surface"],
-            ].map(([label, value, color]) => (
-              <div key={label} className="flex items-center justify-between font-code-sm text-code-sm">
-                <span className="text-on-surface-variant">{label}</span>
-                <span className={`${color} font-bold`}>{value}</span>
-              </div>
-            ))}
-          </div>
+        {/* Right: live platform metrics */}
+        <div className="lg:col-span-5 bg-surface-container-low p-space-md sm:p-space-lg lg:p-space-xl">
+          <PlatformStatsPanel />
         </div>
       </div>
 

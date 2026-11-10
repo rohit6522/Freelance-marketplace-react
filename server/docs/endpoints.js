@@ -118,4 +118,7 @@ export const groups = [
     { method: "PATCH", path: "/admin/users/{{targetUserId}}/status", auth: "admin", summary: "Suspend or reactivate a user. Suspending pauses their published gigs. A reason is required to suspend", body: { isActive: false, reason: "Repeated policy violations." } },
     { method: "GET", path: "/admin/log", auth: "admin", summary: "Moderation activity log", query: { page: 1, limit: 20 } },
   ]},
+    { name: "Public", items: [
+    { method: "GET", path: "/public/stats", auth: "public", summary: "Platform totals and one short public review quote (cached for 60 seconds)" },
+  ]},
 ];

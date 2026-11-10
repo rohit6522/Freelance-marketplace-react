@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import { useCategories } from "../../hooks/useCategories";
 
 const columns = [
-  { title: "About", links: ["Platform Overview", "Engineering Careers", "Press & Media", "Partnership Network"] },
-  { title: "Support", links: ["Help Center", "Escrow Dispute Desk", "Contract Standards", "Contact Support"] },
-  { title: "Trust & Safety", links: ["Verified Badging", "Milestone Protection", "Code Auditing", "Community Guidelines"] },
-  { title: "Terms & Law", links: ["Terms of Service", "Privacy Policy", "Escrow Agreement", "Cookie Preferences"] },
+  { title: "About", links: [["How it works", "/about"], ["For clients", "/about#clients"], ["For freelancers", "/about#freelancers"]] },
+  { title: "Support", links: [["Help Center", "/help"], ["Escrow explained", "/escrow"], ["Contact", "/help#contact"]] },
+  { title: "Trust & Safety", links: [["Community Guidelines", "/guidelines"], ["Reviews & moderation", "/guidelines#reviews"], ["Safety tips", "/guidelines#safety"]] },
+  { title: "Terms & Law", links: [["Terms of Service", "/terms"], ["Privacy Policy", "/privacy"], ["Cookies", "/privacy#cookies"]] },
 ];
 
 const headingClass = "font-label-md text-label-md uppercase tracking-wider text-on-surface mb-space-md";
@@ -23,9 +23,7 @@ export default function Footer() {
             <ul className={listClass}>
               {categories.map((c) => (
                 <li key={c._id}>
-                  <Link to={`/explore?category=${c.slug}`} className="hover:text-primary transition-colors">
-                    {c.name}
-                  </Link>
+                  <Link to={`/explore?category=${c.slug}`} className="hover:text-primary transition-colors">{c.name}</Link>
                 </li>
               ))}
             </ul>
@@ -34,9 +32,9 @@ export default function Footer() {
             <div key={col.title}>
               <h4 className={headingClass}>{col.title}</h4>
               <ul className={listClass}>
-                {col.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" className="hover:text-primary transition-colors">{l}</a>
+                {col.links.map(([label, to]) => (
+                  <li key={to}>
+                    <Link to={to} className="hover:text-primary transition-colors">{label}</Link>
                   </li>
                 ))}
               </ul>
@@ -46,13 +44,9 @@ export default function Footer() {
         <div className="border-t border-outline-variant pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-sm">
           <div className="flex items-center gap-space-xs">
             <span className="font-headline-sm text-headline-sm text-primary font-bold uppercase">GigCraft</span>
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              © {new Date().getFullYear()} GigCraft Marketplace Inc. All rights reserved.
-            </span>
+            <span className="font-body-sm text-body-sm text-on-surface-variant">© {new Date().getFullYear()} GigCraft. A demonstration project.</span>
           </div>
-          <div className="font-code-sm text-code-sm text-on-surface-variant">
-            ENGINEERED FOR HIGH-OUTPUT TECHNICAL CONTRACTS
-          </div>
+          <div className="font-code-sm text-code-sm text-on-surface-variant">PAYMENTS ARE SIMULATED</div>
         </div>
       </div>
     </footer>

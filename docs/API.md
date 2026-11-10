@@ -596,3 +596,92 @@ Example body:
 | `GET` | `/dashboard/client` | Client only | Client stats computed from real data |
 | `GET` | `/dashboard/freelancer` | Freelancer only | Freelancer stats, 6-month earnings and top gigs |
 
+## Admin
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/admin/stats` | Admin only | Platform counts and moderation queue size |
+| `GET` | `/admin/reviews` | Admin only | Reviews by moderation state |
+| `PATCH` | `/admin/reviews/:reviewId/visibility` | Admin only | Hide or restore a review (ratings are recalculated). A reason of 5+ characters is required to hide |
+| `POST` | `/admin/reviews/:reviewId/dismiss-reports` | Admin only | Clear the reports on a review |
+| `GET` | `/admin/users` | Admin only | Search users |
+| `PATCH` | `/admin/users/:targetUserId/status` | Admin only | Suspend or reactivate a user. Suspending pauses their published gigs. A reason is required to suspend |
+| `GET` | `/admin/log` | Admin only | Moderation activity log |
+
+**`GET /admin/reviews`**
+
+filter: reported | hidden | all
+
+Query parameters:
+
+```json
+{
+  "filter": "reported",
+  "page": 1,
+  "limit": 8
+}
+```
+
+**`PATCH /admin/reviews/:reviewId/visibility`**
+
+Example body:
+
+```json
+{
+  "hidden": true,
+  "reason": "Contains abusive language."
+}
+```
+
+**`POST /admin/reviews/:reviewId/dismiss-reports`**
+
+Example body:
+
+```json
+{
+  "reason": "Reports reviewed, no violation."
+}
+```
+
+**`GET /admin/users`**
+
+Query parameters:
+
+```json
+{
+  "q": "elena",
+  "role": "freelancer",
+  "status": "suspended",
+  "page": 1,
+  "limit": 15
+}
+```
+
+**`PATCH /admin/users/:targetUserId/status`**
+
+Example body:
+
+```json
+{
+  "isActive": false,
+  "reason": "Repeated policy violations."
+}
+```
+
+**`GET /admin/log`**
+
+Query parameters:
+
+```json
+{
+  "page": 1,
+  "limit": 20
+}
+```
+
+## Public
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/public/stats` | Public | Platform totals and one short public review quote (cached for 60 seconds) |
+

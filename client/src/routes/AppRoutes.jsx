@@ -27,6 +27,7 @@ const PortfolioPage = lazyPage(() => import("../pages/dashboard/PortfolioPage"))
 const ModerationPage = lazyPage(() => import("../pages/dashboard/ModerationPage"));
 const AdminUsersPage = lazyPage(() => import("../pages/dashboard/AdminUsersPage"));
 const AdminLogPage = lazyPage(() => import("../pages/dashboard/AdminLogPage"));
+const InfoPage = lazyPage(() => import("../pages/InfoPage"));
 
 export default function AppRoutes() {
   return (
@@ -36,6 +37,12 @@ export default function AppRoutes() {
         <Route path="explore" element={<ExplorePage />} />
         <Route path="gigs/:id" element={<GigDetailPage />} />
         <Route path="freelancers/:id" element={<FreelancerProfilePage />} />
+        <Route path="about" element={<InfoPage pageKey="about" />} />
+        <Route path="help" element={<InfoPage pageKey="help" />} />
+        <Route path="escrow" element={<InfoPage pageKey="escrow" />} />
+        <Route path="guidelines" element={<InfoPage pageKey="guidelines" />} />
+        <Route path="terms" element={<InfoPage pageKey="terms" />} />
+        <Route path="privacy" element={<InfoPage pageKey="privacy" />} />
 
         {/* Clients and freelancers only */}
         <Route element={<ProtectedRoute roles={["client", "freelancer"]} />}>

@@ -1656,6 +1656,293 @@
           }
         }
       ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "GET /admin/stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "stats"
+              ],
+              "query": []
+            },
+            "description": "Platform counts and moderation queue size\n\nAccess: Admin only"
+          }
+        },
+        {
+          "name": "GET /admin/reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "reported",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "8",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Reviews by moderation state\n\nAccess: Admin only\n\nfilter: reported | hidden | all"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"reviews.0._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"reviewId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /admin/reviews/:reviewId/visibility",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reviews/{{reviewId}}/visibility",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reviews",
+                "{{reviewId}}",
+                "visibility"
+              ],
+              "query": []
+            },
+            "description": "Hide or restore a review (ratings are recalculated). A reason of 5+ characters is required to hide\n\nAccess: Admin only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hidden\": true,\n  \"reason\": \"Contains abusive language.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /admin/reviews/:reviewId/dismiss-reports",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reviews/{{reviewId}}/dismiss-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reviews",
+                "{{reviewId}}",
+                "dismiss-reports"
+              ],
+              "query": []
+            },
+            "description": "Clear the reports on a review\n\nAccess: Admin only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Reports reviewed, no violation.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /admin/users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "elena",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "freelancer",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "suspended",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "15",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Search users\n\nAccess: Admin only"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"users.0._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"targetUserId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /admin/users/:targetUserId/status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{targetUserId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{targetUserId}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Suspend or reactivate a user. Suspending pauses their published gigs. A reason is required to suspend\n\nAccess: Admin only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false,\n  \"reason\": \"Repeated policy violations.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /admin/log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/log",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "log"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Moderation activity log\n\nAccess: Admin only"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "GET /public/stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "stats"
+              ],
+              "query": []
+            },
+            "description": "Platform totals and one short public review quote (cached for 60 seconds)\n\nAccess: Public"
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -1693,6 +1980,10 @@
     },
     {
       "key": "conversationId",
+      "value": ""
+    },
+    {
+      "key": "targetUserId",
       "value": ""
     }
   ]
