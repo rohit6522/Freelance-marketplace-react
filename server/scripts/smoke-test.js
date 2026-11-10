@@ -864,6 +864,14 @@ await step("admin logs in and reads stats", async () => {
   assert.ok(s.data.stats.reviews.total >= 1);
 });
 
+
+await step("user list accepts empty filters and still rejects a bad role", async () => {
+  const ok = await admin.get("/admin/users?q=&role=&status=&page=1&limit=15");
+  expectStatus(ok, 200);
+  assert.ok(ok.data.users.length >= 1);
+  expectStatus(await admin.get("/admin/users?role=boss"), 400);
+});
+
 await step("admin cannot be created through registration (400)", async () => {
   expectStatus(
     await anon.post("/auth/register", {

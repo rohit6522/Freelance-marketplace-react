@@ -18,7 +18,8 @@ export const adminService = {
     return data.review;
   },
   async users(params) {
-    const { data } = await api.get("/admin/users", { params });
+    const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v != null));
+    const { data } = await api.get("/admin/users", { params: clean });
     return data; // { users, pagination }
   },
   async setUserActive(id, isActive, reason) {

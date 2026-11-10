@@ -30,9 +30,9 @@ export const visibilityRules = [
 export const dismissRules = [optionalReason];
 
 export const listUsersRules = [
-  query("role").optional().isIn(["client", "freelancer", "admin"]).withMessage("Invalid role"),
-  query("status").optional().isIn(["suspended"]).withMessage("Invalid status"),
-  query("q").optional().isString().isLength({ max: 100 }).withMessage("Search is too long"),
+  query("role").optional({ values: "falsy" }).isIn(["client", "freelancer", "admin"]).withMessage("Invalid role"),
+  query("status").optional({ values: "falsy" }).isIn(["suspended"]).withMessage("Invalid status"),
+  query("q").optional({ values: "falsy" }).isString().isLength({ max: 100 }).withMessage("Search is too long"),
   ...paging,
 ];
 
