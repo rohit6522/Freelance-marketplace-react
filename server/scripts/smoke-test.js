@@ -1082,6 +1082,72 @@ await step("admins cannot suspend themselves (400)", async () => {
   );
 });
 
+console.log("\nAdmin-managed categories");
+const catName = `Smoke Cat ${Date.now()}`;
+await step("only admins can manage categories (401/403)", async () => {
+  expectStatus(await anon.get("/admin/categories"), 401);
+  expectStatus(await client.get("/admin/categories"), 403);
+  expectStatus(await marcus.post("/admin/categories", { name: "Nope Category" }), 403);
+});
+await step("bad names are rejected (400)", async () => {
+  expectStatus(await admin.post("/admin/categories", { name: "A" }), 400);
+  expectStatus(await admin.post("/admin/categories", { name: "Bad <script>" }), 400);
+  expectStatus(await admin.post("/admin/categories", {}), 400);
+});
+await step("a new category appears in the public list, last", async () => {
+  const r = await admin.post("/admin/categories", { name: catName, description: "Created by the smoke test." });
+  expectStatus(r, 201);
+  ctx.newCatId = r.data.category._id;
+  assert.equal(r.data.category.slug, catName.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+  const names = (await anon.get("/categories")).data.categories.map((c) => c.name);
+  assert.equal(names[names.length - 1], catName);
+});
+await step("duplicate and look-alike names are rejected (409)", async () => {
+  expectStatus(await admin.post("/admin/categories", { name: catName.toUpperCase() }), 409);
+  expectStatus(await admin.post("/admin/categories", { name: "Graphics and Design" }), 409);
+});
+await step("renaming keeps the slug, and the description can be cleared", async () => {
+  const before = (await admin.get("/admin/categories")).data.categories.find((c) => c._id === ctx.newCatId);
+  const r = await admin.patch(`/admin/categories/${ctx.newCatId}`, { name: `${catName} Renamed`, description: "" });
+  expectStatus(r, 200);
+  assert.equal(r.data.category.slug, before.slug);
+  assert.equal(r.data.category.name, `${catName} Renamed`);
+  assert.ok(!r.data.category.description);
+  expectStatus(await admin.patch(`/admin/categories/${ctx.newCatId}`, {}), 400);
+});
+await step("reordering works, and a stale list is refused (409)", async () => {
+  const ids = (await admin.get("/admin/categories")).data.categories.map((c) => c._id);
+  const swapped = [ids[1], ids[0], ...ids.slice(2)];
+  expectStatus(await admin.put("/admin/categories/order", { ids: swapped }), 200);
+  const after = (await anon.get("/categories")).data.categories.map((c) => c._id);
+  assert.deepEqual(after, swapped);
+  expectStatus(await admin.put("/admin/categories/order", { ids: ids.slice(1) }), 409);
+  expectStatus(await admin.put("/admin/categories/order", { ids }), 200); // restore the original order
+});
+await step("a category with gigs needs a destination; then its gigs move", async () => {
+  const g = await marcus.post("/gigs", { ...gigBody, category: ctx.newCatId });
+  expectStatus(g, 201);
+  const gid = g.data.gig._id;
+  expectStatus(await admin.del(`/admin/categories/${ctx.newCatId}`), 409); // no body at all
+  expectStatus(await admin.call("DELETE", `/admin/categories/${ctx.newCatId}`, { moveTo: ctx.newCatId }), 400);
+  const r = await admin.call("DELETE", `/admin/categories/${ctx.newCatId}`, { moveTo: ctx.categoryId, reason: "Smoke test cleanup" });
+  expectStatus(r, 200);
+  assert.equal(r.data.movedGigs, 1);
+  const moved = await marcus.get(`/gigs/${gid}`);
+  assert.equal(moved.data.gig.category._id, ctx.categoryId);
+  expectStatus(await marcus.del(`/gigs/${gid}`), 200);
+  const names = (await anon.get("/categories")).data.categories.map((c) => c.name);
+  assert.ok(!names.includes(`${catName} Renamed`));
+});
+await step("an empty category deletes cleanly, and unknown ids give 404", async () => {
+  const c = await admin.post("/admin/categories", { name: `${catName} B` });
+  expectStatus(c, 201);
+  const d = await admin.del(`/admin/categories/${c.data.category._id}`);
+  expectStatus(d, 200);
+  assert.equal(d.data.movedGigs, 0);
+  expectStatus(await admin.del(`/admin/categories/${c.data.category._id}`), 404);
+});
+
 await step("activity log recorded the actions", async () => {
   const r = await admin.get("/admin/log");
 

@@ -13,6 +13,9 @@ const LABELS = {
   reports_dismissed: "Reports dismissed",
   user_suspended: "User suspended",
   user_reactivated: "User reactivated",
+    category_created: "Category created",
+  category_updated: "Category updated",
+  category_deleted: "Category deleted",
 };
 
 export default function AdminLogPage() {

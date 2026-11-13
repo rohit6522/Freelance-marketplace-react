@@ -30,4 +30,23 @@ export const adminService = {
     const { data } = await api.get("/admin/log", { params });
     return data; // { logs, pagination }
   },
+    async categories() {
+    const { data } = await api.get("/admin/categories");
+    return data.categories;
+  },
+  async createCategory(payload) {
+    const { data } = await api.post("/admin/categories", payload);
+    return data.category;
+  },
+  async updateCategory(id, payload) {
+    const { data } = await api.patch(`/admin/categories/${id}`, payload);
+    return data.category;
+  },
+  async reorderCategories(ids) {
+    await api.put("/admin/categories/order", { ids });
+  },
+  async deleteCategory(id, payload) {
+    const { data } = await api.delete(`/admin/categories/${id}`, { data: payload });
+    return data; // { movedGigs }
+  },
 };

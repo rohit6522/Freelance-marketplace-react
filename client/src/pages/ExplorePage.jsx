@@ -116,6 +116,9 @@ export default function ExplorePage() {
                 <span className="font-code-sm text-code-sm text-on-surface font-semibold tracking-widest uppercase">Published Gig Catalog</span>
               </div>
               <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight uppercase">{title}</h1>
+              {category?.description && (
+                <p className="font-body-md text-body-md text-on-surface-variant mt-1 max-w-2xl">{category.description}</p>
+              )}
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
                 {pagination ? (
                   <>Displaying <strong className="text-on-surface font-bold">{pagination.total}</strong> published {pagination.total === 1 ? "gig" : "gigs"}</>

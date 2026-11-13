@@ -163,6 +163,11 @@ export const groups = [
       { method: "GET", path: "/admin/users", auth: "admin", summary: "Search users", query: { q: "elena", role: "freelancer", status: "suspended", page: 1, limit: 15 }, save: [["targetUserId", "users.0._id"]] },
       { method: "PATCH", path: "/admin/users/{{targetUserId}}/status", auth: "admin", summary: "Suspend or reactivate a user. Suspending pauses their published gigs. A reason is required to suspend", body: { isActive: false, reason: "Repeated policy violations." } },
       { method: "GET", path: "/admin/log", auth: "admin", summary: "Moderation activity log", query: { page: 1, limit: 20 } },
+      { method: "GET", path: "/admin/categories", auth: "admin", summary: "All categories with published and total gig counts", save: [["categoryAdminId", "categories.0._id"]] },
+      { method: "POST", path: "/admin/categories", auth: "admin", summary: "Create a category. The slug is generated from the name", body: { name: "Photography", description: "Photo editing and shoots." } },
+      { method: "PATCH", path: "/admin/categories/{{categoryAdminId}}", auth: "admin", summary: "Rename or re-describe a category. The slug never changes, so links keep working", body: { name: "Photography & Video", description: "" } },
+      { method: "PUT", path: "/admin/categories/order", auth: "admin", summary: "Set the display order. Send every category id exactly once", body: { ids: ["{{categoryAdminId}}"] } },
+      { method: "DELETE", path: "/admin/categories/{{categoryAdminId}}", auth: "admin", summary: "Delete a category. If gigs use it, moveTo (another category id) is required and the gigs move first", body: { moveTo: "{{categoryId}}", reason: "Merged into another category." } },
     ]
   },
   {

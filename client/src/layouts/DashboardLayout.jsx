@@ -32,6 +32,7 @@ const ADMIN_NAV = [
   ["/dashboard", "Overview", "dashboard"],
   ["/dashboard/moderation", "Reported Reviews", "flag"],
   ["/dashboard/users", "Users", "group"],
+    ["/dashboard/categories", "Categories", "category"],
   ["/dashboard/activity", "Activity Log", "history"],
   ["/dashboard/settings", "Account Settings", "settings"],
 ];

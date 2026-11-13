@@ -1,7 +1,5 @@
 import { Category } from "../models/index.js";
-
-const slugify = (s) =>
-  s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+import { slugify } from "../utils/slugify.js";
 
 export const CATEGORY_DEFS = [
   ["Web Development", "code"],
@@ -14,15 +12,16 @@ export const CATEGORY_DEFS = [
   ["Business", "business_center"],
 ];
 
+// Adds any missing default category. Existing categories, including ones an admin renamed or reordered, are never changed.
 export async function ensureCategories() {
   await Category.bulkWrite(
     CATEGORY_DEFS.map(([name, icon], i) => ({
       updateOne: {
         filter: { slug: slugify(name) },
-        update: { $set: { name, icon, sortOrder: i } },
+        update: { $setOnInsert: { name, icon, sortOrder: i } },
         upsert: true,
       },
     }))
   );
-  return Category.find().sort({ sortOrder: 1 });
+  return Category.find().sort({ sortOrder: 1, name: 1 });
 }

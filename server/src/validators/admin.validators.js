@@ -41,3 +41,41 @@ export const userStatusRules = [
   optionalReason,
   reasonRequiredWhen("isActive", false, "A reason (at least 5 characters) is required to suspend a user"),
 ];
+
+
+const NAME_RX = /^[A-Za-z0-9][A-Za-z0-9 &/,'().+-]*$/;
+
+const nameRule = (optional) => {
+  const base = body("name");
+  const chain = optional ? base.optional() : base;
+  return chain
+    .isString().withMessage("Name is required")
+    .trim()
+    .isLength({ min: 2, max: 40 }).withMessage("Name must be 2-40 characters")
+    .matches(NAME_RX).withMessage("Use letters, numbers, spaces and & / , ' ( ) . + - only");
+};
+
+export const categoryBodyRules = [
+  nameRule(false),
+  body("description").optional({ values: "falsy" }).isString().trim().isLength({ max: 200 }).withMessage("Description must be 200 characters or fewer"),
+];
+
+export const categoryUpdateRules = [
+  nameRule(true),
+  body("description").optional().isString().withMessage("Invalid description").trim().isLength({ max: 200 }).withMessage("Description must be 200 characters or fewer"),
+  body().custom((_, { req }) => {
+    const b = req.body || {};
+    if (b.name === undefined && b.description === undefined) throw new Error("Nothing to update");
+    return true;
+  }),
+];
+
+export const reorderRules = [
+  body("ids").isArray({ min: 1, max: 100 }).withMessage("ids must be a list"),
+  body("ids.*").isMongoId().withMessage("Invalid category id"),
+];
+
+export const deleteCategoryRules = [
+  body("moveTo").optional({ values: "falsy" }).isMongoId().withMessage("Invalid category to move gigs to"),
+  optionalReason,
+];

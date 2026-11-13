@@ -28,6 +28,7 @@ const ModerationPage = lazyPage(() => import("../pages/dashboard/ModerationPage"
 const AdminUsersPage = lazyPage(() => import("../pages/dashboard/AdminUsersPage"));
 const AdminLogPage = lazyPage(() => import("../pages/dashboard/AdminLogPage"));
 const InfoPage = lazyPage(() => import("../pages/InfoPage"));
+const AdminCategoriesPage = lazyPage(() => import("../pages/dashboard/AdminCategoriesPage"));
 
 export default function AppRoutes() {
   return (
@@ -75,6 +76,7 @@ export default function AppRoutes() {
               <Route path="moderation" element={<ModerationPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="activity" element={<AdminLogPage />} />
+              <Route path="categories" element={<AdminCategoriesPage />} />
             </Route>
           </Route>
         </Route>
