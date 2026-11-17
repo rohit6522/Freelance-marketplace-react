@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body, header, query } from "express-validator";
 
 export const createOrderRules = [
   body("gigId").isMongoId().withMessage("A valid gig is required"),
@@ -6,8 +6,10 @@ export const createOrderRules = [
   body("requirements").isString().trim().isLength({ min: 20, max: 5000 })
     .withMessage("Project requirements must be 20-5000 characters"),
   // Note: price / payment status are deliberately NOT read from the request.
-    body("attachments").optional().isArray({ max: 5 }).withMessage("A maximum of 5 attachments"),
+  body("attachments").optional().isArray({ max: 5 }).withMessage("A maximum of 5 attachments"),
   body("attachments.*.url").isURL({ protocols: ["https"], require_protocol: true }).withMessage("Attachment URLs must be valid https URLs"),
+  header("idempotency-key").optional().isString().matches(/^[A-Za-z0-9_-]{8,64}$/).withMessage("Invalid Idempotency-Key"),
+  body("expectedPrice").optional().isFloat({ min: 0 }).withMessage("Invalid expected price"),
 ];
 
 export const listOrdersRules = [

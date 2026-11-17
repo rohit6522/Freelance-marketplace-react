@@ -9,15 +9,10 @@ class Session {
     this.cookie = "";
   }
 
-  async call(method, path, body) {
+  async call(method, path, body, headers = {}) {
     const res = await fetch(`${BASE}${path}`, {
       method,
-      headers: {
-        ...(body !== undefined
-          ? { "Content-Type": "application/json" }
-          : {}),
-        ...(this.cookie ? { Cookie: this.cookie } : {}),
-      },
+      headers: { ...(body !== undefined ? { "Content-Type": "application/json" } : {}), ...(this.cookie ? { Cookie: this.cookie } : {}), ...headers },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 
@@ -43,9 +38,11 @@ class Session {
     return this.call("GET", p);
   }
 
-  post(p, b = {}) {
-    return this.call("POST", p, b);
-  }
+  // post(p, b = {}) {
+  //   return this.call("POST", p, b);
+  // }
+
+  post(p, b = {}, h) { return this.call("POST", p, b, h); }
 
   put(p, b) {
     return this.call("PUT", p, b);
@@ -1227,6 +1224,61 @@ await step("admins see deleted accounts but cannot change them", async () => {
   expectStatus(await admin.patch(`/admin/users/${deleted._id}/status`, { isActive: true }), 400);
 });
 
+
+
+console.log("\nDuplicate and concurrent request protection");
+const dupBody = { gigId: ctx.gigId, tier: "basic", requirements: "Double-submit protection check for the smoke test." };
+const orderTotal = async () => (await client.get("/orders?limit=1")).data.pagination.total;
+
+await step("a double-submitted checkout creates one order (same key twice at once)", async () => {
+  const key = `smoke-${Date.now()}-dup`;
+  const before = await orderTotal();
+  const [a, b] = await Promise.all([
+    client.post("/orders", dupBody, { "Idempotency-Key": key }),
+    client.post("/orders", dupBody, { "Idempotency-Key": key }),
+  ]);
+  assert.deepEqual([a.status, b.status].sort(), [200, 201]);
+  assert.equal(a.data.order._id, b.data.order._id);
+  assert.equal(await orderTotal(), before + 1);
+  ctx.dupOrderId = a.data.order._id;
+  ctx.dupKey = key;
+});
+await step("the same key for a different package is refused (409), a malformed key too (400)", async () => {
+  expectStatus(await client.post("/orders", { ...dupBody, tier: "premium" }, { "Idempotency-Key": ctx.dupKey }), 409);
+  expectStatus(await client.post("/orders", dupBody, { "Idempotency-Key": "x" }), 400);
+});
+await step("a stale price is refused and creates nothing; the right price works", async () => {
+  const before = await orderTotal();
+  expectStatus(await client.post("/orders", { ...dupBody, expectedPrice: ctx.basicPrice + 1 }, { "Idempotency-Key": `smoke-${Date.now()}-stale` }), 409);
+  assert.equal(await orderTotal(), before);
+  const ok = await client.post("/orders", { ...dupBody, expectedPrice: ctx.basicPrice }, { "Idempotency-Key": `smoke-${Date.now()}-ok` });
+  expectStatus(ok, 201);
+  assert.equal(ok.data.order.price, ctx.basicPrice);
+  expectStatus(await client.post(`/orders/${ok.data.order._id}/cancel`, { reason: "Cleaning up after the smoke test." }), 200);
+});
+await step("approving twice at once releases the money once (200 and 409)", async () => {
+  const id = ctx.dupOrderId;
+  expectStatus(await marcus.post(`/orders/${id}/accept`), 200);
+  expectStatus(await marcus.post(`/orders/${id}/deliver`, { message: "Delivery for the concurrency check." }), 200);
+  const res = await Promise.all([client.post(`/orders/${id}/complete`), client.post(`/orders/${id}/complete`)]);
+  assert.deepEqual(res.map((r) => r.status).sort(), [200, 409]);
+  const detail = await client.get(`/orders/${id}`);
+  assert.equal(detail.data.order.status, "completed");
+  assert.equal(detail.data.payment.status, "released");
+  assert.equal(detail.data.order.statusHistory.filter((h) => h.status === "completed").length, 1);
+});
+await step("the same review sent twice at once is stored once, with a clear message", async () => {
+  const body = { orderId: ctx.dupOrderId, rating: 5, comment: "Duplicate review protection check." };
+  const res = await Promise.all([client.post("/reviews", body), client.post("/reviews", body)]);
+  assert.deepEqual(res.map((r) => r.status).sort(), [201, 409]);
+  assert.equal(res.find((r) => r.status === 409).data.message, "You have already reviewed this order");
+});
+await step("rating totals equal the stored reviews after concurrent updates", async () => {
+  const gig = await anon.get(`/gigs/${ctx.gigId}`);
+  const reviews = await anon.get(`/reviews?gig=${ctx.gigId}`);
+  assert.equal(gig.data.gig.ratingCount, reviews.data.summary.count);
+  assert.equal(gig.data.gig.ratingAverage, reviews.data.summary.average);
+});
 // =====================================================
 // FINAL SUMMARY
 // =====================================================

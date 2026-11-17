@@ -8,6 +8,8 @@ import FieldError from "../ui/FieldError";
 import { orderService } from "../../services/orderService";
 import { uploadService } from "../../services/uploadService";
 import { daysLabel, money, revisionsLabel, TIER_LABELS } from "../../utils/format";
+import { newIdempotencyKey } from "../../utils/idempotency";
+import { ghostBtn } from "../ui/formStyles";
 
 export default function CheckoutModal({ open, onClose, gig, tier }) {
   const navigate = useNavigate();
@@ -20,6 +22,9 @@ export default function CheckoutModal({ open, onClose, gig, tier }) {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: { requirements: "" } });
+
+  const [idempotencyKey] = useState(newIdempotencyKey); // new each time the dialog opens, reused if the request is repeated
+  const [priceChanged, setPriceChanged] = useState(false);
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
@@ -40,17 +45,22 @@ export default function CheckoutModal({ open, onClose, gig, tier }) {
   const onSubmit = async ({ requirements }) => {
     setServerError("");
     try {
-      const { order } = await orderService.create({
-        gigId: gig._id,
-        tier,
-        requirements: requirements.trim(),
-        attachments: files.map(({ url, name, size, publicId }) => ({ url, name, size, publicId })),
-      });
+      const { order } = await orderService.create(
+        {
+          gigId: gig._id,
+          tier,
+          requirements: requirements.trim(),
+          attachments: files.map(({ url, name, size, publicId }) => ({ url, name, size, publicId })),
+          expectedPrice: pkg.price, // the price shown on the page, used only to detect that it changed
+        },
+        idempotencyKey
+      );
       toast.success(`Order ${order.orderNumber} placed (simulated payment)`);
       onClose();
       navigate(`/orders?order=${order._id}`);
     } catch (err) {
       setServerError(err.message);
+      setPriceChanged(/price of this package changed/i.test(err.message));
     }
   };
 
@@ -126,6 +136,12 @@ export default function CheckoutModal({ open, onClose, gig, tier }) {
 
         {serverError && (
           <p role="alert" className="p-2 bg-error-container text-on-error-container font-code-sm text-code-sm border border-error">{serverError}</p>
+        )}
+
+        {priceChanged && (
+          <button type="button" onClick={() => window.location.reload()} className={ghostBtn}>
+            Reload to see the current price
+          </button>
         )}
 
         <div className="flex flex-col-reverse sm:flex-row gap-space-sm sm:justify-end">

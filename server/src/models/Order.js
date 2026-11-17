@@ -58,6 +58,7 @@ const orderSchema = new Schema(
     statusHistory: [historySchema],
     cancelReason: { type: String, trim: true, maxlength: 500 },
     completedAt: Date,
+        idempotencyKey: { type: String, maxlength: 64 },
   },
   { timestamps: true }
 );
@@ -71,5 +72,12 @@ orderSchema.pre("validate", async function () {
 orderSchema.index({ client: 1, createdAt: -1 });
 orderSchema.index({ freelancer: 1, status: 1, createdAt: -1 });
 orderSchema.index({ gig: 1, status: 1 });
+
+
+// One order per (client, key): the same checkout request can never create two orders
+orderSchema.index(
+  { client: 1, idempotencyKey: 1 },
+  { unique: true, partialFilterExpression: { idempotencyKey: { $type: "string" } } }
+);
 
 export const Order = mongoose.model("Order", orderSchema);

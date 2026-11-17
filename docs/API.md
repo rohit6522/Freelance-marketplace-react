@@ -407,6 +407,8 @@ Example body:
 
 **`POST /orders`**
 
+Send an Idempotency-Key header (8-64 characters: letters, digits, _ and -) so a double-click or retry returns the first order instead of creating another. The body may include expectedPrice, the price the buyer saw. If it no longer matches, the request is refused with 409.
+
 Example body:
 
 ```json
@@ -619,6 +621,11 @@ Example body:
 | `GET` | `/admin/users` | Admin only | Search users |
 | `PATCH` | `/admin/users/:targetUserId/status` | Admin only | Suspend or reactivate a user. Suspending pauses their published gigs. A reason is required to suspend |
 | `GET` | `/admin/log` | Admin only | Moderation activity log |
+| `GET` | `/admin/categories` | Admin only | All categories with published and total gig counts |
+| `POST` | `/admin/categories` | Admin only | Create a category. The slug is generated from the name |
+| `PATCH` | `/admin/categories/:categoryAdminId` | Admin only | Rename or re-describe a category. The slug never changes, so links keep working |
+| `PUT` | `/admin/categories/order` | Admin only | Set the display order. Send every category id exactly once |
+| `DELETE` | `/admin/categories/:categoryAdminId` | Admin only | Delete a category. If gigs use it, moveTo (another category id) is required and the gigs move first |
 
 **`GET /admin/reviews`**
 
@@ -688,6 +695,51 @@ Query parameters:
 {
   "page": 1,
   "limit": 20
+}
+```
+
+**`POST /admin/categories`**
+
+Example body:
+
+```json
+{
+  "name": "Photography",
+  "description": "Photo editing and shoots."
+}
+```
+
+**`PATCH /admin/categories/:categoryAdminId`**
+
+Example body:
+
+```json
+{
+  "name": "Photography & Video",
+  "description": ""
+}
+```
+
+**`PUT /admin/categories/order`**
+
+Example body:
+
+```json
+{
+  "ids": [
+    "<categoryAdminId>"
+  ]
+}
+```
+
+**`DELETE /admin/categories/:categoryAdminId`**
+
+Example body:
+
+```json
+{
+  "moveTo": "<categoryId>",
+  "reason": "Merged into another category."
 }
 ```
 

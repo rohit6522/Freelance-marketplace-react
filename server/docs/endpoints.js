@@ -96,6 +96,7 @@ export const groups = [
     name: "Orders", items: [
       {
         method: "POST", path: "/orders", auth: "client", summary: "Checkout. The price comes from the gig package, never from the request",
+        notes: "Send an Idempotency-Key header (8-64 characters: letters, digits, _ and -) so a double-click or retry returns the first order instead of creating another. The body may include expectedPrice, the price the buyer saw. If it no longer matches, the request is refused with 409.",
         body: { gigId: "{{gigId}}", tier: "standard", requirements: "Please build a responsive landing page with a pricing section.", attachments: [] }, save: [["orderId", "order._id"]]
       },
       {

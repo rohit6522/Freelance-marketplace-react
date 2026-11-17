@@ -41,6 +41,7 @@ const gigSchema = new mongoose.Schema(
     ratingAverage: { type: Number, default: 0, min: 0, max: 5 },
     ratingCount: { type: Number, default: 0, min: 0 },
     completedOrders: { type: Number, default: 0, min: 0 },
+        statsComputedAt: { type: Date, select: false }, // used to keep concurrent rating updates in order
   },
   { timestamps: true }
 );

@@ -23,7 +23,7 @@ const moveHeldPayment = async (orderId, status, session, extra = {}) => {
   const payment = await Payment.findOneAndUpdate(
     { order: orderId, status: "held" },
     { status, ...extra },
-    { new: true, session }
+  { returnDocument: "after", session }
   );
   if (!payment) throw new ApiError(409, "No held payment found for this order");
   return payment;

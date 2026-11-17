@@ -13,14 +13,20 @@ export const createReview = asyncHandler(async (req, res) => {
   if (order.status !== "completed") throw new ApiError(409, "You can only review completed orders");
   if (await Review.exists({ order: order._id })) throw new ApiError(409, "You have already reviewed this order");
 
-  const review = await Review.create({
-    order: order._id,
-    gig: order.gig,
-    client: req.user._id,
-    freelancer: order.freelancer,
-    rating,
-    comment,
-  });
+  let review;
+  try {
+    review = await Review.create({
+      order: order._id,
+      gig: order.gig,
+      client: req.user._id,
+      freelancer: order.freelancer,
+      rating,
+      comment,
+    });
+  } catch (err) {
+    if (err.code === 11000) throw new ApiError(409, "You have already reviewed this order"); // two requests at once
+    throw err;
+  }
 
   // Averages are always recalculated from stored reviews
   await Promise.all([recalcGigStats(order.gig), recalcFreelancerStats(order.freelancer)]);

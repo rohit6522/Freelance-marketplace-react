@@ -1,8 +1,10 @@
 import api from "./api";
 
 export const orderService = {
-  async create(payload) {
-    const { data } = await api.post("/orders", payload);
+  async create(payload, idempotencyKey) {
+    const { data } = await api.post("/orders", payload, {
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {},
+    });
     return data;
   },
   async list(params) {

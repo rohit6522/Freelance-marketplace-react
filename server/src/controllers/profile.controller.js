@@ -22,7 +22,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 // PUT /api/profile/account   (any logged-in user)
 export const updateAccount = asyncHandler(async (req, res) => {
   const data = pick(req.body, ["firstName", "lastName", "companyName", "domainFocus", "phone"]);
-  const user = await User.findByIdAndUpdate(req.user._id, data, { new: true, runValidators: true });
+  const user = await User.findByIdAndUpdate(req.user._id, data,{ returnDocument: "after", runValidators: true });
   res.json({ success: true, user });
 });
 
@@ -84,7 +84,7 @@ export const updateAvatar = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     { avatar: { url: result.secure_url, publicId: result.public_id } },
-    { new: true }
+   { returnDocument: "after" }
   );
   await deleteAsset(oldPublicId); // remove the previous avatar from Cloudinary
   res.json({ success: true, user });

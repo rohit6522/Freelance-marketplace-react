@@ -25,45 +25,73 @@ async function loadOrder(id, user, session) {
 // POST /api/orders  (client) - checkout: price comes from the gig, never the request
 // ---------------------------------------------------------------------------
 export const createOrder = asyncHandler(async (req, res) => {
-  const { gigId, tier, requirements } = req.body;
+  const { gigId, tier, requirements, expectedPrice } = req.body;
+  const idempotencyKey = req.get("Idempotency-Key") || undefined;
+
+  // The same checkout request sent again (double-click, retry, second tab) returns the first order instead of creating another
+  const replayIfSeen = async () => {
+    if (!idempotencyKey) return false;
+    const prior = await Order.findOne({ client: req.user._id, idempotencyKey });
+    if (!prior) return false;
+    if (String(prior.gig) !== String(gigId) || prior.packageTier !== tier) {
+      throw new ApiError(409, "This Idempotency-Key was already used for a different order");
+    }
+    const payment = await Payment.findOne({ order: prior._id }).lean();
+    res.status(200).json({ success: true, order: prior, payment, replayed: true, notice: "Simulated payment: no real money was charged." });
+    return true;
+  };
+  if (await replayIfSeen()) return;
 
   const gig = await Gig.findById(gigId);
   if (!gig || gig.status !== "published") throw new ApiError(404, "Gig not found or unavailable");
-    const seller = await User.findById(gig.freelancer).select("isActive");
-  if (!seller?.isActive) throw new ApiError(404, "Gig not found or unavailable");
   if (String(gig.freelancer) === String(req.user._id)) throw new ApiError(400, "You cannot order your own gig");
+  const seller = await User.findById(gig.freelancer).select("isActive");
+  if (!seller?.isActive) throw new ApiError(404, "Gig not found or unavailable");
 
   const p = gig.packages[tier];
 
-  const { order, payment } = await runInTransaction(async (session) => {
-    const order = new Order({
-      gig: gig._id,
-      client: req.user._id,
-      freelancer: gig.freelancer,
-      packageTier: tier,
-      packageSnapshot: {
-        title: p.title,
-        price: p.price,
-        deliveryDays: p.deliveryDays,
-        revisions: p.revisions,
-        features: [...p.features],
-      },
-      price: p.price,
-      requirements,
-      attachments: (req.body.attachments || []).map((f) => pick(f, ["url", "name", "size", "publicId"])),
-      status: "pending",
-      statusHistory: [{ status: "pending", by: req.user._id, note: "Order placed" }],
-    });
-    await order.save({ session });
-    const payment = await createSimulatedPayment({ order, session });
-    return { order, payment };
-  });
-  notifyOrderUpdated(order);
+  // The price the buyer saw is only a staleness check. The amount charged always comes from the gig.
+  if (expectedPrice !== undefined && Number(expectedPrice) !== p.price) {
+    throw new ApiError(409, "The price of this package changed while you were ordering. Reload the page to see the current price.");
+  }
 
+  let created;
+  try {
+    created = await runInTransaction(async (session) => {
+      const order = new Order({
+        gig: gig._id,
+        client: req.user._id,
+        freelancer: gig.freelancer,
+        packageTier: tier,
+        packageSnapshot: {
+          title: p.title,
+          price: p.price,
+          deliveryDays: p.deliveryDays,
+          revisions: p.revisions,
+          features: [...p.features],
+        },
+        price: p.price,
+        requirements,
+        attachments: (req.body.attachments || []).map((f) => pick(f, ["url", "name", "size", "publicId"])),
+        status: "pending",
+        idempotencyKey,
+        statusHistory: [{ status: "pending", by: req.user._id, note: "Order placed" }],
+      });
+      await order.save({ session });
+      const payment = await createSimulatedPayment({ order, session });
+      return { order, payment };
+    });
+  } catch (err) {
+    // Two identical requests at the same moment: the unique index lets one through and the other gets its result
+    if (err.code === 11000 && (await replayIfSeen())) return;
+    throw err;
+  }
+
+  notifyOrderUpdated(created.order);
   res.status(201).json({
     success: true,
-    order,
-    payment,
+    order: created.order,
+    payment: created.payment,
     notice: "Simulated payment: no real money was charged.",
   });
 });

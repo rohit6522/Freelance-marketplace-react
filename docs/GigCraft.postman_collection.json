@@ -924,7 +924,7 @@
               ],
               "query": []
             },
-            "description": "Checkout. The price comes from the gig package, never from the request\n\nAccess: Client only",
+            "description": "Checkout. The price comes from the gig package, never from the request\n\nAccess: Client only\n\nSend an Idempotency-Key header (8-64 characters: letters, digits, _ and -) so a double-click or retry returns the first order instead of creating another. The body may include expectedPrice, the price the buyer saw. If it no longer matches, the request is refused with 409.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"gigId\": \"{{gigId}}\",\n  \"tier\": \"standard\",\n  \"requirements\": \"Please build a responsive landing page with a pricing section.\",\n  \"attachments\": []\n}",
@@ -1950,6 +1950,172 @@
             },
             "description": "Moderation activity log\n\nAccess: Admin only"
           }
+        },
+        {
+          "name": "GET /admin/categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categories"
+              ],
+              "query": []
+            },
+            "description": "All categories with published and total gig counts\n\nAccess: Admin only"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "{ const v = \"categories.0._id\".split(\".\").reduce((o, k) => (o ? o[k] : undefined), json); if (v) pm.collectionVariables.set(\"categoryAdminId\", v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /admin/categories",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categories"
+              ],
+              "query": []
+            },
+            "description": "Create a category. The slug is generated from the name\n\nAccess: Admin only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Photography\",\n  \"description\": \"Photo editing and shoots.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH /admin/categories/:categoryAdminId",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categories/{{categoryAdminId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                "{{categoryAdminId}}"
+              ],
+              "query": []
+            },
+            "description": "Rename or re-describe a category. The slug never changes, so links keep working\n\nAccess: Admin only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Photography & Video\",\n  \"description\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /admin/categories/order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categories/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                "order"
+              ],
+              "query": []
+            },
+            "description": "Set the display order. Send every category id exactly once\n\nAccess: Admin only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{categoryAdminId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE /admin/categories/:categoryAdminId",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categories/{{categoryAdminId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categories",
+                "{{categoryAdminId}}"
+              ],
+              "query": []
+            },
+            "description": "Delete a category. If gigs use it, moveTo (another category id) is required and the gigs move first\n\nAccess: Admin only",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moveTo\": \"{{categoryId}}\",\n  \"reason\": \"Merged into another category.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     },
@@ -2017,6 +2183,10 @@
     },
     {
       "key": "targetUserId",
+      "value": ""
+    },
+    {
+      "key": "categoryAdminId",
       "value": ""
     }
   ]
