@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
     domainFocus: { type: String, trim: true },
     marketingOptIn: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    shareMessageStatus: { type: Boolean, default: true }, // show typing and read status to people I message
     deletedAt: { type: Date },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },

@@ -23,8 +23,13 @@ export function RealtimeProvider({ children }) {
       retries = 0;
       setConnected(true);
     };
-    const onDisconnect = () => setConnected(false);
-    // After a password change the server drops old sockets; retry a few times until the new cookie is in place
+    const onDisconnect = (reason) => {
+      setConnected(false);
+      // When the SERVER closes the socket on purpose (for example after a password change) the browser does not
+      // retry by itself, so reconnect. If the login is no longer valid, the retries in onError give up after a few tries.
+      if (reason === "io server disconnect") socket.connect();
+    };
+    // After a password change the old cookie is rejected for a moment, so retry a few times with a growing delay
     const onError = () => {
       setConnected(false);
       if (retries < 5) {

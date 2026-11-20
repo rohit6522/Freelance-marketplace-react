@@ -6,7 +6,7 @@ import FieldError from "../ui/FieldError";
 import { inputCls, labelCls, primaryBtn } from "../ui/formStyles";
 import { useAuth } from "../../hooks/useAuth";
 import { profileService } from "../../services/profileService";
-import { monthYear, formatPhoneNumber } from "../../utils/format";
+import { monthYear } from "../../utils/format";
 
 export default function AccountForm() {
   const { user, setUser } = useAuth();
@@ -16,11 +16,9 @@ export default function AccountForm() {
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
     defaultValues: {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone ? formatPhoneNumber(user.phone) : "",
-      companyName: user.companyName || "",
-      domainFocus: user.domainFocus || "",
+      firstName: user.firstName, lastName: user.lastName,
+      companyName: user.companyName || "", domainFocus: user.domainFocus || "",
+      shareMessageStatus: user.shareMessageStatus !== false, // on unless it was switched off
     },
   });
 
@@ -30,18 +28,12 @@ export default function AccountForm() {
       const updated = await profileService.updateAccount({
         firstName: v.firstName.trim(),
         lastName: v.lastName.trim(),
-        phone: v.phone ? v.phone.trim() : "",
         companyName: v.companyName.trim(),
         domainFocus: v.domainFocus.trim(),
+        shareMessageStatus: v.shareMessageStatus,
       });
       setUser(updated);
-      reset({
-        firstName: updated.firstName,
-        lastName: updated.lastName,
-        phone: updated.phone ? formatPhoneNumber(updated.phone) : "",
-        companyName: updated.companyName || "",
-        domainFocus: updated.domainFocus || "",
-      });
+      reset({ ...v });
       toast.success("Account updated");
     } catch (err) {
       setServerError(err.message);
@@ -74,27 +66,6 @@ export default function AccountForm() {
           <input id="email" value={user.email} readOnly disabled className={`${inputCls(false)} bg-surface-container-low text-on-surface-variant`} />
           <p className="font-code-sm text-code-sm text-on-surface-variant mt-1">Email can't be changed in this version.</p>
         </div>
-        <div>
-          <label htmlFor="phone" className={labelCls}>Phone number (+91 Indian Mobile)</label>
-          <input
-            id="phone"
-            type="tel"
-            placeholder="+91 98765 43210"
-            className={inputCls(errors.phone)}
-            {...register("phone", {
-              validate: (val) => {
-                if (!val || !val.trim()) return true;
-                const digits = val.replace(/\D/g, "");
-                return (
-                  (digits.length === 10 && /^[6-9]/.test(digits)) ||
-                  (digits.length === 12 && digits.startsWith("91") && /^[6-9]/.test(digits.slice(2))) ||
-                  "Enter a valid 10-digit Indian mobile number (e.g. +91 98765 43210)"
-                );
-              },
-            })}
-          />
-          <FieldError message={errors.phone?.message} />
-        </div>
         {user.role === "client" && (
           <div>
             <label htmlFor="companyName" className={labelCls}>Company (shown to sellers)</label>
@@ -107,6 +78,15 @@ export default function AccountForm() {
           <input id="domainFocus" className={inputCls(errors.domainFocus)} {...register("domainFocus", { maxLength: { value: 100, message: "Maximum 100 characters" } })} />
           <FieldError message={errors.domainFocus?.message} />
         </div>
+
+        <label className="flex items-start gap-space-sm cursor-pointer">
+          <input type="checkbox" className="mt-1 w-[18px] h-[18px] rounded-none accent-primary" {...register("shareMessageStatus")} />
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            <strong className="text-on-surface">Show typing and read status.</strong> Let people you message see when you're
+            typing and when you've read their messages. If you turn this off, they won't see either one.
+          </span>
+        </label>
+
         {serverError && <p role="alert" className="p-2 bg-error-container text-on-error-container font-code-sm text-code-sm border border-error">{serverError}</p>}
         <button type="submit" disabled={isSubmitting || !isDirty} className={primaryBtn}>
           {isSubmitting ? "Saving..." : "Save changes"}

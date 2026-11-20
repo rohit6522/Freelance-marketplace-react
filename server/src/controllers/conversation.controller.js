@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import { getConversationForUser, sendMessage, markRead, unreadCounts } from "../services/messaging.service.js";
+import { notifyMessagesRead } from "../realtime/socket.js";
 
 const PERSON = "firstName lastName avatar role companyName";
 
@@ -92,6 +93,7 @@ export const unreadCount = asyncHandler(async (req, res) => {
 });
 
 // GET /api/conversations/:id/messages?before=<messageId>&limit=30  (oldest -> newest)
+// GET /api/conversations/:id/messages?before=<messageId>&limit=30  (oldest -> newest)
 export const listMessages = asyncHandler(async (req, res) => {
   const convo = await getConversationForUser(req.params.id, req.user._id);
   await convo.populate("participants", PERSON);
@@ -102,7 +104,19 @@ export const listMessages = asyncHandler(async (req, res) => {
 
   const rows = await Message.find(filter).sort({ _id: -1 }).limit(limit + 1).lean();
   const hasMore = rows.length > limit;
-  const messages = rows.slice(0, limit).reverse();
+  const page = rows.slice(0, limit).reverse();
+
+  // If the other person turned read status off, never reveal when they read my messages (old reads included)
+  const other = convo.participants.find((p) => String(p._id) !== String(req.user._id));
+  const otherSettings = other ? await User.findById(other._id).select("shareMessageStatus").lean() : null;
+  const messages =
+    otherSettings?.shareMessageStatus === false
+      ? page.map((m) =>
+          String(m.sender) === String(req.user._id)
+            ? { ...m, readBy: (m.readBy || []).filter((id) => String(id) !== String(other._id)) }
+            : m
+        )
+      : page;
 
   res.json({ success: true, conversation: convo, messages, hasMore });
 });
@@ -126,5 +140,18 @@ export const postMessage = asyncHandler(async (req, res) => {
 export const readConversation = asyncHandler(async (req, res) => {
   const convo = await getConversationForUser(req.params.id, req.user._id);
   const updated = await markRead(convo._id, req.user._id);
+
+  // Tell the sender their messages were read, unless the reader turned read status off
+  if (updated > 0 && req.user.shareMessageStatus !== false) {
+    const latest = await Message.findOne({ conversation: convo._id, sender: { $ne: req.user._id } })
+      .sort({ _id: -1 })
+      .select("_id")
+      .lean();
+    const other = convo.participants.find((p) => String(p) !== String(req.user._id));
+    if (latest && other) {
+      notifyMessagesRead({ conversationId: convo._id, readerId: req.user._id, to: other, upTo: latest._id });
+    }
+  }
+
   res.json({ success: true, marked: updated });
 });

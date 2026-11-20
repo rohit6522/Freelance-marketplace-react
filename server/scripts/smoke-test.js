@@ -1,8 +1,10 @@
 
 import assert from "node:assert/strict";
+import { io as connectSocket } from "socket.io-client";
 
 const BASE = process.env.API_URL || "http://localhost:5000/api";
 const PASSWORD = "Password123!";
+const ORIGIN = new URL(BASE).origin; // the site address, without /api
 
 class Session {
   constructor() {
@@ -1278,6 +1280,97 @@ await step("rating totals equal the stored reviews after concurrent updates", as
   const reviews = await anon.get(`/reviews?gig=${ctx.gigId}`);
   assert.equal(gig.data.gig.ratingCount, reviews.data.summary.count);
   assert.equal(gig.data.gig.ratingAverage, reviews.data.summary.average);
+});
+
+
+console.log("\nTyping indicators and read receipts (live sockets)");
+const openSocket = (session) =>
+  new Promise((resolve, reject) => {
+    const s = connectSocket(ORIGIN, { transports: ["websocket"], extraHeaders: { cookie: session.cookie }, reconnection: false });
+    s.events = [];
+    s.onAny((ev, payload) => s.events.push([ev, payload]));
+    s.once("connect", () => resolve(s));
+    s.once("connect_error", reject);
+  });
+const eventsOf = (s, ev) => s.events.filter(([e]) => e === ev).map(([, p]) => p);
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+const sockets = [];
+const ids = {};
+
+await step("a socket without a login is refused", async () => {
+  const bare = connectSocket(ORIGIN, { transports: ["websocket"], reconnection: false });
+  const err = await new Promise((resolve) => { bare.once("connect_error", resolve); bare.once("connect", () => resolve(null)); });
+  bare.close();
+  assert.ok(err && err.message === "unauthorized");
+});
+await step("the client, Marcus and an outsider connect", async () => {
+  ids.client = (await client.get("/auth/me")).data.user._id;
+  ids.marcus = (await marcus.get("/auth/me")).data.user._id;
+  [ctx.sClient, ctx.sMarcus, ctx.sElena] = await Promise.all([openSocket(client), openSocket(marcus), openSocket(elena)]);
+  sockets.push(ctx.sClient, ctx.sMarcus, ctx.sElena);
+});
+await step("typing reaches only the other person in the conversation", async () => {
+  ctx.sClient.emit("typing", { conversationId: ctx.convoId, typing: true });
+  await pause(600);
+  const got = eventsOf(ctx.sMarcus, "typing");
+  assert.equal(got.length, 1);
+  assert.deepEqual(got[0], { conversationId: ctx.convoId, userId: ids.client, typing: true });
+  assert.equal(eventsOf(ctx.sElena, "typing").length, 0);
+  assert.equal(eventsOf(ctx.sClient, "typing").length, 0);
+});
+await step("typing into someone else's conversation, and junk payloads, are ignored", async () => {
+  const before = eventsOf(ctx.sMarcus, "typing").length + eventsOf(ctx.sClient, "typing").length;
+  ctx.sElena.emit("typing", { conversationId: ctx.convoId, typing: true });
+  ["junk", null, 42, {}, { conversationId: "nope", typing: true }, { conversationId: ctx.convoId, typing: "yes" }].forEach((p) => ctx.sClient.emit("typing", p));
+  await pause(600);
+  assert.equal(eventsOf(ctx.sMarcus, "typing").length + eventsOf(ctx.sClient, "typing").length, before);
+});
+await step("when the other person reads, the sender gets a live 'read' event", async () => {
+  const sent = await client.post(`/conversations/${ctx.convoId}/messages`, { text: "Read receipt check for the smoke test." });
+  expectStatus(sent, 201);
+  const before = eventsOf(ctx.sClient, "messages:read").length;
+  expectStatus(await marcus.post(`/conversations/${ctx.convoId}/read`), 200);
+  await pause(600);
+  const got = eventsOf(ctx.sClient, "messages:read").slice(before);
+  assert.equal(got.length, 1);
+  assert.equal(got[0].upTo, sent.data.message._id);
+  assert.equal(got[0].readerId, ids.marcus);
+  assert.equal(eventsOf(ctx.sElena, "messages:read").length, 0);
+  ctx.lastSentId = sent.data.message._id;
+});
+await step("the sender's message list shows who has read their messages", async () => {
+  const list = await client.get(`/conversations/${ctx.convoId}/messages?limit=100`);
+  const mine = list.data.messages.filter((m) => m.sender === ids.client);
+  assert.ok(mine.find((m) => m._id === ctx.lastSentId).readBy.includes(ids.marcus));
+});
+await step("turning read status off hides typing and read receipts completely", async () => {
+  expectStatus(await marcus.put("/profile/account", { shareMessageStatus: "banana" }), 400);
+  const off = await marcus.put("/profile/account", { shareMessageStatus: false });
+  expectStatus(off, 200);
+  assert.equal(off.data.user.shareMessageStatus, false);
+
+  const typingBefore = eventsOf(ctx.sClient, "typing").length;
+  ctx.sMarcus.emit("typing", { conversationId: ctx.convoId, typing: true });
+  expectStatus(await client.post(`/conversations/${ctx.convoId}/messages`, { text: "Sent while read status is off." }), 201);
+  const readBefore = eventsOf(ctx.sClient, "messages:read").length;
+  expectStatus(await marcus.post(`/conversations/${ctx.convoId}/read`), 200);
+  await pause(600);
+  assert.equal(eventsOf(ctx.sClient, "typing").length, typingBefore, "no typing event while off");
+  assert.equal(eventsOf(ctx.sClient, "messages:read").length, readBefore, "no read event while off");
+  const list = await client.get(`/conversations/${ctx.convoId}/messages?limit=100`);
+  const mine = list.data.messages.filter((m) => m.sender === ids.client);
+  assert.ok(mine.every((m) => !m.readBy.includes(ids.marcus)), "old reads must be hidden too");
+  assert.ok(mine.every((m) => m.readBy.includes(ids.client)));
+});
+await step("turning it back on restores both", async () => {
+  expectStatus(await marcus.put("/profile/account", { shareMessageStatus: true }), 200);
+  const typingBefore = eventsOf(ctx.sClient, "typing").length;
+  ctx.sMarcus.emit("typing", { conversationId: ctx.convoId, typing: true });
+  await pause(600);
+  assert.equal(eventsOf(ctx.sClient, "typing").length, typingBefore + 1);
+  const list = await client.get(`/conversations/${ctx.convoId}/messages?limit=100`);
+  assert.ok(list.data.messages.filter((m) => m.sender === ids.client).some((m) => m.readBy.includes(ids.marcus)));
+  sockets.forEach((s) => s.close());
 });
 // =====================================================
 // FINAL SUMMARY

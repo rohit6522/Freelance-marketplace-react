@@ -3,11 +3,14 @@ import toast from "react-hot-toast";
 import Icon from "../ui/Icon";
 import Avatar from "../ui/Avatar";
 import { useAuth } from "../../hooks/useAuth";
-import { conversationService } from "../../services/conversationService";
-import { uploadService } from "../../services/uploadService";
-import { dateTime, fullName } from "../../utils/format";
 import { useRealtime } from "../../hooks/useRealtime";
 import { useSocketEvent } from "../../hooks/useSocketEvent";
+import { useTypingEmitter } from "../../hooks/useTypingEmitter";
+import { useTypingIndicator } from "../../hooks/useTypingIndicator";
+import { conversationService } from "../../services/conversationService";
+import { uploadService } from "../../services/uploadService";
+import { lastSeenOwnId } from "../../utils/readReceipts";
+import { dateTime, fullName } from "../../utils/format";
 
 const POLL_MS = 10000;
 
@@ -21,6 +24,7 @@ const mergeMessages = (prev, incoming) => {
 // footerSlot: optional node rendered between the messages and the input (order action buttons)
 export default function MessageThread({ conversationId, events = [], footerSlot = null, onActivity, heightClass = "max-h-96" }) {
   const { user } = useAuth();
+  const { connected } = useRealtime();
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [hasMore, setHasMore] = useState(false);
@@ -29,13 +33,21 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [seenFromSocket, setSeenFromSocket] = useState("");
   const listRef = useRef(null);
   const stickRef = useRef(true);
   const activityRef = useRef(onActivity);
   activityRef.current = onActivity;
-    const { connected } = useRealtime();
 
+  const myId = String(user._id);
+  const other = conversation?.participants?.find((p) => String(p._id) !== myId);
+  const otherId = other ? String(other._id) : "";
+  const { onInput: signalTyping, stop: stopTyping } = useTypingEmitter(conversationId);
+  const { otherTyping, clearTyping } = useTypingIndicator(conversationId);
+
+  // Only a visible tab counts as "reading", so the other person's "Seen" is honest
   const markRead = useCallback(() => {
+    if (document.hidden) return;
     conversationService
       .read(conversationId)
       .then(() => {
@@ -51,6 +63,7 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
     setState({ loading: true, error: "" });
     setMessages([]);
     setConversation(null);
+    setSeenFromSocket("");
     stickRef.current = true;
     conversationService
       .messages(conversationId, { limit: 30 })
@@ -68,12 +81,21 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
     };
   }, [conversationId, markRead]);
 
-    // Live delivery
+  // Live delivery
   useSocketEvent("message:new", (payload) => {
     if (payload.conversationId !== String(conversationId)) return;
     setMessages((prev) => mergeMessages(prev, [payload.message]));
-    if (String(payload.message.sender) !== String(user._id) && !document.hidden) markRead();
+    if (String(payload.message.sender) !== myId) {
+      clearTyping(); // they sent it, so they are no longer typing
+      markRead();
+    }
     activityRef.current?.();
+  });
+
+  // The other person has read my messages up to this message id
+  useSocketEvent("messages:read", (payload) => {
+    if (payload.conversationId !== String(conversationId)) return;
+    setSeenFromSocket((prev) => (payload.upTo > prev ? payload.upTo : prev));
   });
 
   // After a reconnect, fetch anything missed while offline
@@ -93,17 +115,17 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [markRead]);
 
-  // Polling (swap for Socket.IO later using the server-side messageEvents hook)
+  // Polling fallback while the live connection is down
   useEffect(() => {
     const timer = setInterval(async () => {
-            if (document.hidden || connected) return;
+      if (document.hidden || connected) return;
       try {
         const d = await conversationService.messages(conversationId, { limit: 30 });
         setMessages((prev) => {
           const merged = mergeMessages(prev, d.messages);
           return merged.length === prev.length ? prev : merged;
         });
-        if (d.messages.some((m) => String(m.sender) !== String(user._id) && !(m.readBy || []).map(String).includes(String(user._id)))) {
+        if (d.messages.some((m) => String(m.sender) !== myId && !(m.readBy || []).map(String).includes(myId))) {
           markRead();
         }
       } catch {
@@ -111,13 +133,15 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [conversationId, markRead, user._id, connected]);
+  }, [conversationId, markRead, myId, connected]);
 
   const timeline = useMemo(() => {
     const msgs = messages.map((m) => ({ kind: "msg", key: m._id, at: m.createdAt, m }));
     const evs = events.map((e) => ({ kind: "event", key: `e-${e.id}`, at: e.at, text: e.text }));
     return [...msgs, ...evs].sort((a, b) => new Date(a.at) - new Date(b.at));
   }, [messages, events]);
+
+  const seenId = useMemo(() => lastSeenOwnId(messages, myId, otherId, seenFromSocket), [messages, myId, otherId, seenFromSocket]);
 
   // Stay pinned to the newest message unless the user scrolled up
   useEffect(() => {
@@ -162,11 +186,17 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
     }
   };
 
+  const onChangeText = (e) => {
+    setText(e.target.value);
+    signalTyping(e.target.value);
+  };
+
   const send = async (e) => {
     e.preventDefault();
     const body = text.trim();
     if (!body && !files.length) return;
     setSending(true);
+    stopTyping();
     try {
       const msg = await conversationService.send(conversationId, {
         text: body || "Shared a file",
@@ -186,12 +216,13 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
 
   const people = new Map((conversation?.participants || []).map((p) => [String(p._id), p]));
   const label = (p) => (p ? `${p.companyName || fullName(p)} (${p.role === "client" ? "Buyer" : "Seller"})` : "");
+  const typingName = other?.companyName || other?.firstName || "Someone";
 
   if (state.error) return <p role="alert" className="text-error font-body-md">{state.error}</p>;
 
   return (
     <div className="flex flex-col gap-space-md">
-      <div ref={listRef} onScroll={onScroll} className={`flex flex-col gap-space-md ${heightClass} overflow-y-auto pr-space-xs`} aria-live="polite">
+      <div ref={listRef} onScroll={onScroll} className={`flex flex-col gap-space-md ${heightClass} overflow-y-auto pr-space-xs`}>
         {state.loading && <p className="text-on-surface-variant font-body-sm">Loading messages...</p>}
         {hasMore && (
           <button type="button" onClick={loadEarlier} className="self-center font-label-sm text-label-sm uppercase font-bold text-primary hover:underline">
@@ -216,33 +247,48 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
             );
           }
           const m = item.m;
-          const mine = String(m.sender) === String(user._id);
+          const mine = String(m.sender) === myId;
           const sender = people.get(String(m.sender));
           return (
             <div key={item.key} className={`flex items-start gap-space-sm ${mine ? "flex-row-reverse" : ""}`}>
               <Avatar user={sender || { firstName: "?", lastName: "" }} square className="w-8 h-8" />
-              <div className={`flex flex-col gap-space-xs p-space-md max-w-xl ${mine ? "bg-surface-container-high text-left" : "bg-surface-container-low"}`}>
-                <div className="flex items-center justify-between gap-space-md">
-                  <span className="font-label-sm text-label-sm text-on-surface uppercase font-bold">{mine ? "You" : label(sender)}</span>
-                  <span className="font-code-sm text-code-sm text-on-surface-variant">{dateTime(m.createdAt)}</span>
-                </div>
-                <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-wrap break-words">{m.text}</p>
-                {m.attachments?.length > 0 && (
-                  <div className="pt-space-xs flex flex-wrap items-center gap-space-xs">
-                    {m.attachments.map((a) => (
-                      <a
-                        key={a.url} href={a.url} target="_blank" rel="noopener noreferrer"
-                        className="font-code-sm text-code-sm bg-surface-container-lowest px-space-xs py-0.5 text-on-surface font-semibold flex items-center gap-1 hover:text-primary"
-                      >
-                        <Icon name="attach_file" className="text-body-sm text-primary" /> {a.name || "attachment"}
-                      </a>
-                    ))}
+              <div className={`flex flex-col gap-1 max-w-xl ${mine ? "items-end" : ""}`}>
+                <div className={`flex flex-col gap-space-xs p-space-md ${mine ? "bg-surface-container-high text-left" : "bg-surface-container-low"}`}>
+                  <div className="flex items-center justify-between gap-space-md">
+                    <span className="font-label-sm text-label-sm text-on-surface uppercase font-bold">{mine ? "You" : label(sender)}</span>
+                    <span className="font-code-sm text-code-sm text-on-surface-variant">{dateTime(m.createdAt)}</span>
                   </div>
+                  <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-wrap break-words">{m.text}</p>
+                  {m.attachments?.length > 0 && (
+                    <div className="pt-space-xs flex flex-wrap items-center gap-space-xs">
+                      {m.attachments.map((a) => (
+                        <a
+                          key={a.url} href={a.url} target="_blank" rel="noopener noreferrer"
+                          className="font-code-sm text-code-sm bg-surface-container-lowest px-space-xs py-0.5 text-on-surface font-semibold flex items-center gap-1 hover:text-primary"
+                        >
+                          <Icon name="attach_file" className="text-body-sm text-primary" /> {a.name || "attachment"}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {mine && m._id === seenId && (
+                  <span className="font-code-sm text-code-sm text-on-surface-variant uppercase flex items-center gap-1">
+                    <Icon name="done_all" className="text-body-sm text-primary" /> Seen
+                  </span>
                 )}
               </div>
             </div>
           );
         })}
+      </div>
+
+      <div role="status" aria-live="polite" className="h-5 -mt-space-xs">
+        {otherTyping && (
+          <span className="font-code-sm text-code-sm text-on-surface-variant">
+            {typingName} is typing<span className="motion-safe:animate-pulse" aria-hidden="true">...</span>
+          </span>
+        )}
       </div>
 
       {footerSlot}
@@ -262,7 +308,7 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
         )}
         <div className="flex items-center bg-surface-container-low p-space-xs">
           <input
-            type="text" value={text} onChange={(e) => setText(e.target.value)} maxLength={3000}
+            type="text" value={text} onChange={onChangeText} maxLength={3000}
             aria-label="Message"
             placeholder="Post a contract update or milestone question..."
             className="bg-transparent text-on-surface placeholder:text-outline font-body-sm text-body-sm px-space-sm py-2 focus:outline-none flex-1 min-w-0"
