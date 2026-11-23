@@ -37,11 +37,40 @@ app.use(
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     contentSecurityPolicy: {
       directives: {
-        "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://placehold.co", "https://lh3.googleusercontent.com"],
+        "default-src": ["'self'"],
+        "script-src": [
+          "'self'",
+          "'unsafe-inline'",
+          "https://apis.google.com",
+          "https://*.firebaseapp.com",
+          "https://*.googleapis.com",
+          "https://www.gstatic.com",
+        ],
+        "frame-src": [
+          "'self'",
+          "https://gigcraft-marketplace.firebaseapp.com",
+          "https://*.firebaseapp.com",
+          "https://accounts.google.com",
+        ],
+        "img-src": [
+          "'self'",
+          "data:",
+          "https://res.cloudinary.com",
+          "https://placehold.co",
+          "https://lh3.googleusercontent.com",
+          "https://*.googleusercontent.com",
+        ],
         "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
         "upgrade-insecure-requests": env.nodeEnv === "production" ? [] : null,
-        "connect-src": ["'self'", env.clientWsUrl],
+        "connect-src": [
+          "'self'",
+          env.clientWsUrl,
+          "https://*.googleapis.com",
+          "https://identitytoolkit.googleapis.com",
+          "https://securetoken.googleapis.com",
+          "https://*.firebaseio.com",
+        ],
       },
     },
   })
