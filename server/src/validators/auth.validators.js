@@ -29,6 +29,12 @@ export const loginRules = [
   body("remember").optional().isBoolean().withMessage("Invalid value"),
 ];
 
+export const googleAuthRules = [
+  body("idToken").isString().notEmpty().withMessage("Firebase ID token is required"),
+  email,
+  body("role").optional().isIn(["client", "freelancer"]).withMessage("Role must be client or freelancer"),
+];
+
 export const forgotPasswordRules = [email];
 
 export const resetPasswordRules = [

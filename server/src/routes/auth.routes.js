@@ -4,10 +4,10 @@ import { protect } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { env } from "../config/env.js";
 import {
-  register, login, logout, getMe, forgotPassword, resetPassword, changePassword,
+  register, login, logout, getMe, forgotPassword, resetPassword, changePassword, googleAuth,
 } from "../controllers/auth.controller.js";
 import {
-  registerRules, loginRules, forgotPasswordRules, resetPasswordRules, changePasswordRules,
+  registerRules, loginRules, forgotPasswordRules, resetPasswordRules, changePasswordRules, googleAuthRules,
 } from "../validators/auth.validators.js";
 
 const router = Router();
@@ -22,6 +22,7 @@ const authLimiter = rateLimit({
 
 router.post("/register", authLimiter, registerRules, validate, register);
 router.post("/login", authLimiter, loginRules, validate, login);
+router.post("/google", authLimiter, googleAuthRules, validate, googleAuth);
 router.post("/logout", logout);
 router.get("/me", protect, getMe);
 router.post("/forgot-password", authLimiter, forgotPasswordRules, validate, forgotPassword);

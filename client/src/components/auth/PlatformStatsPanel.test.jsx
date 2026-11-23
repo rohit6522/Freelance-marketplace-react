@@ -17,7 +17,7 @@ describe("PlatformStatsPanel", () => {
   it("shows live numbers and the latest review", async () => {
     publicService.stats.mockResolvedValue(stats);
     render(<PlatformStatsPanel />);
-    expect(await screen.findByText("$1,840")).toBeInTheDocument();
+    expect(await screen.findByText("₹1,840")).toBeInTheDocument();
     expect(screen.getByText("4.5 ★")).toBeInTheDocument();
     expect(screen.getByText(/Great work and fast/)).toBeInTheDocument();
     expect(screen.getByText("LIVE DATA")).toBeInTheDocument();
@@ -26,19 +26,19 @@ describe("PlatformStatsPanel", () => {
   it("hides the review quote in compact mode", async () => {
     publicService.stats.mockResolvedValue(stats);
     render(<PlatformStatsPanel compact />);
-    await screen.findByText("$1,840");
+    await screen.findByText("₹1,840");
     expect(screen.queryByText(/Great work and fast/)).not.toBeInTheDocument();
   });
 
   it("shows a dash instead of a rating when there are no reviews", async () => {
     publicService.stats.mockResolvedValue({ ...stats, reviews: { count: 0, average: 0 }, latestReview: null });
     render(<PlatformStatsPanel />);
-    await screen.findByText("$1,840");
+    await screen.findByText("₹1,840");
     expect(screen.getByText("—")).toBeInTheDocument();
   });
 
   it("says stats are unavailable when the request fails", async () => {
-    publicService.stats.mockRejectedValue(new Error("down"));
+    publicService.stats.mockRejectedValueOnce(new Error("down"));
     render(<PlatformStatsPanel />);
     expect(await screen.findByText(/stats are unavailable/i)).toBeInTheDocument();
   });

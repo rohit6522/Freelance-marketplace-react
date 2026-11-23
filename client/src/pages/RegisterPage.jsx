@@ -95,11 +95,12 @@ function CustomCheckbox({ checked, error, children, registration, id }) {
 }
 
 export default function RegisterPage() {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, loginWithGoogle } = useAuth();
   const location = useLocation();
   const [role, setRole] = useState(location.state?.role === "freelancer" ? "freelancer" : "client");
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const {
     register,
@@ -127,6 +128,21 @@ export default function RegisterPage() {
     return "bg-primary";
   };
   const strengthColor = strength.score === 0 ? "text-on-surface-variant" : strength.score === 1 ? "text-error" : "text-primary";
+
+  const handleGoogleSignUp = async () => {
+    setServerError("");
+    setGoogleLoading(true);
+    try {
+      await loginWithGoogle(role);
+      toast.success("Account created with Google. Welcome to GigCraft!");
+    } catch (err) {
+      if (err.code === "auth/popup-closed-by-user") return;
+      setServerError(err.message || "Failed to sign up with Google");
+      toast.error(err.message || "Failed to sign up with Google");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const onSubmit = async (v) => {
     setServerError("");
@@ -188,9 +204,14 @@ export default function RegisterPage() {
                 <GithubIcon />
                 <span>Sign up with GitHub</span>
               </button>
-              <button type="button" className={hardShadowBtn} onClick={() => toast("Google sign-up isn't available yet. Please register with email.")}>
+              <button
+                type="button"
+                disabled={googleLoading || isSubmitting}
+                className={`${hardShadowBtn} disabled:opacity-50`}
+                onClick={handleGoogleSignUp}
+              >
                 <GoogleIcon />
-                <span>Sign up with Google</span>
+                <span>{googleLoading ? "Connecting..." : "Sign up with Google"}</span>
               </button>
             </div>
           </div>

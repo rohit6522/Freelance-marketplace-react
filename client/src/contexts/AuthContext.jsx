@@ -1,5 +1,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import { signInWithPopup } from "firebase/auth";
 import { authService } from "../services/authService";
+import { auth, googleProvider } from "../config/firebase";
 
 export const AuthContext = createContext(null);
 
@@ -26,6 +28,22 @@ export function AuthProvider({ children }) {
     return u;
   }, []);
 
+  const loginWithGoogle = useCallback(async (role) => {
+    const result = await signInWithPopup(auth, googleProvider);
+    const idToken = await result.user.getIdToken();
+    const payload = {
+      idToken,
+      email: result.user.email,
+      displayName: result.user.displayName,
+      photoURL: result.user.photoURL,
+      googleId: result.user.uid,
+      role,
+    };
+    const u = await authService.googleAuth(payload);
+    setUser(u);
+    return u;
+  }, []);
+
   const register = useCallback(async (payload) => {
     const u = await authService.register(payload);
     setUser(u);
@@ -47,8 +65,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, isAuthenticated: Boolean(user), login, register, resetPassword, logout, setUser }),
-    [user, loading, login, register, resetPassword, logout]
+    () => ({ user, loading, isAuthenticated: Boolean(user), login, register, loginWithGoogle, resetPassword, logout, setUser }),
+    [user, loading, login, register, loginWithGoogle, resetPassword, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

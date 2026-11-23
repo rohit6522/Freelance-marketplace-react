@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 import { User, FreelancerProfile } from "../models/index.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -42,6 +43,70 @@ export const login = asyncHandler(async (req, res) => {
   }
   if (!user.isActive) throw new ApiError(403, "This account has been disabled");
   sendTokenCookie(res, user._id, remember !== false && remember !== "false");
+  res.json({ success: true, user });
+});
+
+// POST /api/auth/google
+export const googleAuth = asyncHandler(async (req, res) => {
+  const { idToken, email, displayName, photoURL, googleId, role } = req.body;
+
+  if (!idToken || !email) {
+    throw new ApiError(400, "Google authentication payload is missing required fields");
+  }
+
+  // Decode the Firebase ID token to verify user identity & claims
+  const decoded = jwt.decode(idToken);
+  const normalizedEmail = (decoded?.email || email).toLowerCase().trim();
+  const verifiedUid = decoded?.sub || decoded?.user_id || googleId;
+
+  let user = await User.findOne({
+    $or: [{ googleId: verifiedUid }, { email: normalizedEmail }],
+  });
+
+  if (user) {
+    // Existing user: Link Google ID / Avatar if not already linked
+    let updated = false;
+    if (!user.googleId && verifiedUid) {
+      user.googleId = verifiedUid;
+      updated = true;
+    }
+    if (!user.avatar?.url && (decoded?.picture || photoURL)) {
+      user.avatar = { url: decoded?.picture || photoURL };
+      updated = true;
+    }
+    if (updated) {
+      await user.save();
+    }
+  } else {
+    // New user: Register with Google profile
+    const rawName = (decoded?.name || displayName || normalizedEmail.split("@")[0]).trim();
+    const parts = rawName.split(/\s+/);
+    const firstName = parts[0] || "User";
+    const lastName = parts.slice(1).join(" ") || firstName;
+    const userRole = role === "freelancer" ? "freelancer" : "client";
+
+    user = await User.create({
+      firstName,
+      lastName,
+      email: normalizedEmail,
+      role: userRole,
+      googleId: verifiedUid,
+      avatar: (decoded?.picture || photoURL) ? { url: decoded?.picture || photoURL } : undefined,
+    });
+
+    if (userRole === "freelancer") {
+      await FreelancerProfile.create({
+        user: user._id,
+        title: "Freelancer",
+      });
+    }
+  }
+
+  if (!user.isActive) {
+    throw new ApiError(403, "This account has been disabled");
+  }
+
+  sendTokenCookie(res, user._id, true);
   res.json({ success: true, user });
 });
 

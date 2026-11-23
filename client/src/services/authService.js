@@ -15,6 +15,10 @@ export const authService = {
     const { data } = await api.post("/auth/login", payload);
     return data.user;
   },
+  async googleAuth(payload) {
+    const { data } = await api.post("/auth/google", payload);
+    return data.user;
+  },
   async register(payload) {
     const { data } = await api.post("/auth/register", payload);
     return data.user;

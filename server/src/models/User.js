@@ -13,7 +13,15 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
     },
-    password: { type: String, required: [true, "Password is required"], minlength: 8, select: false },
+    password: {
+      type: String,
+      minlength: 8,
+      select: false,
+      required: function () {
+        return !this.googleId;
+      },
+    },
+    googleId: { type: String, sparse: true, index: true },
     role: { type: String, enum: ["client", "freelancer", "admin"], required: true },
     companyName: { type: String, trim: true, maxlength: 100 },
     phone: { type: String, trim: true },
@@ -35,12 +43,13 @@ userSchema.virtual("fullName").get(function () {
 });
 
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+  if (!this.password || !this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
   if (!this.isNew) this.passwordChangedAt = new Date(Date.now() - 1000);
 });
 
 userSchema.methods.comparePassword = function (candidate) {
+  if (!this.password) return false;
   return bcrypt.compare(candidate, this.password);
 };
 

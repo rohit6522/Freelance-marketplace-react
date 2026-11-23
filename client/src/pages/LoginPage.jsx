@@ -21,10 +21,11 @@ const trustCards = [
 ];
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const [verified, setVerified] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const {
     register,
@@ -41,6 +42,22 @@ export default function LoginPage() {
       toast.success("Signed in successfully");
     } catch (err) {
       setServerError(err.message);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setServerError("");
+    setGoogleLoading(true);
+    try {
+      await loginWithGoogle();
+      setVerified(true);
+      toast.success("Signed in with Google successfully!");
+    } catch (err) {
+      if (err.code === "auth/popup-closed-by-user") return;
+      setServerError(err.message || "Failed to sign in with Google");
+      toast.error(err.message || "Failed to sign in with Google");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -102,11 +119,12 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => oauthUnavailable("Google")}
-                className="flex items-center justify-center gap-space-sm px-4 py-3 bg-surface-container-lowest border border-on-surface hover:bg-surface-container-low transition-all text-on-surface font-label-md text-label-md"
+                disabled={googleLoading || isSubmitting}
+                onClick={handleGoogleSignIn}
+                className="flex items-center justify-center gap-space-sm px-4 py-3 bg-surface-container-lowest border border-on-surface hover:bg-surface-container-low transition-all text-on-surface font-label-md text-label-md disabled:opacity-50"
               >
                 <GoogleIcon />
-                <span>Google Cloud Identity</span>
+                <span>{googleLoading ? "Signing in..." : "Google Cloud Identity"}</span>
               </button>
             </div>
 
