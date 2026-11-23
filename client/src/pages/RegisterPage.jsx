@@ -230,7 +230,7 @@ export default function RegisterPage() {
                   First Name <span className="text-primary font-bold">*</span>
                 </label>
                 <input
-                  id="firstName" type="text" autoComplete="given-name" placeholder="Linus"
+                  id="firstName" type="text" autoComplete="given-name" placeholder="Rahul"
                   aria-invalid={Boolean(errors.firstName)}
                   className={`${inputBase} ${errors.firstName ? "border-error" : "border-outline"}`}
                   {...register("firstName", {
@@ -246,7 +246,7 @@ export default function RegisterPage() {
                   Last Name <span className="text-primary font-bold">*</span>
                 </label>
                 <input
-                  id="lastName" type="text" autoComplete="family-name" placeholder="Torvalds"
+                  id="lastName" type="text" autoComplete="family-name" placeholder="Sharma"
                   aria-invalid={Boolean(errors.lastName)}
                   className={`${inputBase} ${errors.lastName ? "border-error" : "border-outline"}`}
                   {...register("lastName", {
@@ -268,7 +268,7 @@ export default function RegisterPage() {
               </div>
               <div className="relative">
                 <input
-                  id="email" type="email" autoComplete="email" placeholder="engineer@enterprise.io"
+                  id="email" type="email" autoComplete="email" placeholder="rahul.sharma@example.com"
                   aria-invalid={Boolean(errors.email)}
                   className={`${inputBase} ${errors.email ? "border-error" : "border-outline"}`}
                   {...register("email", {
@@ -295,7 +295,7 @@ export default function RegisterPage() {
               <div className="relative mb-2">
                 <input
                   id="password" type={showPassword ? "text" : "password"} autoComplete="new-password"
-                  placeholder="••••••••••••••••"
+                  placeholder="Create a strong password"
                   aria-invalid={Boolean(errors.password)}
                   className={`${inputBase} tracking-wider pr-10 ${errors.password ? "border-error" : "border-outline"}`}
                   {...register("password", {

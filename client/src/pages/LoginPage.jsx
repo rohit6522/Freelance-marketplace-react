@@ -153,7 +153,7 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="developer@agency.io"
+                    placeholder="rahul.sharma@example.com"
                     aria-invalid={Boolean(errors.email)}
                     className={`${inputBase} ${errors.email ? "border-error" : "border-outline-variant"}`}
                     {...register("email", {
@@ -186,7 +186,7 @@ export default function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
-                    placeholder="••••••••••••••••"
+                    placeholder="Enter your password"
                     aria-invalid={Boolean(errors.password)}
                     className={`${inputBase} border-r-0 ${errors.password ? "border-error" : "border-outline-variant"}`}
                     {...register("password", { required: "Password is required" })}

@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
               Email <span className="text-primary font-bold">*</span>
             </label>
             <input
-              id="email" type="email" autoComplete="email" placeholder="you@company.com"
+              id="email" type="email" autoComplete="email" placeholder="rahul.sharma@example.com"
               className={`w-full px-space-md py-2.5 bg-surface-container-lowest border font-body-md text-body-md focus:border-2 focus:border-on-surface focus:outline-none ${errors.email ? "border-error" : "border-outline"}`}
               {...register("email", {
                 required: "Email is required",
