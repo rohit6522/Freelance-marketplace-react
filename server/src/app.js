@@ -34,9 +34,10 @@ if (env.trustProxy) app.set("trust proxy", env.trustProxy);
 
 app.use(
   helmet({
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     contentSecurityPolicy: {
       directives: {
-        "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://placehold.co"],
+        "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://placehold.co", "https://lh3.googleusercontent.com"],
         "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
         "upgrade-insecure-requests": env.nodeEnv === "production" ? [] : null,

@@ -43,15 +43,15 @@ export function AuthProvider({ children }) {
     if (res?.requiresRole) {
       return { requiresRole: true, payload };
     }
-    setUser(res.user);
-    return { user: res.user };
+    setUser(res?.user);
+    return { user: res?.user };
   }, []);
 
   const completeGoogleRegistration = useCallback(async (pendingPayload, selectedRole) => {
     const payload = { ...pendingPayload, role: selectedRole };
     const res = await authService.googleAuth(payload);
-    setUser(res.user);
-    return res.user;
+    setUser(res?.user);
+    return res?.user;
   }, []);
 
   const register = useCallback(async (payload) => {
