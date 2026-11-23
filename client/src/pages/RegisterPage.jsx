@@ -211,7 +211,7 @@ export default function RegisterPage() {
                 onClick={handleGoogleSignUp}
               >
                 <GoogleIcon />
-                <span>{googleLoading ? "Connecting..." : "Sign up with Google"}</span>
+                <span>{googleLoading ? "Connecting..." : `Sign up with Google as ${role === "freelancer" ? "Freelancer" : "Client"}`}</span>
               </button>
             </div>
           </div>

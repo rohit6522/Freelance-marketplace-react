@@ -1,11 +1,15 @@
-﻿import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import LoginPage from "./LoginPage";
 
-const { login } = vi.hoisted(() => ({ login: vi.fn() }));
-vi.mock("../hooks/useAuth", () => ({ useAuth: () => ({ login }) }));
+const { login, loginWithGoogle, completeGoogleRegistration } = vi.hoisted(() => ({
+  login: vi.fn(),
+  loginWithGoogle: vi.fn(),
+  completeGoogleRegistration: vi.fn(),
+}));
+vi.mock("../hooks/useAuth", () => ({ useAuth: () => ({ login, loginWithGoogle, completeGoogleRegistration }) }));
 
 const setup = () => {
   const user = userEvent.setup();

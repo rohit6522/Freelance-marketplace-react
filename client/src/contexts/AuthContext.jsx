@@ -39,9 +39,19 @@ export function AuthProvider({ children }) {
       googleId: result.user.uid,
       role,
     };
-    const u = await authService.googleAuth(payload);
-    setUser(u);
-    return u;
+    const res = await authService.googleAuth(payload);
+    if (res?.requiresRole) {
+      return { requiresRole: true, payload };
+    }
+    setUser(res.user);
+    return { user: res.user };
+  }, []);
+
+  const completeGoogleRegistration = useCallback(async (pendingPayload, selectedRole) => {
+    const payload = { ...pendingPayload, role: selectedRole };
+    const res = await authService.googleAuth(payload);
+    setUser(res.user);
+    return res.user;
   }, []);
 
   const register = useCallback(async (payload) => {
@@ -65,8 +75,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, isAuthenticated: Boolean(user), login, register, loginWithGoogle, resetPassword, logout, setUser }),
-    [user, loading, login, register, loginWithGoogle, resetPassword, logout]
+    () => ({ user, loading, isAuthenticated: Boolean(user), login, register, loginWithGoogle, completeGoogleRegistration, resetPassword, logout, setUser }),
+    [user, loading, login, register, loginWithGoogle, completeGoogleRegistration, resetPassword, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

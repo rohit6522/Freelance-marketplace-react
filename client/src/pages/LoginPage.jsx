@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Icon from "../components/ui/Icon";
+import Modal from "../components/ui/Modal";
 import FieldError from "../components/ui/FieldError";
 import { GithubIcon, GoogleIcon } from "../components/ui/BrandIcons";
 import { useAuth } from "../hooks/useAuth";
@@ -21,11 +22,12 @@ const trustCards = [
 ];
 
 export default function LoginPage() {
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, completeGoogleRegistration } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const [verified, setVerified] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [pendingGoogleAuth, setPendingGoogleAuth] = useState(null);
 
   const {
     register,
@@ -49,13 +51,32 @@ export default function LoginPage() {
     setServerError("");
     setGoogleLoading(true);
     try {
-      await loginWithGoogle();
+      const res = await loginWithGoogle();
+      if (res?.requiresRole) {
+        setPendingGoogleAuth(res.payload);
+        return;
+      }
       setVerified(true);
       toast.success("Signed in with Google successfully!");
     } catch (err) {
       if (err.code === "auth/popup-closed-by-user") return;
       setServerError(err.message || "Failed to sign in with Google");
       toast.error(err.message || "Failed to sign in with Google");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleSelectRole = async (selectedRole) => {
+    if (!pendingGoogleAuth) return;
+    setGoogleLoading(true);
+    try {
+      await completeGoogleRegistration(pendingGoogleAuth, selectedRole);
+      setPendingGoogleAuth(null);
+      setVerified(true);
+      toast.success(`${selectedRole === "freelancer" ? "Freelancer" : "Client"} account created! Welcome to GigCraft.`);
+    } catch (err) {
+      toast.error(err.message || "Failed to complete registration");
     } finally {
       setGoogleLoading(false);
     }
@@ -302,6 +323,69 @@ export default function LoginPage() {
           </div>
         ))}
       </div>
+
+      {/* Role Selection Modal for new Google sign-ups on Login Page */}
+      <Modal
+        open={Boolean(pendingGoogleAuth)}
+        onClose={() => setPendingGoogleAuth(null)}
+        title="Select Account Type"
+        maxWidth="max-w-xl"
+      >
+        <div className="p-space-md sm:p-space-lg space-y-space-md">
+          <div>
+            <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Welcome to GigCraft!
+            </h3>
+            <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              You are signing in for the first time with <span className="font-semibold text-on-surface">{pendingGoogleAuth?.email}</span>. How would you like to use your account?
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-2">
+            <button
+              type="button"
+              disabled={googleLoading}
+              onClick={() => handleSelectRole("client")}
+              className="p-space-md border-2 border-outline-variant hover:border-primary text-left bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-[2px_2px_0px_#0b1c30] flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-1.5 text-primary mb-1">
+                  <Icon name="business_center" className="text-xl" />
+                  <span className="font-label-md text-label-md uppercase font-bold">Client</span>
+                </div>
+                <h4 className="font-headline-sm text-headline-sm text-on-surface">Hire Talent</h4>
+                <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                  Browse gigs, hire freelancers, order packages, and manage milestone disbursements.
+                </p>
+              </div>
+              <span className="mt-space-md font-label-sm text-label-sm text-primary uppercase font-bold">
+                Join as Client →
+              </span>
+            </button>
+
+            <button
+              type="button"
+              disabled={googleLoading}
+              onClick={() => handleSelectRole("freelancer")}
+              className="p-space-md border-2 border-outline-variant hover:border-primary text-left bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-[2px_2px_0px_#0b1c30] flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-1.5 text-primary mb-1">
+                  <Icon name="terminal" className="text-xl" />
+                  <span className="font-label-md text-label-md uppercase font-bold">Freelancer</span>
+                </div>
+                <h4 className="font-headline-sm text-headline-sm text-on-surface">Work & Sell</h4>
+                <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                  Publish gigs, showcase technical portfolio projects, and earn from completed deliveries.
+                </p>
+              </div>
+              <span className="mt-space-md font-label-sm text-label-sm text-primary uppercase font-bold">
+                Join as Freelancer →
+              </span>
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -78,7 +78,15 @@ export const googleAuth = asyncHandler(async (req, res) => {
       await user.save();
     }
   } else {
-    // New user: Register with Google profile
+    // New user: Require role if not provided
+    if (!role) {
+      return res.json({
+        success: true,
+        requiresRole: true,
+        message: "Please select whether you want to join as a Client or Freelancer",
+      });
+    }
+
     const rawName = (decoded?.name || displayName || normalizedEmail.split("@")[0]).trim();
     const parts = rawName.split(/\s+/);
     const firstName = parts[0] || "User";
