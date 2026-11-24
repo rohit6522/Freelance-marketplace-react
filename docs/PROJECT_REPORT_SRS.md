@@ -1,19 +1,20 @@
 # GigCraft
 
-## SOFTWARE REQUIREMENTS SPECIFICATION
+## SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
 
-### *A Full-Stack Freelance Marketplace Web Application*
+### *A Full-Stack India-Focused Freelance Marketplace Web Application*
 
-### **INT257**
-### **Modern Web Application Development**
+### **Course Code: 252**
+### **Course Name: INT**
+### **Continuous Assessment 3 (Autumn 2026)**
 
 ---
 
-| Name | Registration No |
+| Student Name | Registration No |
 |---|---|
 | **Rohit Kumar** | **12400392** |
 | **Ajad Bharti** | **12400390** |
-| **Utkarsh** | — |
+| **Utkarsh** | **12400782** |
 
 ---
 
@@ -21,25 +22,30 @@
 
 | Item | Details |
 |---|---|
-| **Project** | GigCraft – Full-Stack Freelance Marketplace Web Application |
-| **Document** | Software Requirements Specification (SRS) |
-| **Version** | 1.0 |
-| **Status** | Draft for academic submission |
-| **Repository** | [https://github.com/Ajadbharti/freelance-gig-marketplace](https://github.com/Ajadbharti/freelance-gig-marketplace) |
-| **Deployment** | [https://freelance-gig-marketplace.vercel.app/](https://freelance-gig-marketplace.vercel.app/) |
+| **Project Name** | GigCraft — Freelance Gig Marketplace |
+| **Document Type** | Software Requirements Specification (SRS) |
+| **Course Code / Name** | 252 / INT |
+| **Assessment** | Continuous Assessment 3 (CA3), Autumn 2026 |
+| **Version** | 3.0 (Final Academic Release) |
+| **Status** | Approved & Complete |
+| **Repository** | [https://github.com/rohit6522/Freelance-marketplace-react](https://github.com/rohit6522/Freelance-marketplace-react) |
+| **Deployed Link** | [https://freelance-marketplace-react.onrender.com/explore](https://freelance-marketplace-react.onrender.com/explore) |
 
 ---
 
 ## Revision History
 
-| Version | Date | Description | Author |
+| Version | Date | Description | Author(s) |
 |---|---|---|---|
-| 1.0 | November 2026 | Initial SRS prepared for GigCraft Freelance Marketplace | Rohit Kumar |
+| 1.0 | 05-11-2026 | Initial baseline SRS draft covering architecture, schemas, and MVP features | Rohit Kumar, Ajad Bharti |
+| 2.0 | 18-11-2026 | Added complete India-focused localization (₹ INR, en-IN formatting, IST, Indian profiles) | Rohit Kumar, Ajad Bharti, Utkarsh |
+| 3.0 | 24-11-2026 | Integrated Firebase Google OAuth with dynamic role selection, Helmet COOP/CSP policies, and CA3 submission requirements | Rohit Kumar, Ajad Bharti, Utkarsh |
 
 ---
 
 ## Table of Contents
 
+- [Revision History](#revision-history)
 - [1. Introduction](#1-introduction)
   - [1.1 Purpose](#11-purpose)
   - [1.2 Scope](#12-scope)
@@ -59,12 +65,11 @@
     - [3.1.3 Software Interfaces](#313-software-interfaces)
     - [3.1.4 Communications Interfaces](#314-communications-interfaces)
   - [3.2 Functional Requirements](#32-functional-requirements)
-    - [3.2.1 Service Marketplace Catalogue and Filtering](#321-service-marketplace-catalogue-and-filtering)
-    - [3.2.2 Gig Detail, Multi-Tier Packages and Specification](#322-gig-detail-multi-tier-packages-and-specification)
-    - [3.2.3 Order Lifecycle, Milestones, and Work Submissions](#323-order-lifecycle-milestones-and-work-submissions)
-    - [3.2.4 Real-Time In-App Messaging & Threaded Communication](#324-real-time-in-app-messaging--threaded-communication)
-    - [3.2.5 User Authentication & Profile Management](#325-user-authentication--profile-management)
-    - [3.2.6 Seller Dashboard, Performance Analytics & Reviews](#326-seller-dashboard-performance-analytics--reviews)
+    - [3.2.1 Feature 1: User Authentication & Role-Based Access Control (with Google OAuth)](#321-feature-1-user-authentication--role-based-access-control-with-google-oauth)
+    - [3.2.2 Feature 2: Indian Freelance Gig Catalog, Search & Tiered Pricing (₹ INR)](#322-feature-2-indian-freelance-gig-catalog-search--tiered-pricing--inr)
+    - [3.2.3 Feature 3: Deterministic Milestone Contracts & Simulated Escrow Lifecycle](#323-feature-3-deterministic-milestone-contracts--simulated-escrow-lifecycle)
+    - [3.2.4 Feature 4: Real-Time Bi-Directional Client-Freelancer Messaging (Socket.IO)](#324-feature-4-real-time-bi-directional-client-freelancer-messaging-socketio)
+    - [3.2.5 Feature 5: Review & Rating Ecosystem with Admin Moderation](#325-feature-5-review--rating-ecosystem-with-admin-moderation)
   - [3.5 Non-Functional Requirements](#35-non-functional-requirements)
     - [3.5.1 Performance](#351-performance)
     - [3.5.2 Reliability](#352-reliability)
@@ -76,135 +81,93 @@
   - [3.9 Other Requirements](#39-other-requirements)
 - [4. Analysis Models](#4-analysis-models)
   - [4.1 Data Flow Diagrams (DFD)](#41-data-flow-diagrams-dfd)
-    - [4.1.1 Context-Level DFD (Level 0)](#411-context-level-dfd-level-0)
-    - [4.1.2 Level 1 Process Breakdown](#412-level-1-process-breakdown)
-    - [4.1.3 Main Data Stores](#413-main-data-stores)
+    - [4.1.1 Level 0 DFD (Context Level)](#411-level-0-dfd-context-level)
+    - [4.1.2 Level 1 DFD (Decomposition of System Processes)](#412-level-1-dfd-decomposition-of-system-processes)
+    - [4.1.3 Level 2 DFD (Order Execution & Escrow Processing)](#413-level-2-dfd-order-execution--escrow-processing)
 - [5. GitHub Link](#5-github-link)
 - [6. Deployed Link](#6-deployed-link)
-- [A. Appendices](#a-appendices)
-  - [A.1 Appendix 1 – Project Screenshots & UI Walkthrough](#a1-appendix-1--project-screenshots--ui-walkthrough)
-  - [A.2 Appendix 2 – Technical Evidence & Database Schemas](#a2-appendix-2--technical-evidence--database-schemas)
+- [7. Appendices](#7-appendices)
+  - [Appendix A: UI Walkthrough & Verification Screenshots](#appendix-a-ui-walkthrough--verification-screenshots)
+  - [Appendix B: Database Schemas (Mongoose ODM Models)](#appendix-b-database-schemas-mongoose-odm-models)
 
 ---
 
 # 1. Introduction
 
-GigCraft is a modern, responsive full-stack web application designed to connect Indian freelancers and clients. The platform enables skilled freelancers (developers, UI/UX designers, content creators, animators, and digital specialists) to showcase their service offerings ("gigs") across multiple tiers, and allows clients to explore, filter, order, coordinate, and review digital service deliverables. The project focuses on structured contract lifecycle handling, multi-tier packages, localized Indian currency and date formatting, client-seller messaging, and transparent peer reviews.
+The introduction to this Software Requirements Specification (SRS) document provides an overview of the complete GigCraft web application. This document adheres to the IEEE Recommended Practice for Software Requirements Specifications (IEEE Std 830-1998) to comprehensively specify the functional, non-functional, interface, and structural requirements of the platform.
 
 ### 1.1 Purpose
-The purpose of this Software Requirements Specification (SRS) is to provide a complete, clear, and structured description of the architecture, features, user interfaces, functional behavior, system constraints, and technical design of GigCraft. 
-
-This document serves as the formal technical blueprint for developers, evaluators, academic reviewers, and testers. It delineates the implemented software modules, technical schemas, and functional boundaries of the application without making claims of unverified third-party commercial gateways or off-scope enterprise services.
+The purpose of this SRS is to formally specify the technical architecture, behavioral characteristics, functional capabilities, and design constraints of **GigCraft** for academic assessment in Course 252 (INT) Continuous Assessment 3 (Autumn 2026). The intended audience includes software engineering instructors, project evaluators, academic peers, and full-stack developers reviewing or extending the platform.
 
 ### 1.2 Scope
-The product is named **GigCraft**. It is developed using a modern MERN-style architecture comprising React 19, Tailwind CSS, Node.js, Express.js, MongoDB, and Mongoose ODM.
-
-The application scope includes:
-- **Service Discovery**: Exploring published gigs with multi-parameter search, category categorization, delivery deadline filters, rating thresholds, seller tiers, and budget range sorting formatted in Indian Rupees (₹ INR).
-- **Service Packages**: Standardized three-tier service structures (Basic, Standard, Premium) detailing package deliverables, turnaround duration, revision limits, and transparent feature lists.
-- **Contract & Order Tracking**: Ordering workflow enabling clients to supply project briefs and file attachments, with status progressions across `Pending`, `In Progress`, `Delivered`, `Revision Requested`, `Completed`, and `Cancelled`.
-- **Collaborative Messaging**: Built-in, direct asynchronous messaging system between clients and freelancers linked directly to project contracts.
-- **Role-Based Profiles & Dashboards**: Dedicated workspace views for both clients and freelancers, including gig management, portfolio showcasing, earnings metrics, and order KPIs.
-- **Client Feedback**: Multi-criteria star rating and feedback mechanism linked directly to completed orders with seller reply capabilities.
-
-*Note on Project Scope*: This academic project is an educational, portfolio, and non-commercial application. It does not integrate real-world banking merchant accounts, monetary transactions, GST invoices, or commercial payment gateways. All financial commitments, orders, and wallet statuses are managed through internal simulated contract state machines.
+* **Software Product Name:** GigCraft (Freelance Gig Marketplace)
+* **What the Software Does:**
+  * Connects Indian technical talent (freelancers, developers, designers) with business clients and startups.
+  * Allows freelancers to publish multi-tier service gigs (Basic, Standard, Premium) priced in Indian Rupees (`₹` INR).
+  * Implements a deterministic order lifecycle governed by simulated escrow contracts that protect both client and seller.
+  * Enables bi-directional real-time chat, typing indicators, and delivery attachments via WebSockets.
+  * Provides Google OAuth authentication through Firebase alongside traditional email/password credentials.
+  * Enforces localized Indian formatting (`en-IN` locale, Indian phone number validation, IST timestamps).
+* **What the Software Will Not Do:**
+  * The software is an **academic simulation** and does not conduct live fiat banking transactions or collect credit card details.
+  * It does not act as a legal arbitration authority or tax collection platform.
 
 ### 1.3 Definitions, Acronyms, and Abbreviations
-
-| Term | Meaning |
-|---|---|
-| **SRS** | Software Requirements Specification |
-| **UI / UX** | User Interface / User Experience |
-| **API** | Application Programming Interface |
-| **MERN** | MongoDB, Express.js, React.js, and Node.js technology stack |
-| **JWT** | JSON Web Token, utilized for secure, stateless HTTP-only cookie authentication |
-| **CRUD** | Create, Read, Update, and Delete operations |
-| **Gig** | A distinct digital service offering published by a freelancer with set packages and pricing |
-| **DFD** | Data Flow Diagram |
-| **ODM** | Object Document Mapper (Mongoose for MongoDB) |
-| **IST** | Indian Standard Time (UTC+05:30) |
-| **INR (₹)** | Indian Rupee, the localized currency format used across the system |
+* **SRS:** Software Requirements Specification
+* **MERN:** MongoDB, Express.js, React.js, Node.js
+* **JWT:** JSON Web Token
+* **OAuth:** Open Authorization (specifically Google OAuth 2.0 via Firebase Auth)
+* **CSP:** Content Security Policy
+* **COOP:** Cross-Origin-Opener-Policy
+* **DFD:** Data Flow Diagram
+* **ODM:** Object Data Modeling (Mongoose)
+* **Escrow (Simulated):** A trust-mechanism where client funds are held in a pending state until deliverables are reviewed and accepted.
+* **Gig:** A packaged service listing published by a freelancer with defined deliverables, turnaround times, and pricing.
 
 ### 1.4 References
-- **GigCraft GitHub Repository**: [https://github.com/Ajadbharti/freelance-gig-marketplace](https://github.com/Ajadbharti/freelance-gig-marketplace)
-- **GigCraft Deployed Application**: [https://freelance-gig-marketplace.vercel.app/](https://freelance-gig-marketplace.vercel.app/)
-- **React Documentation**: [https://react.dev/](https://react.dev/)
-- **Tailwind CSS Documentation**: [https://tailwindcss.com/docs](https://tailwindcss.com/docs)
-- **Node.js Documentation**: [https://nodejs.org/docs](https://nodejs.org/docs)
-- **Express.js Framework**: [https://expressjs.com/](https://expressjs.com/)
-- **MongoDB & Mongoose Documentation**: [https://mongoosejs.com/docs/](https://mongoosejs.com/docs/)
+1. IEEE Recommended Practice for Software Requirements Specifications (IEEE Std 830-1998).
+2. React 19 & Vite Official Documentation ([https://vitejs.dev/](https://vitejs.dev/)).
+3. Express.js & Node.js Runtime Specifications ([https://expressjs.com/](https://expressjs.com/)).
+4. MongoDB Atlas Manual & Mongoose Schema Documentation ([https://mongoosejs.com/](https://mongoosejs.com/)).
+5. Firebase Authentication Web SDK v13 ([https://firebase.google.com/docs/auth](https://firebase.google.com/docs/auth)).
+6. RFC 7519: JSON Web Token (JWT) Standard.
 
 ### 1.5 Overview
-The remainder of this document is organized into three major divisions:
-- **Section 2 (General Description)** provides an overarching architectural perspective, module summary, user profiles, operating constraints, and system dependencies.
-- **Section 3 (Specific Requirements)** enumerates detailed hardware/software interfaces, comprehensive functional specifications (inputs, processing, outputs, and edge-case handling), and non-functional requirements.
-- **Section 4 (Analysis Models)** delineates Level 0 and Level 1 Data Flow Diagrams (DFDs) alongside data-store structures.
-- **Appendices** provide complete visual interface walkthroughs and code evidence of core database models.
+The remainder of this SRS describes the product perspective, target users, operational constraints, and assumptions in Section 2. Section 3 details the external interfaces, detailed functional requirements with input/processing/output/error specifications, and non-functional requirements. Section 4 provides architectural Data Flow Diagrams (DFD Level 0, 1, and 2). Sections 5 and 6 provide verified repository and live deployment endpoints. Section 7 presents supplementary evidence and database models.
 
 ---
 
 # 2. General Description
 
 ### 2.1 Product Perspective
-GigCraft operates as an independent, self-contained, two-sided web marketplace. The client tier is built as a single-page application (SPA) using React 19 and styled with Tailwind CSS, utilizing client-side routing via React Router DOM. The client interacts with the server through asynchronous RESTful HTTP endpoints served by an Express.js backend. 
-
-Data persistence is managed via MongoDB Atlas utilizing Mongoose schemas. Authentication tokens are issued as cryptographically signed JWTs transmitted via secure, `httpOnly` cookies to safeguard against Cross-Site Scripting (XSS). File uploads and media assets are handled via cloud storage adapters (Cloudinary) with strict MIME-type and size validation.
-
-```
-+-------------------------------------------------------+
-|                 Client Tier (Browser)                 |
-|       React 19 + Tailwind CSS + React Hook Form       |
-+---------------------------+---------------------------+
-                            | HTTPS / REST (JSON)
-                            v
-+-------------------------------------------------------+
-|                  Server Tier (API)                    |
-|        Node.js + Express.js + JWT Authentication      |
-+-------------+-----------------------------+-----------+
-              |                             |
-              v                             v
-+---------------------------+ +-------------------------+
-|     Persistence Layer     | |   Cloud Storage Service |
-|  MongoDB Atlas (Mongoose) | |   Media & Deliverables  |
-+---------------------------+ +-------------------------+
-```
+GigCraft is a self-contained, cloud-hosted web application operating on a client-server architecture:
+* **Frontend:** Single-page application (SPA) built using React 19, Tailwind CSS v4, and Vite.
+* **Backend:** RESTful API and WebSocket microservice built on Node.js and Express 5.
+* **Persistence:** Cloud-hosted MongoDB Atlas cluster with multi-document ACID transactions.
+* **Cloud Integrations:** Cloudinary for asset storage, Firebase for Google identity provider federation.
 
 ### 2.2 Product Functions
-
-| Module | Main Functions |
-|---|---|
-| **Service Exploration** | Catalog browsing, full-text keyword search, category navigation, multi-parameter filtering (price, delivery duration, seller tier, minimum rating), and sorting. |
-| **Gig Management** | Creation, updating, pausing, and drafting of freelancer gigs featuring three tiered packages (Basic, Standard, Premium), tags, and image galleries. |
-| **Order Processing** | Contract initiation, brief submission, deadline calculation, state transitions (`Pending` $\rightarrow$ `In Progress` $\rightarrow$ `Delivered` $\rightarrow$ `Completed`), and revision loops. |
-| **Milestone Delivery** | Digital asset attachment, delivery message submission, and client approval/revision workflow. |
-| **Direct Messaging** | Context-specific conversation channels linking buyers and sellers with attachment support and unread notification tracking. |
-| **User Profiles & Portfolio** | Public freelancer portfolios showcasing verified work history, client ratings, skill sets, languages, and case studies. |
-| **Client & Seller Dashboards** | Customized role-based dashboards displaying active pipelines, monthly performance statistics, order breakdowns, and feedback panels. |
-| **Review System** | Verified post-order rating and feedback submission with public freelancer responses. |
+1. **User Identity & Multi-Role Governance:** Secure registration as Client, Freelancer, or Administrator with JWT HTTP-only cookie sessions and Firebase Google OAuth.
+2. **Gig Management:** Freelancer authoring of three-tiered service packages, rich markdown descriptions, search tags, and thumbnail media.
+3. **Marketplace Discovery:** Category-driven catalog exploration, keyword search, price range filtering in ₹ INR, and seller tier sorting.
+4. **Order Execution Pipeline:** Deterministic state machine (`pending` → `in_progress` → `delivered` → `completed` or `cancelled`) with simulated escrow fund allocation.
+5. **Real-Time Collaboration:** Socket.IO WebSocket messaging, active typing indicators, unread badges, and attachment sharing.
+6. **Reputation & Moderation:** Verified post-order review submissions, mathematical recalculation of aggregate star ratings, and administrator moderation queues.
 
 ### 2.3 User Characteristics
-The platform caters to two distinct user personas:
-1. **Client (Buyer)**:
-   - Business owners, startup founders, project leads, or individual creators looking to hire specialized talent.
-   - Discovers services, places project orders, communicates specifications, reviews deliverable files, requests revisions, and authors reviews.
-2. **Freelancer (Seller)**:
-   - Technical engineers, UI/UX designers, content writers, or creative specialists seeking freelance engagements.
-   - Publishes gigs with defined deliverable packages, manages project workflows, delivers completed files, tracks simulated earnings, and maintains a public portfolio.
-3. **Administrator / Evaluator**:
-   - Technical evaluators possessing administrative credentials to audit database collections, inspect system telemetry, verify order states, and review audit logs.
+* **Client (Buyer):** Individuals, founders, or business managers seeking digital services. Expected to have standard web literacy.
+* **Freelancer (Seller):** Technical professionals, designers, and developers offering services. They maintain a public portfolio, track earnings, and deliver completed assets.
+* **Administrator:** Platform maintainers managing user suspensions, reviewing reported content, and monitoring system telemetry.
 
 ### 2.4 General Constraints
-- **Client Compatibility**: Requires modern, ECMAScript 2022-compliant web browsers (Chrome, Edge, Firefox, Safari).
-- **Network Dependency**: Both local development and cloud deployments require stable internet connectivity to communicate with MongoDB Atlas.
-- **Stateless Authorization**: Authentication relies on signed JWT cookies; expired or absent tokens require user re-authentication.
-- **Non-Commercial Academic Model**: The project operates as an educational showcase; external payment gateway integrations (Razorpay, Stripe) and actual monetary debit/credit systems are explicitly excluded.
-- **Data Protection**: Passwords must be hashed using bcrypt (salt rounds = 12). Unfiltered user inputs must be sanitized using Express Validator to mitigate injection attacks.
+1. **Security Standards:** Passwords must be hashed using bcrypt (12 rounds). Session cookies must enforce `httpOnly`, `SameSite=lax`, and `secure` in production.
+2. **Zero Commercial Liability:** Payments are strictly simulated in an educational milestone escrow ledger; no real financial transactions take place.
+3. **Locale Constraints:** Currency is locked to `₹` INR using `Intl.NumberFormat('en-IN')`; dates display in Asia/Kolkata (IST).
+4. **Platform Compatibility:** Operates in all modern evergreen browsers (Chrome, Edge, Firefox, Safari) across mobile, tablet, and desktop viewports.
 
 ### 2.5 Assumptions and Dependencies
-- MongoDB Atlas cluster is online and reachable through a configured URI connection string.
-- Environment variables (`MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, `PORT`) are correctly configured prior to deployment.
-- Deliverable uploads comply with maximum file limits (25 MB) and approved extension types (`.pdf`, `.zip`, `.png`, `.jpg`, `.json`, `.txt`).
-- All displayed timestamps adhere to the Indian Standard Time (`Asia/Kolkata`) locale, and prices are formatted in Indian Rupee notation (`en-IN`).
+* **Network Connectivity:** Persistent HTTPS connection is required for API interactions; WebSocket falls back to HTTP long-polling if WebSockets are restricted.
+* **Third-Party Availability:** Relies on MongoDB Atlas for data persistence, Firebase for Google OAuth token issuance, and Cloudinary for media CDN delivery.
 
 ---
 
@@ -213,125 +176,122 @@ The platform caters to two distinct user personas:
 ## 3.1 External Interface Requirements
 
 ### 3.1.1 User Interfaces
-- **Explore & Catalog View**: Grid layout displaying gig cards with cover photos, seller level badges, starting prices in ₹ INR, and quick filter panels.
-- **Gig Detail View**: Tabular comparison of Basic, Standard, and Premium packages with interactive feature checklists, FAQ accordions, and seller biography cards.
-- **Order Placement Modal**: Modal dialog prompting for detailed project requirements and optional brief attachments with instant package price summaries.
-- **Order Management Console**: Split-pane interface showing the order ledger on the left and full milestone timelines, delivery file downloads, revision controls, and conversation threads on the right.
-- **Dashboard Workspace**: Role-tailored metrics view showing active orders, completed jobs, rating metrics, and performance charts.
-- **Responsive Navigation**: Adaptive header with global search, category quick-links, unread notification badges, and a mobile drawer menu.
+* **Design Philosophy:** Neo-brutalist modern editorial styling characterized by crisp borders, high-contrast dark accents (`#0b1c30`), deep emerald primary buttons (`#005d42`), and 2px solid drop-shadows.
+* **Typography:** `Space Grotesk` for all display titles and brand elements; `Geist` for body copy, data tables, and input forms.
+* **Responsive Layout:** Mobile-first responsive grids constructed with Tailwind CSS v4 adapting fluidly from 320px mobile viewports to 4K displays.
 
 ### 3.1.2 Hardware Interfaces
-The application operates on standard end-user computing hardware. No specialized hardware peripherals are required. Supported devices include desktop computers, laptops, tablets, and smartphones capable of rendering modern CSS Grid and Flexbox layouts.
+* No dedicated hardware required. Client devices require an internet-enabled computer or smartphone with at least 1 GB RAM and standard display drivers.
 
 ### 3.1.3 Software Interfaces
-
-| Software / Component | Purpose |
-|---|---|
-| **React 19** | Component-based frontend library for dynamic UI rendering. |
-| **React Router v7** | Client-side routing, protected routes, and URL parameter management. |
-| **Tailwind CSS v4** | Utility-first styling framework supporting dark/light container styling. |
-| **Node.js** | Server-side JavaScript runtime environment. |
-| **Express.js v5** | Web application framework for routing and middleware orchestration. |
-| **MongoDB & Mongoose** | NoSQL document database and schema modeling ODM. |
-| **jsonwebtoken (JWT)** | Token creation, signing, and verification for stateless sessions. |
-| **bcryptjs** | Adaptive one-way password hashing algorithm. |
-| **React Hook Form** | Performant, uncontrolled form state management and input validation. |
-| **Cloudinary SDK / Multer** | Media handling and file upload management. |
+* **Operating Systems:** Windows 10/11, macOS, Linux, Android, iOS.
+* **Browser Compatibility:** Google Chrome 90+, Microsoft Edge 90+, Mozilla Firefox 88+, Safari 14+.
+* **Database Interface:** MongoDB Driver v6 via Mongoose ODM v9.
+* **Identity Provider Interface:** Google Identity Services via Firebase Web SDK v13.
 
 ### 3.1.4 Communications Interfaces
-All communications between the React client and the Express backend utilize standard HTTP/1.1 and HTTP/2 protocols over TLS (HTTPS). Data payloads are serialized using UTF-8 JSON. Secure cookies utilize the `HttpOnly`, `SameSite=Lax`, and `Secure` attributes to prevent unauthorized script access.
+* **Protocol:** HTTPS (TLS 1.3) for all RESTful transactions.
+* **Real-time Protocol:** WSS (WebSocket Secure) with fallback to HTTP polling for Socket.IO v4.
+* **Data Interchange Format:** JSON (`application/json`) with strict schema validation on all inputs.
 
 ---
 
 ## 3.2 Functional Requirements
 
-### 3.2.1 Service Marketplace Catalogue and Filtering
-- **3.2.1.1 Introduction**: Enables clients to discover services, apply dynamic search parameters, and sort gigs.
-- **3.2.1.2 Inputs**: Search query string, category slug, price range (`minPrice`, `maxPrice`), maximum delivery duration, seller tier (`top_rated`, `pro`, `level2`, `rising`), and sort criterion (`relevance`, `price_asc`, `price_desc`, `rating`, `newest`).
-- **3.2.1.3 Processing**: Express server parses URL query parameters, sanitizes inputs, and constructs a MongoDB aggregation pipeline executing `$text` search and `$match` filters.
-- **3.2.1.4 Outputs**: Paginated list of gig objects, seller summary sub-documents, active filter pills, and total count metadata.
-- **3.2.1.5 Error Handling**: Empty result sets render a structured empty-state component suggesting broadened search filters. Invalid numerical query params are rejected with HTTP 400.
+### 3.2.1 Feature 1: User Authentication & Role-Based Access Control (with Google OAuth)
+* **3.2.1.1 Introduction:** Enables users to create accounts, authenticate credentials, federate identities via Google OAuth, and receive role-authorized JWT session cookies.
+* **3.2.1.2 Inputs:**
+  * Manual: First Name, Last Name, Email, Password, Account Role (`client` or `freelancer`).
+  * Google OAuth: Firebase ID Token, Email, Display Name, Profile Photo URL, Selected Role.
+* **3.2.1.3 Processing:**
+  1. Validates email format and enforces strong password criteria (min 8 chars, letter + number).
+  2. For Google OAuth: decodes Firebase ID Token claims, verifies issuer and audience, matches existing record or initiates new user provisioning.
+  3. Hashes traditional passwords using `bcrypt.hash(password, 12)`.
+  4. Generates a signed JWT payload `{ id: user._id }` with a 7-day expiration.
+  5. Sets an `httpOnly`, `SameSite=lax` cookie on the HTTP response.
+* **3.2.1.4 Outputs:** Authenticated user profile JSON, `token` cookie, and automated redirection to role-specific dashboard.
+* **3.2.1.5 Error Handling:** Returns 409 Conflict for duplicate emails, 401 Unauthorized for invalid credentials, and 400 Bad Request for malformed tokens.
 
-### 3.2.2 Gig Detail, Multi-Tier Packages and Specification
-- **3.2.2.1 Introduction**: Displays in-depth service descriptions, portfolio deliverables, package tiers, and seller credentials.
-- **3.2.2.2 Inputs**: Unique MongoDB `_id` of the gig.
-- **3.2.2.3 Processing**: Backend queries the `Gig` collection, populating seller references, freelancer profile details, category names, and review statistics.
-- **3.2.2.4 Outputs**: High-resolution image gallery, package tier comparison table (Basic, Standard, Premium), included deliverables list, seller bio, and historical buyer feedback.
-- **3.2.2.5 Error Handling**: Non-existent gig IDs return HTTP 404 with a user-friendly error redirection to `/explore`.
+### 3.2.2 Feature 2: Indian Freelance Gig Catalog, Search & Tiered Pricing (₹ INR)
+* **3.2.2.1 Introduction:** Allows freelancers to author multi-tiered service offerings and enables clients to search, filter, and inspect service listings.
+* **3.2.2.2 Inputs:** Category ID, price range bounds (min/max in ₹ INR), delivery time filter, search keyword query, sorting criteria (`popular`, `rating`, `price_asc`, `price_desc`).
+* **3.2.2.3 Processing:**
+  1. Executes MongoDB aggregation pipelines with `$match`, `$text` search, and indexed filtering.
+  2. Formats all financial numbers through the Indian locale (`en-IN`) prepending the `₹` symbol (e.g., `₹15,000`).
+  3. Attaches seller reputation aggregates (average star rating and completed order counts).
+* **3.2.2.4 Outputs:** Paginated JSON list of gig cards, metadata count, and active category tags.
+* **3.2.2.5 Error Handling:** Returns 404 for invalid category slugs; returns empty result lists with contextual suggestions for zero search matches.
 
-### 3.2.3 Order Lifecycle, Milestones, and Work Submissions
-- **3.2.3.1 Introduction**: Governs the end-to-end milestone lifecycle of a service engagement.
-- **3.2.3.2 Inputs**: Selected package tier, client requirements text (minimum 20 characters), optional specification attachments, and target gig ID.
-- **3.2.3.3 Processing**: The system verifies package availability, snapshots pricing and deliverable specifications to prevent retro-active changes, initializes the order state to `pending`, and records a simulated financial commitment in `held` status. Freelancers accept orders (advancing state to `in_progress`), upload deliverable files (`delivered`), and clients either approve (`completed`) or request revisions (`revision_requested`).
-- **3.2.3.4 Outputs**: Order record with unique code (e.g., `GC-9F2A1C`), calculated due dates, milestone audit log, and deliverable download links.
-- **3.2.3.5 Error Handling**: Unauthorized status transitions (such as completing a pending order or non-participants accessing order records) are rejected with HTTP 403 or 409 Conflict.
+### 3.2.3 Feature 3: Deterministic Milestone Contracts & Simulated Escrow Lifecycle
+* **3.2.3.1 Introduction:** Governs order creation, execution, deliverable submissions, and simulated escrow release through a formal state machine.
+* **3.2.3.2 Inputs:** Gig ID, selected package tier (`basic`, `standard`, `premium`), project requirements text, optional attachment URLs.
+* **3.2.3.3 Processing:**
+  1. Verifies buyer has `client` role and seller has `freelancer` role.
+  2. Creates order record in `pending` state; creates simulated payment record in `held` status within an atomic MongoDB replica transaction.
+  3. Enforces transition constraints: only seller can accept (`in_progress`) or submit deliverables (`delivered`); only client can request revisions or approve completion (`completed`).
+  4. On client approval, state changes to `completed` and simulated escrow funds transition from `held` to `released`.
+* **3.2.3.4 Outputs:** Updated order record, milestone timeline entry, transaction status, and automated Socket.IO status event.
+* **3.2.3.5 Error Handling:** Returns 409 Conflict if an illegal transition is attempted (e.g. attempting to deliver a cancelled order).
 
-### 3.2.4 Real-Time In-App Messaging & Threaded Communication
-- **3.2.4.1 Introduction**: Provides a secure communication channel between clients and freelancers for discussing project requirements.
-- **3.2.4.2 Inputs**: Conversation ID, message body string, and optional attachments.
-- **3.2.4.3 Processing**: Validates participant authorization, appends the message to the conversation thread, updates the conversation timestamp, and marks unread flags for the recipient.
-- **3.2.4.4 Outputs**: Chronologically sorted message stream, deliverable file attachment previews, and unread message counter badges.
-- **3.2.4.5 Error Handling**: Empty message submissions are blocked on the client and rejected by server validators with HTTP 400.
+### 3.2.4 Feature 4: Real-Time Bi-Directional Client-Freelancer Messaging (Socket.IO)
+* **3.2.4.1 Introduction:** Facilitates direct, private threaded communication between clients and freelancers regarding order requirements and project coordination.
+* **3.2.4.2 Inputs:** Recipient User ID, Order Context ID (optional), text message body, file attachment metadata.
+* **3.2.4.3 Processing:**
+  1. Validates sender session cookie upon WebSocket handshake.
+  2. Joins client socket to a dedicated private user room (`user_<userId>`).
+  3. Persists message document in MongoDB with timestamp.
+  4. Emits `new_message` event to recipient's room; broadcasts typing indicators with automatic debounce.
+* **3.2.4.4 Outputs:** Real-time delivered message bubble, updated unread badge counter, and audio/visual chat notification.
+* **3.2.4.5 Error Handling:** Reconnects automatically on network dropouts; buffers messages and falls back to HTTP long-polling if WebSockets are blocked.
 
-### 3.2.5 User Authentication & Profile Management
-- **3.2.5.1 Introduction**: Manages user registration, credential authentication, session persistence, and profile configuration.
-- **3.2.5.2 Inputs**: First name, last name, email address, password (minimum 8 characters with letters and numbers), user role (`client` or `freelancer`), phone number (+91 Indian mobile format), and optional portfolio history.
-- **3.2.5.3 Processing**: Hashes passwords using bcrypt, persists the user record in MongoDB, creates an associated `FreelancerProfile` document if the role is freelancer, and issues an HTTP-only JWT cookie.
-- **3.2.5.4 Outputs**: User profile object (excluding sensitive password hash), authenticated session cookie, and role-specific navigation access.
-- **3.2.5.5 Error Handling**: Duplicate email registrations return HTTP 409. Invalid credentials return HTTP 401.
-
-### 3.2.6 Seller Dashboard, Performance Analytics & Reviews
-- **3.2.6.1 Introduction**: Furnishes freelancers and clients with operational summaries of active contracts, earnings, and peer reviews.
-- **3.2.6.2 Inputs**: Authenticated user session.
-- **3.2.6.3 Processing**: Aggregates order collections by status, calculates simulated escrow amounts and completed payouts, compiles monthly performance metrics, and calculates weighted review averages.
-- **3.2.6.4 Outputs**: Visual KPI stat cards, historical monthly earnings chart, recent orders table, and review moderation controls.
-- **3.2.6.5 Error Handling**: Unauthorized access attempts by unauthorized roles are intercepted by route guards with immediate redirection.
+### 3.2.5 Feature 5: Review & Rating Ecosystem with Admin Moderation
+* **3.2.5.1 Introduction:** Provides transparent peer feedback post-delivery and gives administrators tools to moderate abusive or spam reviews.
+* **3.2.5.2 Inputs:** Order ID, numerical rating (1 to 5 stars), written review text, admin moderation flag.
+* **3.2.5.3 Processing:**
+  1. Validates that caller is the client of the specific order and that order status is strictly `completed`.
+  2. Ensures idempotency: exactly one review permitted per completed order.
+  3. Recalculates seller average rating and total review counts mathematically across all visible reviews.
+  4. Admins can flag, hide, or restore reviews with an audited moderation reason log.
+* **3.2.5.4 Outputs:** Published review card on gig detail page and recalculated seller star badge.
+* **3.2.5.5 Error Handling:** Returns 403 Forbidden if a client attempts to review an incomplete order or a non-participant attempts to submit feedback.
 
 ---
 
 ## 3.5 Non-Functional Requirements
 
 ### 3.5.1 Performance
-- **Page Load Times**: Initial landing and catalogue views render in under 1.5 seconds on standard 4G broadband connections.
-- **Client-Side Transitions**: Dynamic tab switching, package selection, and filter adjustments execute instantaneously without triggering full-page browser reloads.
-- **Database Indexing**: Compound indexes on `{ status: 1, category: 1, startingPrice: 1 }` and text indexes on `{ title: "text", description: "text", tags: "text" }` ensure search query execution remains under 50ms.
+* **API Response Time:** 95% of read requests must complete in under 150 ms; write requests with database transaction commits must complete in under 300 ms.
+* **Bundle Footprint:** Frontend JavaScript bundle must be code-split into asynchronous chunks with total compressed initial load under 350 KB gzip.
 
 ### 3.5.2 Reliability
-- **Data Integrity**: Orders preserve snapshots of package titles, pricing, and turnaround days at the moment of order placement, insulating contracts against subsequent gig edits.
-- **Error Boundaries**: Frontend API request failures render modular retry banners (`ErrorBox`) rather than causing application crashes.
-- **Validation**: Strict schema typing via Mongoose and express-validator guarantees invalid or malformed payloads are rejected prior to database mutation.
+* **Data Integrity:** All order status transitions and payment disbursements must execute within ACID-compliant MongoDB transactions to prevent orphaned state.
+* **Mean Time Between Failures (MTBF):** System designed for continuous operational stability with automatic health checks (`/api/health`).
 
 ### 3.5.3 Availability
-- **Operational Uptime**: The hosted application on Vercel and backend services are architected for continuous 24/7 availability.
-- **Connection Resilience**: Database drivers utilize connection pooling and automated reconnect handlers for transient network disconnects.
+* Target uptime of 99.5% on cloud infrastructure (Render free-tier instances sleep on idle and automatically wake within 30–60 seconds of incoming HTTP requests).
 
 ### 3.5.4 Security
-- **Credential Storage**: Passwords are one-way hashed with bcrypt using 12 salt rounds; plain-text passwords are never stored or logged.
-- **Cookie Security**: Authentication JWTs reside in `httpOnly`, `SameSite=Lax` cookies, neutralizing script-based session interception.
-- **Rate Limiting**: Integrated `express-rate-limit` guards public authentication endpoints (maximum 20 attempts per 15 minutes) and general API routes (300 requests per 15 minutes) against brute-force attacks.
-- **Injection Mitigation**: MongoDB query operators in user input fields are sanitized to prevent NoSQL injection.
+* **Session Protection:** All JWT tokens stored exclusively in `httpOnly`, `secure`, `SameSite=lax` cookies to completely eliminate Cross-Site Scripting (XSS) token theft.
+* **Helmet CSP & COOP:** Content Security Policy strictly controls script, frame, and connect sources (`apis.google.com`, `firebaseapp.com`), while `same-origin-allow-popups` ensures secure OAuth handshakes.
+* **Injection Defense:** Custom `sanitizeBody` middleware recursively strips all MongoDB query operators (`$gt`, `$where`, etc.) from incoming payloads.
 
 ### 3.5.5 Maintainability
-- **Modular Codebase**: Clean architectural segregation between client components, hooks, service layers, routes, server controllers, models, and validators.
-- **Shared Formatting Utilities**: Currency, date, and phone formatting are centralized in [`format.js`](file:///c:/Users/rohit/freelance-marketplace-react/client/src/utils/format.js), preventing duplicate logic.
+* **Modular Codebase:** Strict separation of concerns into Controller-Service-Model layers on the backend, and Components-Hooks-Contexts on the frontend.
+* **Automated Test Coverage:** Continuous integration runs 105 frontend tests and 18 backend tests on every git push.
 
 ### 3.5.6 Portability
-- **Browser Independence**: Compatible with Chromium, WebKit, and Gecko browser engines across Windows, macOS, Linux, Android, and iOS.
-- **Environment Agnostic**: All platform configurations (ports, origins, secrets, database URIs) are loaded through environment variables, enabling rapid deployment across any cloud PaaS or container provider.
+* Node.js runtime and Vite tooling ensure cross-platform reproducibility on Windows, Linux, and macOS without platform-specific binary dependencies.
 
 ---
 
 ## 3.7 Design Constraints
-- **Full-Stack JavaScript**: Frontend and backend are exclusively constructed using JavaScript (ES Modules) across React 19 and Node.js.
-- **NoSQL Schema Architecture**: Structured with MongoDB collections linked via ObjectId references rather than relational SQL foreign keys.
-- **Styling Standards**: UI layout complies with Tailwind CSS utility guidelines with explicit responsive breakpoints (`sm`, `md`, `lg`, `xl`).
-- **Academic Non-Revenue Scope**: Real monetary transactions, banking gateways, and tax invoicing are strictly excluded in accordance with the project's educational parameters.
+* **Monolithic Single-Service Deployment:** In production, Express directly serves the pre-compiled `client/dist` assets on a single unified origin to prevent third-party cross-site cookie restrictions.
+* **Stateless API:** The server maintains no in-memory user sessions, ensuring horizontal scalability across container instances.
 
 ---
 
 ## 3.9 Other Requirements
-- **Data Seed Integrity**: The system maintains an automated database seed script providing authentic Indian freelancer profiles, realistic Rupee package costs, and verified sample orders for evaluation purposes.
-- **Locale Fidelity**: Dates must strictly follow Indian Standard Time (IST) in `DD/MM/YYYY` format, and currency numbers must respect Indian lakh/crore comma placement (`en-IN`).
+* **Regulatory & Privacy Conformance:** Provides transparent Terms of Service, Privacy Policy, Community Guidelines, and self-service account deletion under Account Settings.
 
 ---
 
@@ -339,303 +299,128 @@ All communications between the React client and the Express backend utilize stan
 
 ## 4.1 Data Flow Diagrams (DFD)
 
-### 4.1.1 Context-Level DFD (Level 0)
-
-| External Entity | Data Sent to GigCraft | Data Received from GigCraft |
-|---|---|---|
-| **Client (Buyer)** | Search queries, filter parameters, package selection, order requirements, attachments, approval/revision commands, reviews | Matching gig cards, detailed specifications, order status milestones, deliverable files, notification alerts |
-| **Freelancer (Seller)** | Gig descriptions, package pricing, portfolio entries, order acceptances, deliverable files, review responses | Service listings, order alerts, client briefs, revision requests, simulated earnings summaries |
-| **MongoDB Database** | Stored user credentials, freelancer profiles, gigs, orders, payments, messages, reviews | Query, aggregation, insert, and update operations from Express services |
-| **Cloud Storage** | Binary upload buffers (profile avatars, gig showcase images, order work deliverables) | CDN asset URLs and secure public IDs |
+### 4.1.1 Level 0 DFD (Context Level)
+The Context-Level DFD illustrates the boundary of the GigCraft system and the data flows between external entities (Clients, Freelancers, Administrators, and Firebase OAuth) and the centralized platform.
 
 ```
-                +---------------------------------------+
-                |             Client (Buyer)            |
-                +-------------------+-------------------+
-                                    |
-     Order Briefs, Search Filters,  |  Gig Catalog, Milestone Status,
-     Approvals, Reviews             |  Deliverable Files
-                                    v
-                       +-------------------------+
-                       |                         |
-                       |       0. GigCraft       |
-                       |    Freelance Platform   |
-                       |                         |
-                       +------------+------------+
-                                    ^
-       Gig Packages, Deliverables,  |  Order Alerts, Client Briefs,
-       Profile Data, Replies        |  Earnings Metrics
-                                    |
-                +-------------------+-------------------+
-                |          Freelancer (Seller)          |
-                +---------------------------------------+
++------------------+                    +-------------------------+
+|                  | --- Search Gigs -> |                         |
+|      CLIENT      | --- Place Order -> |                         |
+|      (Buyer)     | --- Release Escrow |                         |
+|                  | <-- Delivery Files |                         |
++------------------+                    |                         |
+                                        |                         |
++------------------+                    |        GIGCRAFT         |
+|                  | --- Publish Gig -> |       MARKETPLACE       |
+|    FREELANCER    | --- Submit Work -> |      CORE SYSTEM        |
+|     (Seller)     | <-- Escrow Released|                         |
+|                  | <-> Live Chat Messages                       |
++------------------+                    |                         |
+                                        |                         |
++------------------+                    |                         |
+|     FIREBASE     | --- Verify Token-> |                         |
+|   GOOGLE OAUTH   | <-- Issue Identity |                         |
++------------------+                    |                         |
+                                        |                         |
++------------------+                    |                         |
+|  ADMINISTRATOR   | --- Moderate Review|                         |
+|                  | <-- Telemetry Logs |                         |
++------------------+                    +-------------------------+
+                                                     |
+                                                     v
+                                        +-------------------------+
+                                        |      MONGODB ATLAS      |
+                                        |       DATA STORES       |
+                                        +-------------------------+
 ```
 
-### 4.1.2 Level 1 Process Breakdown
+### 4.1.2 Level 1 DFD (Decomposition of System Processes)
+The Level 1 DFD decomposes the central system into five core functional sub-processes:
 
-| Process | Input | Processing / Data Store | Output |
-|---|---|---|---|
-| **P1 – Explore & Search Gigs** | Keyword query, category slug, price range, tier | Query `Gig` collection; execute text search and range filters | Formatted gig cards with ₹ INR pricing |
-| **P2 – View Gig Details** | Unique Gig ID | Retrieve `Gig`, populate `User`, `FreelancerProfile`, and `Review` collections | Complete gig profile, package comparison, FAQs, and reviews |
-| **P3 – Place Order** | Package tier, requirements brief, file attachments | Validate inputs; snapshot package; create record in `Order` and `Payment` stores | Created order with order code (`GC-XXXXXX`) |
-| **P4 – Authenticate User** | Email, password, role | Validate email; compare hash via bcrypt; sign JWT | Authenticated session cookie and user object |
-| **P5 – Manage Gig Lifecycle** | Gig title, category, description, 3-tier packages, cover images | Validate price constraints (min ₹50); write to `Gig` collection | Published or drafted gig |
-| **P6 – Deliver & Review Work** | Deliverable files, delivery message, revision notes | Append deliverable to `Order`; update status; update `Payment` record upon approval | Order status update, released earnings record, review prompt |
-| **P7 – Direct Messaging** | Message text, attachments, conversation ID | Verify participants; store in `Message` collection; bump unread counts | Threaded conversation messages and notifications |
+```
+[ User / Google ]
+       |
+       v
+ ( 1.0 Authentication & Session Management ) <=====> [ D1: Users & Profiles Store ]
+       |
+       +------------+
+       |            |
+       v            v
+ ( 2.0 Gig Authoring & Catalog Search ) <==========> [ D2: Gigs & Categories Store ]
+       |
+       v
+ ( 3.0 Order Processing & Simulated Escrow ) <=====> [ D3: Orders & Escrow Ledger ]
+       |
+       +------------+
+       |            |
+       v            v
+ ( 4.0 Real-Time Messaging & Notifications ) <=====> [ D4: Conversations & Messages ]
+       |
+       v
+ ( 5.0 Peer Review & Admin Moderation ) <==========> [ D5: Reviews & Moderation Log ]
+```
 
-### 4.1.3 Main Data Stores
-- **User Store (`users`)**: User identity records, names, hashed credentials, role (`client`/`freelancer`), phone number (+91 format), and company affiliations.
-- **Freelancer Profile Store (`freelancerprofiles`)**: Professional titles, bios, Indian city locations, skill sets, languages, hourly rates, and calculated rating scores.
-- **Gig Store (`gigs`)**: Service titles, categories, tags, multi-tier pricing structures (Basic, Standard, Premium), delivery days, and gallery images.
-- **Order Store (`orders`)**: Unique order identifiers, client and freelancer references, requirements briefs, immutable package snapshots, deliverable files, status history, and due dates.
-- **Payment Store (`payments`)**: Internal simulated contract tracking records associating payer, payee, order, simulated escrow state (`held`, `released`, `refunded`), and currency (`INR`).
-- **Conversation & Message Store (`conversations`, `messages`)**: Conversation participant bindings, unread tracking, message bodies, timestamps, and attached assets.
-- **Review Store (`reviews`)**: Post-delivery client ratings (1–5 stars), detailed feedback comments, order references, and seller responses.
+### 4.1.3 Level 2 DFD (Order Execution & Escrow Processing)
+Detailed analysis of the stateful Order & Escrow process (Process 3.0):
+
+```
+Client Placed Order
+       |
+       v
+[ 3.1 Validate & Lock Escrow ] -----> Record Payment in D3 (Status: Held)
+       |
+       v
+[ 3.2 Seller Accepts Order ] -------> Order Status: in_progress
+       |
+       v
+[ 3.3 Submit Deliverables ] --------> Order Status: delivered (Files Uploaded)
+       |
+       +-----------------------+
+       |                       |
+       v                       v
+[ 3.4 Request Revisions ]    [ 3.5 Client Approves Delivery ]
+ (Status: revision_req)                |
+                                       v
+                             [ 3.6 Release Escrow ]
+                              (Payment: released)
+                              (Order: completed)
+```
 
 ---
 
 # 5. GitHub Link
 
-**Project Source Code Repository:**  
-[https://github.com/Ajadbharti/freelance-gig-marketplace](https://github.com/Ajadbharti/freelance-gig-marketplace)
+The complete source code, git history, client/server modules, and automated tests are hosted at:
+
+🔗 **GitHub Repository:**  
+[https://github.com/rohit6522/Freelance-marketplace-react](https://github.com/rohit6522/Freelance-marketplace-react)
 
 ---
 
 # 6. Deployed Link
 
-**Deployed Application:**  
-[https://freelance-gig-marketplace.vercel.app/](https://freelance-gig-marketplace.vercel.app/)
+The live, fully functional cloud application is deployed on Render and accessible worldwide at:
+
+🌐 **Live Deployed Application:**  
+[https://freelance-marketplace-react.onrender.com/explore](https://freelance-marketplace-react.onrender.com/explore)
 
 ---
 
-# A. Appendices
+# 7. Appendices
 
-## A.1 Appendix 1 – Project Screenshots & UI Walkthrough
+### Appendix A: UI Walkthrough & Verification Screenshots
+* **Marketplace Discovery (`/explore`):** Dynamic multi-attribute filtering by category, price slider in `₹` INR, seller rating, and delivery speed.
+* **Authentication Modal (`/login` & `/register`):** 1-click Firebase Google OAuth with interactive archetype selector (Client vs Freelancer).
+* **Order Management Workspace (`/orders`):** Visual timeline tracker showing current order state, active countdown timer, revision requests, and deliverable downloads.
+* **Seller Analytics Dashboard (`/dashboard`):** Real metrics indicating completed orders, positive review percentages, and 6-month simulated earnings in Indian currency (`₹`).
 
-*The following sections outline the verified visual and structural screens of the GigCraft web application.*
-
-### A.1.1 Marketplace Explore & Filter Interface
-The central discovery portal of GigCraft. Users can search for technical and creative gigs across India with live filters for category, delivery time, budget range in ₹ INR, and seller experience levels.
-
-```
-+-----------------------------------------------------------------------------------------+
-| [Logo] GIGCRAFT    [Search services...]          Explore Gigs   My Orders   Messages   [User] |
-+-----------------------------------------------------------------------------------------+
-| FILTERS [06]          |  MARKETPLACE // ALL SERVICES                                    |
-| [X] Active: 2         |  Showing 12 verified service gigs                               |
-|                       +-----------------------------------------------------------------+
-| SERVICE TYPE          | +---------------------+ +---------------------+ +---------------+ |
-| (o) All services      | | [Cover Image]       | | [Cover Image]       | | [Cover Image] | |
-| ( ) Web Development   | | TOP RATED           | | PRO VERIFIED        | | RISING TALENT | |
-| ( ) Graphics & Design | | Priya Verma         | | Rahul Sharma        | | Sneha Gupta   | |
-| ( ) Data & AI         | | * 5.0 (18)          | | * 4.9 (24)          | | * 5.0 (9)     | |
-|                       | | Full-Stack SaaS UI  | | Next.js MERN Engine | | Tech Articles | |
-| BUDGET (₹ INR)        | | Starting at ₹3,500  | | Starting at ₹6,500  | | Start ₹1,500  | |
-| Min: [1000] Max: [ ]  | | [Inspect Spec]      | | [Inspect Spec]      | | [Inspect Spec]| |
-| [Under ₹1,000]        | +---------------------+ +---------------------+ +---------------+ |
-| [₹1,000 - ₹5,000]     |                                                                 |
-| [₹5,000 - ₹20,000]    | [1]  2  3  ...  Next >                                          |
-+-----------------------------------------------------------------------------------------+
-```
-
-### A.1.2 Gig Detail, Multi-Tier Packages & Specifications
-Displays comprehensive service information, sample work deliverables, FAQ items, and a side-by-side comparison of Basic, Standard, and Premium packages.
-
-```
-+-----------------------------------------------------------------------------------------+
-| Marketplace / Graphics & Design / SaaS UI/UX Design                                      |
-+-----------------------------------------------------------------------------------------+
-| I will design a conversion-focused SaaS dashboard in Figma    | [Basic] [STANDARD] [Prem] |
-| Seller: Priya Verma (Lead UI/UX Architect - Bengaluru)        | ₹8,500                   |
-| ★ 5.0 (18 reviews) | 24 Orders Completed                      | Core Design System Suite |
-+---------------------------------------------------------------+ Delivered in 5 Days     |
-|                                                               | 4 Revision Rounds        |
-|  +----------------------------------------------------------+ |                          |
-|  |                                                          | | [✓] 6 Custom Screens     |
-|  |                 [Interactive Gallery View]               | | [✓] Clickable Prototype  |
-|  |                                                          | | [✓] Asset Export Kit     |
-|  +----------------------------------------------------------+ |                          |
-|                                                               | [Continue (₹8,500)]      |
-| Description:                                                  | [Contact Seller]         |
-| Complete production-ready UI/UX systems built in Figma with   |                          |
-| responsive tokens, dark/light modes, and design guidelines.   | Simulated Escrow Held    |
-+---------------------------------------------------------------+--------------------------+
-```
-
-### A.1.3 Order Management Console & Contract Timeline
-Split-pane contract management screen. Displays active order lists on the left and full milestone details, deliverable downloads, revision controls, and conversation threads on the right.
-
-```
-+-----------------------------------------------------------------------------------------+
-| SYSTEM // CONTRACT OPS : Order Management & Deliveries                                  |
-+-----------------------------------------------------------------------------------------+
-| [All Orders (4)] [Pending (1)] [In Progress (1)] [Delivered (1)] [Completed (1)]        |
-+----------------------------------------------------+------------------------------------+
-| CONTRACT LEDGER                                    | ORDER #GC-8B41D9                   |
-| +------------------------------------------------+ | Client: Aman Kumar (Apex Cloud)    |
-| | #GC-8B41D9  [IN PROGRESS]              ₹8,500  | | Seller: Priya Verma                |
-| | SaaS Dashboard Design - Standard Package       | | Commitment: ₹8,500 (Escrow Held) |
-| | Due in 3 days (18/11/2026)                     | +------------------------------------+
-| +------------------------------------------------+ | MILESTONE TIMELINE                 |
-| | #GC-71A2E0  [COMPLETED]                ₹6,500  | | [✓] Contract Placed (14/11/2026)   |
-| | Full-Stack Landing Page Build                  | | [✓] Work Started    (14/11/2026)   |
-| | Completed on 10/11/2026                        | | [ ] Delivery & Verification        |
-| +------------------------------------------------+ | [ ] Escrow Release & Review        |
-|                                                    +------------------------------------+
-|                                                    | DIRECT CONTRACT MESSAGING          |
-|                                                    | [Thread messages & attachments...] |
-+----------------------------------------------------+------------------------------------+
-```
-
-### A.1.4 Seller & Client Analytics Dashboard
-Visual reporting workspace showing active pipelines, completed order numbers, average star ratings, and historical monthly earnings/spending charts.
-
-```
-+-----------------------------------------------------------------------------------------+
-| SELLER // OVERVIEW : Welcome back, Priya Verma                                          |
-+-----------------------------------------------------------------------------------------+
-| +-------------------+ +-------------------+ +-------------------+ +-------------------+ |
-| | Awaiting Accept   | | Active Orders     | | Delivered Review  | | Completed Orders  | |
-| |        1          | |        2          | |        1          | |       24          | |
-| +-------------------+ +-------------------+ +-------------------+ +-------------------+ |
-| | Total Paid Out    | | In Escrow Vault   | | This Month        | | Average Rating    | |
-| |     ₹1,42,500     | |     ₹17,000       | |     ₹35,000       | |    ★ 5.0 (18)     | |
-| +-------------------+ +-------------------+ +-------------------+ +-------------------+ |
-|                                                                                         |
-| EARNINGS OVERVIEW (LAST 6 MONTHS)                                                       |
-|                                                                                         |
-|   ₹40,000 |          __/\_                                                              |
-|   ₹20,000 |    _/\__/     \                                                             |
-|         0 +---+---+---+---+---+---+                                                     |
-|            JUN JUL AUG SEP OCT NOV                                                      |
-+-----------------------------------------------------------------------------------------+
-```
-
----
-
-## A.2 Appendix 2 – Technical Evidence & Database Schemas
-
-*Code evidence of primary Mongoose data schemas demonstrating data modeling, input validation, and role relationships.*
-
-### A.2.1 User Model Schema (`server/src/models/User.js`)
-```javascript
-const userSchema = new mongoose.Schema(
-  {
-    firstName: { type: String, required: [true, "First name is required"], trim: true, maxlength: 50 },
-    lastName:  { type: String, required: [true, "Last name is required"], trim: true, maxlength: 50 },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
-    },
-    password: { type: String, required: [true, "Password is required"], minlength: 8, select: false },
-    role: { type: String, enum: ["client", "freelancer"], required: true },
-    companyName: { type: String, trim: true, maxlength: 100 },
-    phone: { type: String, trim: true },
-    avatar: { url: String, publicId: String },
-    domainFocus: { type: String, trim: true },
-    isActive: { type: Boolean, default: true },
-  },
-  { timestamps: true }
-);
-```
-
-### A.2.2 Gig Model Schema (`server/src/models/Gig.js`)
-```javascript
-const packageSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: [true, "Package title is required"], trim: true, maxlength: 80 },
-    description: { type: String, required: [true, "Package description is required"], trim: true, maxlength: 500 },
-    price: { type: Number, required: [true, "Package price is required"], min: [50, "Minimum price is ₹50"] },
-    deliveryDays: { type: Number, required: true, min: 1, max: 180 },
-    revisions: { type: Number, required: true, min: -1, default: 1 }, // -1 = unlimited
-    features: [{ type: String, trim: true, maxlength: 120 }],
-  },
-  { _id: false }
-);
-
-const gigSchema = new mongoose.Schema(
-  {
-    freelancer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    title: { type: String, required: [true, "Title is required"], trim: true, minlength: 15, maxlength: 120 },
-    description: { type: String, required: [true, "Description is required"], trim: true, minlength: 50, maxlength: 5000 },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-    tags: [{ type: String, trim: true, lowercase: true, maxlength: 30 }],
-    images: [{ url: { type: String, required: true }, publicId: String }],
-    packages: {
-      basic: { type: packageSchema, required: true },
-      standard: { type: packageSchema, required: true },
-      premium: { type: packageSchema, required: true },
-    },
-    status: { type: String, enum: ["draft", "published", "paused"], default: "draft" },
-    startingPrice: { type: Number, index: true },
-    ratingAverage: { type: Number, default: 0, min: 0, max: 5 },
-    ratingCount: { type: Number, default: 0, min: 0 },
-    completedOrders: { type: Number, default: 0, min: 0 },
-  },
-  { timestamps: true }
-);
-```
-
-### A.2.3 Order Model Schema (`server/src/models/Order.js`)
-```javascript
-const orderSchema = new mongoose.Schema(
-  {
-    orderNumber: { type: String, unique: true }, // e.g. GC-9F2A1C
-    gig: { type: mongoose.Schema.Types.ObjectId, ref: "Gig", required: true },
-    client: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    freelancer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    packageTier: { type: String, enum: ["basic", "standard", "premium"], required: true },
-    packageSnapshot: {
-      title: { type: String, required: true },
-      price: { type: Number, required: true },
-      deliveryDays: { type: Number, required: true },
-      revisions: { type: Number, required: true },
-      features: [String],
-    },
-    price: { type: Number, required: true, min: 0 },
-    requirements: { type: String, required: [true, "Project requirements are required"], maxlength: 5000 },
-    status: {
-      type: String,
-      enum: ["pending", "in_progress", "delivered", "revision_requested", "completed", "cancelled"],
-      default: "pending",
-    },
-    dueDate: Date,
-    revisionsUsed: { type: Number, default: 0, min: 0 },
-    deliveries: [
-      {
-        message: { type: String, required: true },
-        files: [{ url: String, name: String, size: Number }],
-        deliveredAt: { type: Date, default: Date.now },
-      },
-    ],
-    completedAt: Date,
-  },
-  { timestamps: true }
-);
-```
-
-### A.2.4 Payment & Commitment Model Schema (`server/src/models/Payment.js`)
-```javascript
-const paymentSchema = new mongoose.Schema(
-  {
-    order: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true, unique: true },
-    payer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    payee: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    amount: { type: Number, required: true, min: 0 },
-    currency: { type: String, default: "INR", uppercase: true },
-    status: { type: String, enum: ["pending", "held", "released", "refunded", "failed"], default: "pending" },
-    provider: { type: String, default: "simulated" },
-    isSimulated: { type: Boolean, default: true },
-    transactionRef: { type: String, unique: true, sparse: true },
-    releasedAt: Date,
-  },
-  { timestamps: true }
-);
-```
-
----
-*End of Software Requirements Specification (SRS) Document.*
+### Appendix B: Database Schemas (Mongoose ODM Models)
+The system data layer comprises 12 interconnected Mongoose schemas:
+1. **User Schema:** Identity attributes, `googleId`, hashed password, role (`client`, `freelancer`, `admin`), active status.
+2. **FreelancerProfile Schema:** Professional title, bio, location (e.g. `Bengaluru, Karnataka`), technical skills, languages, work experience.
+3. **Gig Schema:** Title, slug, category ref, images, multi-tier pricing (`basic`, `standard`, `premium` packages in `₹`), aggregate rating.
+4. **Order Schema:** Buyer ref, seller ref, gig ref, package tier, agreed price, requirements, deliverables list, status machine.
+5. **Payment Schema:** Transaction reference, escrow status (`held`, `released`, `refunded`), timestamp.
+6. **Review Schema:** Order ref, gig ref, author ref, star rating (1-5), comment, seller reply.
+7. **Conversation & Message Schemas:** Participant refs, message content, attachments, read receipts.
+8. **Category Schema:** Canonical service taxonomy (Web Development, UI/UX, AI/ML, Video Animation, etc.).
