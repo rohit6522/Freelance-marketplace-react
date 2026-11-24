@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCategories } from "../../hooks/useCategories";
+import InstallAppButton from "../ui/InstallAppButton";
 
 const columns = [
   { title: "About", links: [["How it works", "/about"], ["For clients", "/about#clients"], ["For freelancers", "/about#freelancers"]] },
@@ -46,7 +47,10 @@ export default function Footer() {
             <span className="font-headline-sm text-headline-sm text-primary font-bold uppercase">GigCraft</span>
             <span className="font-body-sm text-body-sm text-on-surface-variant">© {new Date().getFullYear()} GigCraft. A demonstration project.</span>
           </div>
-          <div className="font-code-sm text-code-sm text-on-surface-variant">PAYMENTS ARE SIMULATED</div>
+          <div className="flex items-center gap-space-md">
+            <InstallAppButton />
+            <div className="font-code-sm text-code-sm text-on-surface-variant">PAYMENTS ARE SIMULATED</div>
+          </div>
         </div>
       </div>
     </footer>

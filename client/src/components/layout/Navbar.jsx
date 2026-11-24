@@ -80,7 +80,6 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-space-xs sm:gap-space-sm">
-          <InstallAppButton />
           <ThemeToggle />
           {user ? (
             <>
@@ -149,6 +148,9 @@ export default function Navbar() {
                 {l.label}
               </NavLink>
             ))}
+            <div className="pt-2">
+              <InstallAppButton />
+            </div>
             {!user && (
               <>
                 <Link to="/login" className="font-label-md text-label-md text-on-surface py-1">Log in</Link>

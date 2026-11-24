@@ -11,7 +11,7 @@ export default function ThemeToggle({ className = "" }) {
       onClick={toggleTheme}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className={`inline-flex items-center justify-center p-1.5 border border-outline-variant hover:border-primary text-on-surface-variant hover:text-primary bg-surface-container-low hover:bg-surface-container transition-colors ${className}`}
+      className={`w-8 h-8 inline-flex items-center justify-center border border-outline-variant hover:border-primary text-on-surface-variant hover:text-primary bg-surface-container-low hover:bg-surface-container transition-colors shrink-0 ${className}`}
     >
       <Icon
         name={isDark ? "light_mode" : "dark_mode"}
