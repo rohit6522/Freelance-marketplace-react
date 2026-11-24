@@ -5,6 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import { assertOwnedImages, ownedPublicIds } from "../utils/assets.js";
 import { deleteAsset } from "../services/upload.service.js";
+import { escapeRegex, correctQuery } from "../services/search.service.js";
 
 const ACTIVE_ORDER_STATUSES = ["pending", "in_progress", "delivered", "revision_requested"];
 const EDITABLE = ["title", "description", "category", "tags", "images", "packages"];
@@ -24,43 +25,14 @@ async function assertCategoryExists(id) {
   if (!(await Category.exists({ _id: id }))) throw new ApiError(400, "Category does not exist");
 }
 
-// ---------------------------------------------------------------------------
-// GET /api/gigs  (public: search + filters + sorting + pagination, server-side)
-// ---------------------------------------------------------------------------
-export const listGigs = asyncHandler(async (req, res) => {
-  const { q, category, sort = "relevance" } = req.query;
-  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 12));
-
-  const match = { status: "published" };
-
-  if (q && q.trim()) match.$text = { $search: q.trim().slice(0, 100) };
-
-  if (category) {
-    const key = String(category);
-    const cat = mongoose.isValidObjectId(key)
-      ? await Category.findById(key)
-      : await Category.findOne({ slug: key.toLowerCase() });
-    if (!cat) {
-      return res.json({ success: true, gigs: [], pagination: { page, limit, total: 0, pages: 0 } });
-    }
-    // include sub-categories of the selected category
-    const ids = (await Category.find({ $or: [{ _id: cat._id }, { parent: cat._id }] }).select("_id")).map((c) => c._id);
-    match.category = { $in: ids };
-  }
-
-  // Budget filters on the cheapest package (startingPrice)
-  if (req.query.minPrice !== undefined || req.query.maxPrice !== undefined) {
-    match.startingPrice = {};
-    if (req.query.minPrice !== undefined) match.startingPrice.$gte = Number(req.query.minPrice);
-    if (req.query.maxPrice !== undefined) match.startingPrice.$lte = Number(req.query.maxPrice);
-  }
-  if (req.query.maxDelivery !== undefined) match.minDeliveryDays = { $lte: Number(req.query.maxDelivery) };
-  if (req.query.minRating !== undefined) match.ratingAverage = { $gte: Number(req.query.minRating) };
-
-  const tags = csv(req.query.tags).map((t) => t.toLowerCase());
-  if (tags.length) match.tags = { $in: tags };
-
+function buildGigAggregationPipeline({
+  match,
+  sort,
+  page,
+  limit,
+  levels = [],
+  minExperience,
+}) {
   const pipeline = [{ $match: match }];
   if (match.$text) pipeline.push({ $addFields: { score: { $meta: "textScore" } } });
 
@@ -78,10 +50,9 @@ export const listGigs = asyncHandler(async (req, res) => {
   );
 
   const profileMatch = {};
-  const levels = csv(req.query.levels);
   if (levels.length) profileMatch["profile.sellerLevel"] = { $in: levels };
-  if (req.query.minExperience !== undefined) {
-    profileMatch["profile.experienceYears"] = { $gte: Number(req.query.minExperience) };
+  if (minExperience !== undefined) {
+    profileMatch["profile.experienceYears"] = { $gte: Number(minExperience) };
   }
   if (Object.keys(profileMatch).length) pipeline.push({ $match: profileMatch });
 
@@ -107,9 +78,8 @@ export const listGigs = asyncHandler(async (req, res) => {
     price_asc: { startingPrice: 1, _id: 1 },
     price_desc: { startingPrice: -1, _id: -1 },
     rating: { ratingAverage: -1, ratingCount: -1, _id: -1 },
-    rating: { ratingAverage: -1, ratingCount: -1, _id: -1 },
     popular: { completedOrders: -1, ratingAverage: -1, _id: -1 },
-  }[sort];
+  }[sort] || { ratingAverage: -1, completedOrders: -1, _id: -1 };
 
   pipeline.push({
     $facet: {
@@ -137,13 +107,201 @@ export const listGigs = asyncHandler(async (req, res) => {
     },
   });
 
+  return pipeline;
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/gigs  (public: search + filters + sorting + pagination, server-side)
+// ---------------------------------------------------------------------------
+export const listGigs = asyncHandler(async (req, res) => {
+  const { q, category, sort = "relevance" } = req.query;
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 12));
+
+  const match = { status: "published" };
+
+  if (q && q.trim()) match.$text = { $search: q.trim().slice(0, 100) };
+
+  if (category) {
+    const key = String(category);
+    const cat = mongoose.isValidObjectId(key)
+      ? await Category.findById(key)
+      : await Category.findOne({ slug: key.toLowerCase() });
+    if (!cat) {
+      return res.json({ success: true, gigs: [], pagination: { page, limit, total: 0, pages: 0 }, didYouMean: null, isFallback: false });
+    }
+    // include sub-categories of the selected category
+    const ids = (await Category.find({ $or: [{ _id: cat._id }, { parent: cat._id }] }).select("_id")).map((c) => c._id);
+    match.category = { $in: ids };
+  }
+
+  // Budget filters on the cheapest package (startingPrice)
+  if (req.query.minPrice !== undefined || req.query.maxPrice !== undefined) {
+    match.startingPrice = {};
+    if (req.query.minPrice !== undefined) match.startingPrice.$gte = Number(req.query.minPrice);
+    if (req.query.maxPrice !== undefined) match.startingPrice.$lte = Number(req.query.maxPrice);
+  }
+  if (req.query.maxDelivery !== undefined) match.minDeliveryDays = { $lte: Number(req.query.maxDelivery) };
+  if (req.query.minRating !== undefined) match.ratingAverage = { $gte: Number(req.query.minRating) };
+
+  const tags = csv(req.query.tags).map((t) => t.toLowerCase());
+  if (tags.length) match.tags = { $in: tags };
+
+  const levels = csv(req.query.levels);
+  const pipeline = buildGigAggregationPipeline({
+    match,
+    sort,
+    page,
+    limit,
+    levels,
+    minExperience: req.query.minExperience,
+  });
+
   const [result] = await Gig.aggregate(pipeline);
   const total = result.total[0]?.n || 0;
 
+  // If text query yielded results, return them immediately
+  if (total > 0 || !q || !q.trim()) {
+    return res.json({
+      success: true,
+      gigs: result.items,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+      didYouMean: null,
+      isFallback: false,
+    });
+  }
+
+  // Typo tolerance / fuzzy regex fallback when 0 exact results match
+  const rawQ = q.trim();
+  const [allTags, dbCategories] = await Promise.all([
+    Gig.distinct("tags", { status: "published" }),
+    Category.find().select("name slug").lean(),
+  ]);
+
+  const dictionary = [...(allTags || []), ...dbCategories.map((c) => c.name)];
+  const { corrected, hasCorrection } = correctQuery(rawQ, dictionary);
+  const didYouMean = hasCorrection ? corrected : null;
+
+  const rawEscaped = escapeRegex(rawQ);
+  const fallbackConditions = [
+    { title: { $regex: rawEscaped, $options: "i" } },
+    { tags: { $regex: rawEscaped, $options: "i" } },
+    { description: { $regex: rawEscaped, $options: "i" } },
+  ];
+
+  if (didYouMean) {
+    const meanEscaped = escapeRegex(didYouMean);
+    fallbackConditions.push(
+      { title: { $regex: meanEscaped, $options: "i" } },
+      { tags: { $regex: meanEscaped, $options: "i" } }
+    );
+  }
+
+  const fallbackMatch = { ...match };
+  delete fallbackMatch.$text;
+  fallbackMatch.$or = fallbackConditions;
+
+  const fallbackPipeline = buildGigAggregationPipeline({
+    match: fallbackMatch,
+    sort,
+    page,
+    limit,
+    levels,
+    minExperience: req.query.minExperience,
+  });
+
+  const [fallbackResult] = await Gig.aggregate(fallbackPipeline);
+  const fallbackTotal = fallbackResult?.total[0]?.n || 0;
+
+  return res.json({
+    success: true,
+    gigs: fallbackResult?.items || [],
+    pagination: {
+      page,
+      limit,
+      total: fallbackTotal,
+      pages: Math.ceil(fallbackTotal / limit),
+    },
+    didYouMean,
+    isFallback: fallbackTotal > 0,
+  });
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/gigs/suggestions  (public: autocomplete suggestions & typo hints)
+// ---------------------------------------------------------------------------
+export const gigSuggestions = asyncHandler(async (req, res) => {
+  const q = String(req.query.q || "").trim().slice(0, 80);
+
+  if (!q) {
+    const [categories, allTags] = await Promise.all([
+      Category.find({ parent: null }).select("name slug icon").sort({ sortOrder: 1 }).limit(5).lean(),
+      Gig.distinct("tags", { status: "published" }),
+    ]);
+    return res.json({
+      success: true,
+      suggestions: {
+        query: "",
+        didYouMean: null,
+        categories: categories.map((c) => ({ _id: c._id, name: c.name, slug: c.slug, icon: c.icon })),
+        tags: (allTags || []).slice(0, 6),
+        gigs: [],
+      },
+    });
+  }
+
+  const cleanQ = escapeRegex(q);
+
+  const [categories, allTags, matchingGigs, dbCategories] = await Promise.all([
+    Category.find({ name: { $regex: cleanQ, $options: "i" } })
+      .select("name slug icon")
+      .limit(4)
+      .lean(),
+    Gig.distinct("tags", { status: "published" }),
+    Gig.find({
+      status: "published",
+      $or: [
+        { title: { $regex: cleanQ, $options: "i" } },
+        { tags: { $regex: cleanQ, $options: "i" } },
+      ],
+    })
+      .select("title startingPrice category images ratingAverage completedOrders")
+      .populate("category", "name slug")
+      .sort({ ratingAverage: -1, completedOrders: -1 })
+      .limit(4)
+      .lean(),
+    Category.find().select("name slug").lean(),
+  ]);
+
+  const matchingTags = (allTags || [])
+    .filter((t) => t.toLowerCase().includes(q.toLowerCase()))
+    .slice(0, 5);
+
+  const dictionary = [...(allTags || []), ...dbCategories.map((c) => c.name)];
+  const { corrected, hasCorrection } = correctQuery(q, dictionary);
+  const didYouMean = hasCorrection ? corrected : null;
+
   res.json({
     success: true,
-    gigs: result.items,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    suggestions: {
+      query: q,
+      didYouMean,
+      categories: categories.map((c) => ({
+        _id: c._id,
+        name: c.name,
+        slug: c.slug,
+        icon: c.icon,
+      })),
+      tags: matchingTags,
+      gigs: matchingGigs.map((g) => ({
+        _id: g._id,
+        title: g.title,
+        startingPrice: g.startingPrice,
+        ratingAverage: g.ratingAverage,
+        categoryName: g.category?.name || "",
+        thumbnail: g.images?.[0]?.url || "",
+      })),
+    },
   });
 });
 

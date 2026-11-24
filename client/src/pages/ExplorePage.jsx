@@ -36,7 +36,14 @@ function SkeletonCard() {
 export default function ExplorePage() {
   const [params, setParams] = useSearchParams();
   const categories = useCategories();
-  const [state, setState] = useState({ loading: true, error: "", gigs: [], pagination: null });
+  const [state, setState] = useState({
+    loading: true,
+    error: "",
+    gigs: [],
+    pagination: null,
+    didYouMean: null,
+    isFallback: false,
+  });
   const [reloadKey, setReloadKey] = useState(0);
   const query = params.toString();
 
@@ -46,8 +53,28 @@ export default function ExplorePage() {
     setState((s) => ({ ...s, loading: true, error: "" }));
     gigService
       .list({ ...Object.fromEntries(new URLSearchParams(query)), limit: PAGE_SIZE })
-      .then((d) => active && setState({ loading: false, error: "", gigs: d.gigs, pagination: d.pagination }))
-      .catch((err) => active && setState({ loading: false, error: err.message, gigs: [], pagination: null }));
+      .then((d) =>
+        active &&
+        setState({
+          loading: false,
+          error: "",
+          gigs: d.gigs,
+          pagination: d.pagination,
+          didYouMean: d.didYouMean,
+          isFallback: d.isFallback,
+        })
+      )
+      .catch((err) =>
+        active &&
+        setState({
+          loading: false,
+          error: err.message,
+          gigs: [],
+          pagination: null,
+          didYouMean: null,
+          isFallback: false,
+        })
+      );
     return () => {
       active = false;
     };
@@ -93,7 +120,7 @@ export default function ExplorePage() {
   const resetFilters = () => update(Object.fromEntries(FILTER_KEYS.map((k) => [k, ""])));
 
   const title = category ? category.name : q ? `Results for “${q}”` : "All Services";
-  const { loading, error, gigs, pagination } = state;
+  const { loading, error, gigs, pagination, didYouMean, isFallback } = state;
 
   return (
     <div className="flex flex-col w-full">
@@ -178,6 +205,33 @@ export default function ExplorePage() {
               </div>
             </div>
 
+            {/* Typo fallback banner */}
+            {!loading && !error && gigs.length > 0 && isFallback && (
+              <div className="mb-space-md p-space-sm bg-surface-container-high border-l-4 border-primary flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-body-sm">
+                <div className="flex items-center gap-space-xs text-on-surface">
+                  <Icon name="spellcheck" className="text-primary text-body-lg" />
+                  <span>
+                    No exact match for &quot;<strong>{q}</strong>&quot;. Showing fuzzy / related matches
+                    {didYouMean ? (
+                      <>
+                        {" "}for &quot;<strong>{didYouMean}</strong>&quot;
+                      </>
+                    ) : null}
+                    .
+                  </span>
+                </div>
+                {didYouMean && (
+                  <button
+                    type="button"
+                    onClick={() => update({ q: didYouMean })}
+                    className="text-primary font-bold text-label-sm uppercase underline hover:text-primary-container shrink-0 text-left"
+                  >
+                    Search exact &quot;{didYouMean}&quot;
+                  </button>
+                )}
+              </div>
+            )}
+
             {error ? (
               <div role="alert" className="bg-error-container border border-error p-space-lg text-on-error-container">
                 <p className="font-body-md mb-space-sm">{error}</p>
@@ -193,10 +247,27 @@ export default function ExplorePage() {
               <div className="bg-surface-container-lowest border border-outline-variant p-space-xl text-center">
                 <Icon name="search_off" className="text-5xl text-outline" />
                 <h2 className="font-headline-sm text-headline-sm text-on-surface uppercase mt-space-sm">No gigs match these criteria</h2>
-                <p className="font-body-md text-on-surface-variant mt-1">Try removing a filter or searching for something broader.</p>
-                <button type="button" onClick={clearAll} className="mt-space-md bg-primary text-on-primary font-label-md text-label-md uppercase px-space-lg py-2 border border-primary hover:bg-primary-container">
-                  Clear all filters
-                </button>
+                {didYouMean ? (
+                  <div className="my-space-md p-space-sm bg-surface-container-high border border-primary inline-flex items-center gap-space-xs text-body-sm">
+                    <Icon name="spellcheck" className="text-primary" />
+                    <span>Did you mean:</span>
+                    <button
+                      type="button"
+                      onClick={() => update({ q: didYouMean })}
+                      className="font-bold text-primary underline uppercase hover:text-primary-container"
+                    >
+                      &quot;{didYouMean}&quot;
+                    </button>
+                    <span>?</span>
+                  </div>
+                ) : (
+                  <p className="font-body-md text-on-surface-variant mt-1">Try removing a filter or searching for something broader.</p>
+                )}
+                <div>
+                  <button type="button" onClick={clearAll} className="mt-space-md bg-primary text-on-primary font-label-md text-label-md uppercase px-space-lg py-2 border border-primary hover:bg-primary-container">
+                    Clear all filters
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-md">

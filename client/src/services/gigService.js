@@ -3,7 +3,11 @@ import api from "./api";
 export const gigService = {
   async list(params) {
     const { data } = await api.get("/gigs", { params });
-    return data; // { gigs, pagination }
+    return data; // { gigs, pagination, didYouMean, isFallback }
+  },
+  async getSuggestions(q) {
+    const { data } = await api.get("/gigs/suggestions", { params: { q } });
+    return data.suggestions; // { query, didYouMean, categories, tags, gigs }
   },
   async get(id) {
     const { data } = await api.get(`/gigs/${id}`);
