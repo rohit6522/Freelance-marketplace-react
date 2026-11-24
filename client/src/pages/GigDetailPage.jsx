@@ -11,6 +11,7 @@ import { useFavorites } from "../hooks/useFavorites";
 import { gigService } from "../services/gigService";
 import { conversationService } from "../services/conversationService";
 import { LEVELS, TIERS, TIER_LABELS, daysLabel, fullName, money, monthYear, revisionsLabel } from "../utils/format";
+import SEO from "../components/common/SEO";
 
 const FAQS = [
   ["How does payment work?", "When you place an order, the amount is held in escrow (simulated in this demo; no real money moves). It is released to the seller only after you approve the delivery."],
@@ -111,6 +112,32 @@ export default function GigDetailPage() {
 
   return (
     <div className="flex flex-col w-full">
+      <SEO
+        title={gig.title}
+        description={`${gig.description ? gig.description.slice(0, 155) : ""}... Starting at ${money(gig.startingPrice)}. By ${sellerName}.`}
+        image={images[0]?.url}
+        type="product"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: gig.title,
+          description: gig.description?.slice(0, 200),
+          image: images[0]?.url,
+          offers: {
+            "@type": "Offer",
+            price: gig.startingPrice,
+            priceCurrency: "INR",
+            availability: "https://schema.org/InStock",
+          },
+          ...(gig.ratingAverage > 0 && {
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: gig.ratingAverage,
+              reviewCount: gig.ratingCount || 1,
+            },
+          }),
+        }}
+      />
       {/* Breadcrumb strip */}
       <div className="w-full bg-surface-container-low py-space-xs">
         <div className="max-w-7xl mx-auto px-margin-sm lg:px-margin flex items-center justify-between">

@@ -25,6 +25,7 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import compression from "compression";
 import publicRoutes from "./routes/public.routes.js";
+import { getRobots, getSitemap, getSeoMetadata, renderSpaWithSeo } from "./controllers/seo.controller.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -106,15 +107,20 @@ app.use("/api/conversations", conversationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/public", publicRoutes);
+app.get("/api/public/seo", getSeoMetadata);
 
-// Optional single-service deployment: Express also serves the built React app (same origin = simple cookies)
+// Public SEO entrypoints for web crawlers & search engines
+app.get("/robots.txt", getRobots);
+app.get("/sitemap.xml", getSitemap);
+
+// Single-service deployment: Express serves built React app with dynamic SEO link previews
 if (env.serveClient) {
   const dist = path.resolve(__dirname, "../../client/dist");
   // Vite puts a content hash in every file name under /assets, so these can be cached for a year.
   // fallthrough:false makes a missing file a real 404 (never the index.html page, which would break script loading).
   app.use("/assets", express.static(path.join(dist, "assets"), { maxAge: "1y", immutable: true, fallthrough: false }));
-  app.use(express.static(dist)); // index.html and other files are revalidated on every load
-  app.get(/^\/(?!api\/).*/, (req, res) => res.sendFile(path.join(dist, "index.html")));
+  app.use(express.static(dist, { index: false }));
+  app.get(/^\/(?!api\/).*/, (req, res) => renderSpaWithSeo(req, res, dist));
 }
 
 // const api = axios.create({

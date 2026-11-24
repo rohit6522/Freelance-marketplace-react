@@ -7,6 +7,7 @@ import GigFilters from "../components/gig/GigFilters";
 import { useCategories } from "../hooks/useCategories";
 import { gigService } from "../services/gigService";
 import { LEVELS, money } from "../utils/format";
+import SEO from "../components/common/SEO";
 
 const PAGE_SIZE = 12;
 const FILTER_KEYS = ["category", "minPrice", "maxPrice", "maxDelivery", "minRating", "levels", "minExperience"];
@@ -124,6 +125,14 @@ export default function ExplorePage() {
 
   return (
     <div className="flex flex-col w-full">
+      <SEO
+        title={category ? `${category.name} Services` : q ? `Search “${q}”` : "Explore All Services"}
+        description={
+          category
+            ? `Hire verified ${category.name} freelancers on GigCraft. Protected milestone escrow payments in INR and verified reviews.`
+            : "Explore top Indian freelance developers, designers, and creative experts on GigCraft with simulated escrow protection."
+        }
+      />
       {/* Header */}
       <section className="w-full bg-surface-container-lowest border-b border-outline-variant">
         <div className="max-w-7xl mx-auto px-margin-sm lg:px-margin py-space-md">

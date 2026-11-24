@@ -185,9 +185,8 @@ export default function SearchBox({ className = "" }) {
           {suggestions.didYouMean && (
             <div
               onClick={() => handleSelectQuery(suggestions.didYouMean)}
-              className={`p-space-xs px-space-sm flex items-center gap-space-xs cursor-pointer transition-colors bg-secondary-container/30 hover:bg-secondary-container text-on-secondary-container ${
-                navigableItems[selectedIndex]?.type === "didYouMean" ? "ring-2 ring-primary" : ""
-              }`}
+              className={`p-space-xs px-space-sm flex items-center gap-space-xs cursor-pointer transition-colors bg-secondary-container/30 hover:bg-secondary-container text-on-secondary-container ${navigableItems[selectedIndex]?.type === "didYouMean" ? "ring-2 ring-primary" : ""
+                }`}
             >
               <Icon name="spellcheck" className="text-primary text-body-md" />
               <div className="font-body-sm text-body-sm">
@@ -217,9 +216,8 @@ export default function SearchBox({ className = "" }) {
                       key={cat._id}
                       type="button"
                       onClick={() => handleSelectCategory(cat)}
-                      className={`text-left inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 border border-outline-variant hover:border-primary hover:bg-surface-container-high transition-colors ${
-                        isSelected ? "bg-primary text-on-primary border-primary" : "text-on-surface"
-                      }`}
+                      className={`text-left inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 border border-outline-variant hover:border-primary hover:bg-surface-container-high transition-colors ${isSelected ? "bg-primary text-on-primary border-primary" : "text-on-surface"
+                        }`}
                     >
                       {cat.icon && <Icon name={cat.icon} className="text-xs" />}
                       <span>{cat.name}</span>
@@ -247,9 +245,8 @@ export default function SearchBox({ className = "" }) {
                       key={tag}
                       type="button"
                       onClick={() => handleSelectTag(tag)}
-                      className={`font-label-sm text-label-sm px-2 py-0.5 border border-outline-variant hover:border-secondary hover:text-secondary transition-colors ${
-                        isSelected ? "bg-secondary text-on-secondary border-secondary" : "text-on-surface-variant bg-surface-container-high"
-                      }`}
+                      className={`font-label-sm text-label-sm px-2 py-0.5 border border-outline-variant hover:border-secondary hover:text-secondary transition-colors ${isSelected ? "bg-secondary text-on-secondary border-secondary" : "text-on-surface-variant bg-surface-container-high"
+                        }`}
                     >
                       #{tag}
                     </button>
@@ -274,9 +271,8 @@ export default function SearchBox({ className = "" }) {
                   <div
                     key={gig._id}
                     onClick={() => handleSelectGig(gig._id)}
-                    className={`p-space-xs px-space-sm flex items-center justify-between gap-space-sm cursor-pointer hover:bg-surface-container transition-colors ${
-                      isSelected ? "bg-surface-container-high border-l-4 border-primary" : ""
-                    }`}
+                    className={`p-space-xs px-space-sm flex items-center justify-between gap-space-sm cursor-pointer hover:bg-surface-container transition-colors ${isSelected ? "bg-surface-container-high border-l-4 border-primary" : ""
+                      }`}
                   >
                     <div className="flex items-center gap-space-xs min-w-0">
                       {gig.thumbnail ? (
