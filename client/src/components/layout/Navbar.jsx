@@ -4,6 +4,8 @@ import Logo from "../ui/Logo";
 import Icon from "../ui/Icon";
 import SearchBox from "./SearchBox";
 import UserMenu from "./UserMenu";
+import ThemeToggle from "../ui/ThemeToggle";
+import InstallAppButton from "../ui/InstallAppButton";
 import { useAuth } from "../../hooks/useAuth";
 import { useCategories } from "../../hooks/useCategories";
 import { conversationService } from "../../services/conversationService";
@@ -77,7 +79,9 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-space-md">
+        <div className="flex items-center gap-space-xs sm:gap-space-sm">
+          <InstallAppButton />
+          <ThemeToggle />
           {user ? (
             <>
               <Link

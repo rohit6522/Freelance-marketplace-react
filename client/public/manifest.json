@@ -1,0 +1,20 @@
+{
+  "name": "GigCraft | Modern Freelance Marketplace",
+  "short_name": "GigCraft",
+  "description": "India's Modern Freelance Marketplace with simulated escrow milestone protection.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b111e",
+  "theme_color": "#005d42",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -140,7 +140,7 @@
 @layer base {
   /* Tailwind v4 defaults border color to currentColor; Stitch's CDN build (v3) used gray-200 */
   *, ::before, ::after, ::backdrop {
-    border-color: var(--color-gray-200);
+    border-color: var(--color-outline-variant, #e5e7eb);
   }
   html, body { margin: 0; padding: 0; }
   body {
@@ -149,6 +149,53 @@
     font-family: "Geist", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+}
+
+/* ---- Dark Mode Tokens ---- */
+html.dark {
+  --color-background: #0b111e;
+  --color-surface: #0b111e;
+  --color-surface-dim: #070b14;
+  --color-surface-bright: #172236;
+  --color-surface-variant: #1a2538;
+  --color-surface-container-lowest: #0e1626;
+  --color-surface-container-low: #131d2e;
+  --color-surface-container: #182438;
+  --color-surface-container-high: #202d44;
+  --color-surface-container-highest: #283752;
+  --color-surface-tint: #4ade80;
+  --color-on-background: #e6edf8;
+  --color-on-surface: #e6edf8;
+  --color-on-surface-variant: #9aa8ba;
+  --color-inverse-surface: #e6edf8;
+  --color-inverse-on-surface: #0b111e;
+  --color-outline: #5c6d80;
+  --color-outline-variant: #28374d;
+
+  --color-primary: #10b981;
+  --color-on-primary: #022c22;
+  --color-primary-container: #065f46;
+  --color-on-primary-container: #a7f3d0;
+  --color-inverse-primary: #047857;
+  --color-primary-fixed: #a7f3d0;
+  --color-primary-fixed-dim: #6ee7b7;
+  --color-on-primary-fixed: #022c22;
+  --color-on-primary-fixed-variant: #064e3b;
+
+  --color-secondary: #94a3b8;
+  --color-on-secondary: #0f172a;
+  --color-secondary-container: #1e293b;
+  --color-on-secondary-container: #cbd5e1;
+
+  --color-tertiary: #60a5fa;
+  --color-on-tertiary: #082f49;
+  --color-tertiary-container: #1d4ed8;
+  --color-on-tertiary-container: #dbeafe;
+
+  --color-error: #f87171;
+  --color-on-error: #450a0a;
+  --color-error-container: #7f1d1d;
+  --color-on-error-container: #fecaca;
 }
 
 @layer components {
