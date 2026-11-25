@@ -29,6 +29,23 @@ export async function recalcGigStats(gigId) {
   );
 }
 
+export function calculateSellerLevel({ completedOrders = 0, ratingAverage = 0, ratingCount = 0 } = {}) {
+  // Top Rated: 20+ completed orders, 4.8+ rating, at least 5 reviews
+  if (completedOrders >= 20 && ratingAverage >= 4.8 && ratingCount >= 5) {
+    return "top_rated";
+  }
+  // Pro Verified: 10+ completed orders, 4.5+ rating, at least 3 reviews
+  if (completedOrders >= 10 && ratingAverage >= 4.5 && ratingCount >= 3) {
+    return "pro";
+  }
+  // Level 2 Seller: 5+ completed orders, 4.0+ rating, at least 1 review
+  if (completedOrders >= 5 && ratingAverage >= 4.0 && ratingCount >= 1) {
+    return "level2";
+  }
+  // Default entry tier for all new sellers
+  return "rising";
+}
+
 export async function recalcFreelancerStats(userId) {
   const startedAt = new Date();
   const id = new mongoose.Types.ObjectId(userId);
@@ -37,12 +54,30 @@ export async function recalcFreelancerStats(userId) {
     { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } },
   ]);
   const completed = await Order.countDocuments({ freelancer: id, status: "completed" });
+  const avg = agg ? round1(agg.avg) : 0;
+  const count = agg ? agg.count : 0;
+
+  const currentProfile = await FreelancerProfile.findOne({ user: id }).select("sellerLevel").lean();
+  const calculatedLevel = calculateSellerLevel({
+    completedOrders: completed,
+    ratingAverage: avg,
+    ratingCount: count,
+  });
+
+  const LEVEL_RANKS = { rising: 0, level2: 1, pro: 2, top_rated: 3 };
+  const currentRank = LEVEL_RANKS[currentProfile?.sellerLevel] || 0;
+  const newRank = LEVEL_RANKS[calculatedLevel] || 0;
+
+  // Upgrade level if newly qualified, preserving any higher admin-assigned tiers
+  const finalLevel = newRank > currentRank ? calculatedLevel : (currentProfile?.sellerLevel || calculatedLevel);
+
   await FreelancerProfile.updateOne(
     { user: id, ...notOlderThan(startedAt) },
     {
-      ratingAverage: agg ? round1(agg.avg) : 0,
-      ratingCount: agg ? agg.count : 0,
+      ratingAverage: avg,
+      ratingCount: count,
       completedOrders: completed,
+      sellerLevel: finalLevel,
       statsComputedAt: startedAt,
     }
   );

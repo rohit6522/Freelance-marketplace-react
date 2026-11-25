@@ -75,6 +75,38 @@ export default function FreelancerOverview() {
               <span className="text-on-surface-variant uppercase font-label-sm">Seller level</span>
               <span className={`px-2 py-0.5 font-label-sm uppercase font-bold ${LEVELS[s.sellerLevel].badge}`}>{LEVELS[s.sellerLevel].label}</span>
             </div>
+
+            {/* Automatic Level Progression Track */}
+            {s.sellerLevel !== "top_rated" ? (
+              <div className="mt-space-xs bg-surface-container-lowest p-2 border border-outline-variant">
+                <div className="flex justify-between items-center text-[11px] font-code-sm mb-1 text-on-surface">
+                  <span className="text-secondary uppercase">
+                    Next: {s.sellerLevel === "rising" ? "Level 2 (4.0★)" : s.sellerLevel === "level2" ? "Pro (4.5★)" : "Top Rated (4.8★)"}
+                  </span>
+                  <span className="font-bold text-primary">
+                    {s.completedOrders} / {s.sellerLevel === "rising" ? 5 : s.sellerLevel === "level2" ? 10 : 20} orders
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-surface-container-high overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-300"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.round(
+                          (s.completedOrders / (s.sellerLevel === "rising" ? 5 : s.sellerLevel === "level2" ? 10 : 20)) * 100
+                        )
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="mt-space-xs text-[11px] font-code-sm text-primary uppercase font-bold text-center py-1 bg-surface-container-lowest border border-outline-variant">
+                ★ Top Rated Tier Achieved ★
+              </div>
+            )}
+
             <div className="mt-space-xs flex items-center justify-between font-body-sm text-body-sm">
               <span className="text-on-surface-variant uppercase font-label-sm">On-time delivery</span>
               <span className="font-bold text-on-surface">{onTime.rate != null ? `${onTime.rate}% (${onTime.sampleSize})` : "No data yet"}</span>
