@@ -91,12 +91,16 @@ export default function AdminUsersPage() {
                     <td className="p-space-sm uppercase font-label-sm">{u.role}</td>
                     <td className="p-space-sm whitespace-nowrap">{shortDate(u.createdAt)}</td>
                     <td className="p-space-sm">
-
-                      <span className={`font-label-sm text-label-sm px-space-xs py-0.5 uppercase font-bold ${u.deletedAt ? "bg-surface-dim text-on-surface-variant" : u.isActive ? "bg-primary-container text-on-primary-container" : "bg-error-container text-on-error-container"
-                        }`}>
-                        {u.deletedAt ? "Deleted" : u.isActive ? "Active" : "Suspended"}
-                      </span>
-
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`font-label-sm text-label-sm px-space-xs py-0.5 uppercase font-bold ${u.deletedAt ? "bg-surface-dim text-on-surface-variant" : u.isActive ? "bg-primary-container text-on-primary-container" : "bg-error-container text-on-error-container"}`}>
+                          {u.deletedAt ? "Deleted" : u.isActive ? "Active" : "Suspended"}
+                        </span>
+                        {u.openOrdersCount > 0 && (
+                          <span className="font-code-sm text-[11px] bg-surface-container-high border border-outline-variant px-1.5 py-0.5 text-primary font-bold whitespace-nowrap">
+                            {u.openOrdersCount} open order{u.openOrdersCount === 1 ? "" : "s"}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-space-sm text-right">
                       <button
@@ -118,14 +122,28 @@ export default function AdminUsersPage() {
 
       <TextActionModal
         open={Boolean(target)} onClose={() => setTarget(null)}
-        title={suspending ? "Suspend user" : "Reactivate user"}
-        description={target ? (suspending ? `${fullName(target)} will be signed out, can't log in, and any published gigs are paused.` : `${fullName(target)} will be able to log in again. Paused gigs stay paused until they republish them.`) : ""}
-        label={suspending ? "Reason (saved in the activity log) *" : "Note (optional)"}
+        title={suspending ? `Suspend ${target ? fullName(target) : "user"}` : `Reactivate ${target ? fullName(target) : "user"}`}
+        description={
+          target
+            ? suspending
+              ? `${fullName(target)} will be signed out, unable to log in, published gigs will be paused, and all ${target.openOrdersCount ? `${target.openOrdersCount} ` : ""}active open orders will be automatically cancelled with escrow payments refunded to clients.`
+              : `${fullName(target)} will be able to log in again. Paused gigs stay paused until they choose to republish them.`
+            : ""
+        }
+        label={suspending ? "Reason for suspension (recorded in moderation audit log) *" : "Note (optional)"}
         minLength={suspending ? 5 : 0} maxLength={500}
-        submitLabel={suspending ? "Suspend user" : "Reactivate user"} tone={suspending ? "danger" : "primary"}
+        submitLabel={suspending ? "Suspend User & Refund Orders" : "Reactivate User"} tone={suspending ? "danger" : "primary"}
         onSubmit={async (text) => {
           const r = await adminService.setUserActive(target._id, !target.isActive, text);
-          toast.success(suspending ? `User suspended${r.pausedGigs ? `, ${r.pausedGigs} gig(s) paused` : ""}` : "User reactivated");
+          if (suspending) {
+            const parts = [
+              r.pausedGigs ? `${r.pausedGigs} gig(s) paused` : null,
+              r.cancelledOrders ? `${r.cancelledOrders} open order(s) cancelled & refunded` : null,
+            ].filter(Boolean);
+            toast.success(`User suspended${parts.length ? ` (${parts.join(", ")})` : ""}`);
+          } else {
+            toast.success("User reactivated");
+          }
           reload();
         }}
       />

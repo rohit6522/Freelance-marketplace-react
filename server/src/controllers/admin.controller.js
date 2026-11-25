@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { recalcGigStats, recalcFreelancerStats } from "../services/rating.service.js";
 import { disconnectUser } from "../realtime/socket.js";
+import { refundPayment } from "../services/payment.service.js";
 
 const paging = (q, def) => ({
   page: Math.max(1, parseInt(q.page, 10) || 1),
@@ -115,12 +116,36 @@ export const listUsers = asyncHandler(async (req, res) => {
       .lean(),
     User.countDocuments(match),
   ]);
-  res.json({ success: true, users, pagination: { page, limit, total, pages: pages(total, limit) } });
+
+  // Attach count of active in-flight orders for each listed user
+  const userIds = users.map((u) => u._id);
+  const openOrderCounts = await Order.aggregate([
+    {
+      $match: {
+        $or: [{ freelancer: { $in: userIds } }, { client: { $in: userIds } }],
+        status: { $in: ["pending", "in_progress", "delivered", "revision_requested"] },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $cond: [{ $in: ["$freelancer", userIds] }, "$freelancer", "$client"],
+        },
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+  const orderCountMap = new Map(openOrderCounts.map((o) => [String(o._id), o.count]));
+  const usersWithOrders = users.map((u) => ({
+    ...u,
+    openOrdersCount: orderCountMap.get(String(u._id)) || 0,
+  }));
+
+  res.json({ success: true, users: usersWithOrders, pagination: { page, limit, total, pages: pages(total, limit) } });
 });
 
 // PATCH /api/admin/users/:id/status   { isActive, reason }
 export const setUserStatus = asyncHandler(async (req, res) => {
-
   const target = await User.findById(req.params.id).select("role isActive deletedAt");
   if (!target) throw new ApiError(404, "User not found");
   if (target.deletedAt) throw new ApiError(400, "Deleted accounts can't be changed");
@@ -133,15 +158,75 @@ export const setUserStatus = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(target._id, { isActive });
 
   let pausedGigs = 0;
+  let cancelledOrders = 0;
+  let refundedAmount = 0;
+
   if (!isActive) {
-    // A suspended seller's gigs must not stay visible or orderable; they are paused, not deleted
+    // 1. A suspended seller's gigs must not stay visible or orderable; they are paused, not deleted
     const r = await Gig.updateMany({ freelancer: target._id, status: "published" }, { status: "paused" });
     pausedGigs = r.modifiedCount;
     disconnectUser(target._id); // close their live socket connections
+
+    // 2. Handle a suspended seller's open orders:
+    // Any active in-flight orders are auto-cancelled and held escrow funds are refunded to clients
+    const sellerOpenOrders = await Order.find({
+      freelancer: target._id,
+      status: { $in: ["pending", "in_progress", "delivered", "revision_requested"] },
+    });
+
+    for (const order of sellerOpenOrders) {
+      order.status = "cancelled";
+      order.cancelReason = `Contract cancelled: Seller account suspended by administration (${reason || "Policy violation"}).`;
+      order.history.push({
+        status: "cancelled",
+        at: new Date(),
+        by: req.user._id,
+        note: "Cancelled due to seller suspension. Escrow refunded to client.",
+      });
+      await order.save();
+
+      try {
+        await refundPayment(order._id);
+        refundedAmount += order.price;
+      } catch (err) {
+        // Payment was already released/refunded or not held
+      }
+      cancelledOrders++;
+    }
+
+    // 3. If a client is suspended, cancel any pending orders awaiting freelancer acceptance
+    if (target.role === "client") {
+      const clientPendingOrders = await Order.find({
+        client: target._id,
+        status: "pending",
+      });
+      for (const order of clientPendingOrders) {
+        order.status = "cancelled";
+        order.cancelReason = "Contract cancelled: Client account suspended by administration.";
+        order.history.push({
+          status: "cancelled",
+          at: new Date(),
+          by: req.user._id,
+          note: "Cancelled due to client suspension. Escrow refunded.",
+        });
+        await order.save();
+        try {
+          await refundPayment(order._id);
+          refundedAmount += order.price;
+        } catch (err) {}
+        cancelledOrders++;
+      }
+    }
   }
 
-  await record(req.user, isActive ? "user_reactivated" : "user_suspended", "user", target._id, reason);
-  res.json({ success: true, isActive, pausedGigs });
+  const logNote = [
+    reason,
+    pausedGigs ? `${pausedGigs} gig(s) paused` : null,
+    cancelledOrders ? `${cancelledOrders} open order(s) cancelled and refunded` : null,
+  ].filter(Boolean).join(" // ");
+
+  await record(req.user, isActive ? "user_reactivated" : "user_suspended", "user", target._id, logNote);
+  res.json({ success: true, isActive, pausedGigs, cancelledOrders, refundedAmount });
 });
 
 // GET /api/admin/log
