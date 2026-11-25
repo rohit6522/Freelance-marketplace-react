@@ -25,6 +25,7 @@ const GigFormPage = lazyPage(() => import("../pages/dashboard/GigFormPage"));
 const EarningsPage = lazyPage(() => import("../pages/dashboard/EarningsPage"));
 const PortfolioPage = lazyPage(() => import("../pages/dashboard/PortfolioPage"));
 const ModerationPage = lazyPage(() => import("../pages/dashboard/ModerationPage"));
+const AdminDisputesPage = lazyPage(() => import("../pages/dashboard/AdminDisputesPage"));
 const AdminUsersPage = lazyPage(() => import("../pages/dashboard/AdminUsersPage"));
 const AdminLogPage = lazyPage(() => import("../pages/dashboard/AdminLogPage"));
 const InfoPage = lazyPage(() => import("../pages/InfoPage"));
@@ -73,6 +74,7 @@ export default function AppRoutes() {
             </Route>
 
             <Route element={<ProtectedRoute roles={["admin"]} />}>
+              <Route path="disputes" element={<AdminDisputesPage />} />
               <Route path="moderation" element={<ModerationPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="activity" element={<AdminLogPage />} />

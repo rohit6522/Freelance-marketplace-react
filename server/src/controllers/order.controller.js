@@ -235,3 +235,39 @@ export const cancelOrder = act(async ({ order, role, req, session }) => {
   order.cancelReason = req.body.reason;
   await refundPayment(order._id, session);
 }, null, "cancelled", (req) => req.body.reason);
+
+// POST /api/orders/:id/dispute  (client or freelancer on active order)
+export const raiseDispute = asyncHandler(async (req, res) => {
+  const { reason } = req.body;
+  const order = await runInTransaction(async (session) => {
+    const { order, role } = await loadOrder(req.params.id, req.user, session);
+    if (!["in_progress", "delivered", "revision_requested"].includes(order.status)) {
+      throw new ApiError(409, `Cannot raise a dispute on an order that is "${order.status}"`);
+    }
+    if (order.dispute?.status === "open") {
+      throw new ApiError(409, "A dispute is already open for this order");
+    }
+
+    order.dispute = {
+      status: "open",
+      reason,
+      raisedBy: req.user._id,
+      raisedAt: new Date(),
+      previousStatus: order.status,
+    };
+    order.status = "disputed";
+    order.statusHistory.push({
+      status: "disputed",
+      by: req.user._id,
+      note: `Dispute raised: ${reason}`,
+      at: new Date(),
+    });
+    await order.save({ session });
+    return order;
+  });
+
+  notifyOrderUpdated(order);
+  notifyOrderNotification(order, "disputed", reason).catch(() => {});
+
+  res.json({ success: true, order });
+});

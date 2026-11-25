@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
   createOrder, listOrders, getOrder, acceptOrder, deliverOrder,
-  requestRevision, completeOrder, cancelOrder,
+  requestRevision, completeOrder, cancelOrder, raiseDispute,
 } from "../controllers/order.controller.js";
 import { protect, authorize } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { idRule } from "../validators/gig.validators.js";
 import {
-  createOrderRules, listOrdersRules, deliverRules, revisionRules, cancelRules,
+  createOrderRules, listOrdersRules, deliverRules, revisionRules, cancelRules, disputeRules,
 } from "../validators/order.validators.js";
 
 const router = Router();
@@ -22,5 +22,6 @@ router.post("/:id/deliver", authorize("freelancer"), idRule, deliverRules, valid
 router.post("/:id/revision", authorize("client"), idRule, revisionRules, validate, requestRevision);
 router.post("/:id/complete", authorize("client"), idRule, validate, completeOrder);
 router.post("/:id/cancel", idRule, cancelRules, validate, cancelOrder);
+router.post("/:id/dispute", idRule, disputeRules, validate, raiseDispute);
 
 export default router;

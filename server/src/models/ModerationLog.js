@@ -8,10 +8,11 @@ const moderationLogSchema = new mongoose.Schema(
       enum: [
         "review_hidden", "review_unhidden", "reports_dismissed", "user_suspended", "user_reactivated",
         "category_created", "category_updated", "category_deleted",
+        "dispute_refund", "dispute_release", "dispute_dismiss",
       ],
       required: true,
     },
-    targetType: { type: String, enum: ["review", "user", "category"], required: true },
+    targetType: { type: String, enum: ["review", "user", "category", "order"], required: true },
     target: { type: mongoose.Schema.Types.ObjectId, required: true },
     label: { type: String, trim: true, maxlength: 120 },
     reason: { type: String, trim: true, maxlength: 500 },

@@ -33,10 +33,19 @@ export default function OrderActions({ order, role, permissions, onChanged }) {
   const isClient = role === "client";
   const noRevisions = permissions.revisionsLeft === 0;
   const cancelLabel = !isClient && order.status === "pending" ? "Reject Order" : "Cancel Order";
-  const nothingToDo = next.length === 0 && !permissions.canReview;
+  const canDispute = ["in_progress", "delivered", "revision_requested"].includes(order.status) && order.dispute?.status !== "open";
+  const nothingToDo = next.length === 0 && !permissions.canReview && !canDispute && order.status !== "disputed";
 
   return (
     <div className="flex flex-col gap-space-sm pt-space-sm">
+      {order.status === "disputed" && (
+        <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/40 text-amber-200 font-body-sm text-body-sm">
+          <Icon name="gavel" className="text-amber-400 mt-0.5 shrink-0" />
+          <div>
+            <strong className="text-amber-300">Under Admin Dispute Review:</strong> {order.dispute?.reason || "An issue has been reported."} Escrow funds are held while GigCraft Admin investigates.
+          </div>
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-space-sm">
         <div className="flex flex-wrap items-center gap-space-xs">
           {!isClient && next.includes("in_progress") && (
@@ -66,6 +75,11 @@ export default function OrderActions({ order, role, permissions, onChanged }) {
               <Icon name="cancel" className="text-body-sm" /> {cancelLabel}
             </button>
           )}
+          {canDispute && (
+            <button type="button" onClick={() => setModal("dispute")} className={ghost} title="Request Admin Review">
+              <Icon name="gavel" className="text-body-sm" /> Raise Dispute
+            </button>
+          )}
           {permissions.canReview && (
             <button type="button" onClick={() => setModal("review")} className={solid}>
               <Icon name="star" className="text-body-sm" /> Leave a Review
@@ -92,6 +106,13 @@ export default function OrderActions({ order, role, permissions, onChanged }) {
         label="Reason *" placeholder="Tell the other party why the order is being cancelled." maxLength={500}
         submitLabel={cancelLabel}
         onSubmit={async (text) => { await orderService.cancel(order._id, text); toast.success("Order cancelled and payment refunded"); onChanged(); }}
+      />
+      <TextActionModal
+        open={modal === "dispute"} onClose={close} title="Raise Order Dispute" tone="danger"
+        description="Submit this order for GigCraft Admin Support investigation. Funds in escrow will remain locked until an admin decides whether to refund or release."
+        label="Explanation of the dispute *" placeholder="Detail what went wrong and what resolution you expect (minimum 10 characters)." minLength={10} maxLength={1000}
+        submitLabel="Submit Dispute"
+        onSubmit={async (text) => { await orderService.dispute(order._id, text); toast.success("Dispute submitted to Admin Support."); onChanged(); }}
       />
 
       <Modal open={modal === "approve"} onClose={close} title="Approve & release funds" maxWidth="max-w-md">

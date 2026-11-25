@@ -49,4 +49,12 @@ export const adminService = {
     const { data } = await api.delete(`/admin/categories/${id}`, { data: payload });
     return data; // { movedGigs }
   },
+  async disputes(params) {
+    const { data } = await api.get("/admin/disputes", { params });
+    return data; // { orders, pagination }
+  },
+  async resolveDispute(id, payload) {
+    const { data } = await api.post(`/admin/disputes/${id}/resolve`, payload);
+    return data.order;
+  },
 };

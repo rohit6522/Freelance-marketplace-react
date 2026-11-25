@@ -6,6 +6,7 @@ export const ORDER_STATUSES = [
   "in_progress",
   "delivered",
   "revision_requested",
+  "disputed",
   "completed",
   "cancelled",
 ];
@@ -58,7 +59,17 @@ const orderSchema = new Schema(
     statusHistory: [historySchema],
     cancelReason: { type: String, trim: true, maxlength: 500 },
     completedAt: Date,
-        idempotencyKey: { type: String, maxlength: 64 },
+    dispute: {
+      status: { type: String, enum: ["open", "resolved_refunded", "resolved_released", "dismissed"] },
+      reason: { type: String, trim: true, maxlength: 1000 },
+      raisedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      raisedAt: { type: Date },
+      previousStatus: { type: String, enum: ORDER_STATUSES },
+      resolutionNote: { type: String, trim: true, maxlength: 1000 },
+      resolvedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      resolvedAt: { type: Date },
+    },
+    idempotencyKey: { type: String, maxlength: 64 },
   },
   { timestamps: true }
 );

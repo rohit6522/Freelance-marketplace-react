@@ -34,3 +34,7 @@ export const revisionRules = [
 export const cancelRules = [
   body("reason").isString().trim().isLength({ min: 5, max: 500 }).withMessage("A cancellation reason (5-500 characters) is required"),
 ];
+
+export const disputeRules = [
+  body("reason").isString().trim().isLength({ min: 10, max: 1000 }).withMessage("A dispute explanation (10-1000 characters) is required"),
+];

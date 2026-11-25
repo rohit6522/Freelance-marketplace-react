@@ -4,8 +4,9 @@ import { slugify } from "../utils/slugify.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { recalcGigStats, recalcFreelancerStats } from "../services/rating.service.js";
-import { disconnectUser } from "../realtime/socket.js";
-import { refundPayment } from "../services/payment.service.js";
+import { disconnectUser, notifyOrderUpdated } from "../realtime/socket.js";
+import { refundPayment, releasePayment } from "../services/payment.service.js";
+import { notifyOrderNotification } from "../services/notification.service.js";
 
 const paging = (q, def) => ({
   page: Math.max(1, parseInt(q.page, 10) || 1),
@@ -361,4 +362,88 @@ export const deleteCategory = asyncHandler(async (req, res) => {
 
   await record(req.user, "category_deleted", "category", cat._id, reason || (total ? `${total} gig(s) moved` : null), cat.name);
   res.json({ success: true, movedGigs: total });
+});
+
+// GET /api/admin/disputes
+export const listDisputes = asyncHandler(async (req, res) => {
+  const { page, limit } = paging(req.query, 10);
+  const filterStatus = req.query.status || "open";
+
+  const filter = filterStatus === "open"
+    ? { status: "disputed" }
+    : filterStatus === "resolved"
+    ? { "dispute.status": { $in: ["resolved_refunded", "resolved_released", "dismissed"] } }
+    : { $or: [{ status: "disputed" }, { "dispute.status": { $exists: true } }] };
+
+  const [orders, total] = await Promise.all([
+    Order.find(filter)
+      .sort({ updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("client", "firstName lastName email avatar role")
+      .populate("freelancer", "firstName lastName email avatar role")
+      .populate("gig", "title images price")
+      .populate("dispute.raisedBy", "firstName lastName email")
+      .populate("dispute.resolvedBy", "firstName lastName email")
+      .lean(),
+    Order.countDocuments(filter),
+  ]);
+
+  res.json({
+    success: true,
+    orders,
+    pagination: { page, limit, total, pages: pages(total, limit) },
+  });
+});
+
+// POST /api/admin/disputes/:id/resolve
+export const resolveDispute = asyncHandler(async (req, res) => {
+  const { action, note } = req.body; // "refund" | "release" | "dismiss"
+
+  const order = await runInTransaction(async (session) => {
+    const o = await Order.findById(req.params.id).session(session);
+    if (!o) throw new ApiError(404, "Order not found");
+    if (o.status !== "disputed" && o.dispute?.status !== "open") {
+      throw new ApiError(409, "This order is not currently disputed");
+    }
+
+    if (action === "refund") {
+      o.status = "cancelled";
+      o.cancelReason = note ? `Admin refund: ${note}` : "Refunded by admin dispute resolution";
+      o.dispute.status = "resolved_refunded";
+      await refundPayment(o._id, session);
+    } else if (action === "release") {
+      o.status = "completed";
+      o.completedAt = new Date();
+      o.dispute.status = "resolved_released";
+      await releasePayment(o._id, session);
+    } else if (action === "dismiss") {
+      o.status = o.dispute.previousStatus || "in_progress";
+      o.dispute.status = "dismissed";
+    }
+
+    o.dispute.resolutionNote = note || undefined;
+    o.dispute.resolvedBy = req.user._id;
+    o.dispute.resolvedAt = new Date();
+
+    o.statusHistory.push({
+      status: o.status,
+      by: req.user._id,
+      note: `Admin dispute resolution (${action}): ${note || ""}`.trim(),
+      at: new Date(),
+    });
+
+    await o.save({ session });
+    return o;
+  });
+
+  if (action === "release") {
+    await Promise.all([recalcGigStats(order.gig), recalcFreelancerStats(order.freelancer)]);
+  }
+
+  await record(req.user, `dispute_${action}`, "order", order._id, note, `Dispute resolved (${action}) for order #${order.orderNumber}`);
+  notifyOrderUpdated(order);
+  notifyOrderNotification(order, action === "refund" ? "cancelled" : action === "release" ? "completed" : "accepted", note).catch(() => {});
+
+  res.json({ success: true, order });
 });

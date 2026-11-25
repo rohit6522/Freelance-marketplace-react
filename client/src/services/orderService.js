@@ -35,4 +35,8 @@ export const orderService = {
     const { data } = await api.post(`/orders/${id}/cancel`, { reason });
     return data.order;
   },
+  async dispute(id, reason) {
+    const { data } = await api.post(`/orders/${id}/dispute`, { reason });
+    return data.order;
+  },
 };

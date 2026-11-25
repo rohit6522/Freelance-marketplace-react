@@ -30,6 +30,7 @@ const SELLER_NAV = [
 
 const ADMIN_NAV = [
   ["/dashboard", "Overview", "dashboard"],
+  ["/dashboard/disputes", "Disputes", "gavel"],
   ["/dashboard/moderation", "Reported Reviews", "flag"],
   ["/dashboard/users", "Users", "group"],
     ["/dashboard/categories", "Categories", "category"],

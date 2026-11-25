@@ -42,6 +42,11 @@ export const userStatusRules = [
   reasonRequiredWhen("isActive", false, "A reason (at least 5 characters) is required to suspend a user"),
 ];
 
+export const resolveDisputeRules = [
+  body("action").isIn(["refund", "release", "dismiss"]).withMessage("Action must be refund, release, or dismiss"),
+  body("note").optional({ values: "falsy" }).isString().trim().isLength({ max: 1000 }).withMessage("Note is too long"),
+];
+
 
 const NAME_RX = /^[A-Za-z0-9][A-Za-z0-9 &/,'().+-]*$/;
 

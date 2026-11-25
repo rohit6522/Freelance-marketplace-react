@@ -2,13 +2,14 @@ import { Router } from "express";
 import {
   getStats, listReviews, setReviewVisibility, dismissReports, listUsers, setUserStatus, listLog,
   listCategoriesAdmin, createCategory, updateCategory, reorderCategories, deleteCategory,
+  listDisputes, resolveDispute,
 } from "../controllers/admin.controller.js";
 import { protect, authorize } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { idRule } from "../validators/gig.validators.js";
 import {
   pageRules, listReviewsRules, visibilityRules, dismissRules, listUsersRules, userStatusRules,
-  categoryBodyRules, categoryUpdateRules, reorderRules, deleteCategoryRules,
+  categoryBodyRules, categoryUpdateRules, reorderRules, deleteCategoryRules, resolveDisputeRules,
 } from "../validators/admin.validators.js";
 
 const router = Router();
@@ -20,6 +21,8 @@ router.patch("/reviews/:id/visibility", idRule, visibilityRules, validate, setRe
 router.post("/reviews/:id/dismiss-reports", idRule, dismissRules, validate, dismissReports);
 router.get("/users", listUsersRules, validate, listUsers);
 router.patch("/users/:id/status", idRule, userStatusRules, validate, setUserStatus);
+router.get("/disputes", listDisputes);
+router.post("/disputes/:id/resolve", idRule, resolveDisputeRules, validate, resolveDispute);
 router.get("/log", pageRules, validate, listLog);
 
 router.get("/categories", listCategoriesAdmin);
