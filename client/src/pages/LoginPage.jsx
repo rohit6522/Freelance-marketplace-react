@@ -67,8 +67,11 @@ export default function LoginPage() {
       toast.success("Signed in with Google successfully!");
     } catch (err) {
       if (err.code === "auth/popup-closed-by-user") return;
-      setServerError(err.message || "Failed to sign in with Google");
-      toast.error(err.message || "Failed to sign in with Google");
+      const msg = err.code === "auth/account-exists-with-different-credential"
+        ? "An account already exists with this email using another login method (Google or Password). Please enable 'Allow multiple accounts with the same email' in Firebase Console Settings to link them."
+        : (err.message || "Failed to sign in with Google");
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setGoogleLoading(false);
     }
@@ -87,8 +90,11 @@ export default function LoginPage() {
       toast.success("Signed in with GitHub successfully!");
     } catch (err) {
       if (err.code === "auth/popup-closed-by-user") return;
-      setServerError(err.message || "Failed to sign in with GitHub");
-      toast.error(err.message || "Failed to sign in with GitHub");
+      const msg = err.code === "auth/account-exists-with-different-credential"
+        ? "An account already exists with this email using another login method (Google or Password). Please enable 'Allow multiple accounts with the same email' in Firebase Console Settings to link them."
+        : (err.message || "Failed to sign in with GitHub");
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setGithubLoading(false);
     }

@@ -138,8 +138,11 @@ export default function RegisterPage() {
       toast.success("Account created with Google. Welcome to GigCraft!");
     } catch (err) {
       if (err.code === "auth/popup-closed-by-user") return;
-      setServerError(err.message || "Failed to sign up with Google");
-      toast.error(err.message || "Failed to sign up with Google");
+      const msg = err.code === "auth/account-exists-with-different-credential"
+        ? "An account already exists with this email using another login method (Google or Password). Please enable 'Allow multiple accounts with the same email' in Firebase Console Settings to link them."
+        : (err.message || "Failed to sign up with Google");
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setGoogleLoading(false);
     }
@@ -153,8 +156,11 @@ export default function RegisterPage() {
       toast.success("Account created with GitHub. Welcome to GigCraft!");
     } catch (err) {
       if (err.code === "auth/popup-closed-by-user") return;
-      setServerError(err.message || "Failed to sign up with GitHub");
-      toast.error(err.message || "Failed to sign up with GitHub");
+      const msg = err.code === "auth/account-exists-with-different-credential"
+        ? "An account already exists with this email using another login method (Google or Password). Please enable 'Allow multiple accounts with the same email' in Firebase Console Settings to link them."
+        : (err.message || "Failed to sign up with GitHub");
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setGithubLoading(false);
     }
