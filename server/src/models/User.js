@@ -18,10 +18,11 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
       required: function () {
-        return !this.googleId;
+        return !this.googleId && !this.githubId;
       },
     },
     googleId: { type: String, sparse: true, index: true },
+    githubId: { type: String, sparse: true, index: true },
     role: { type: String, enum: ["client", "freelancer", "admin"], required: true },
     companyName: { type: String, trim: true, maxlength: 100 },
     phone: { type: String, trim: true },

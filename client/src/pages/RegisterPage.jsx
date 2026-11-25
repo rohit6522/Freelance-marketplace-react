@@ -95,12 +95,13 @@ function CustomCheckbox({ checked, error, children, registration, id }) {
 }
 
 export default function RegisterPage() {
-  const { register: registerUser, loginWithGoogle } = useAuth();
+  const { register: registerUser, loginWithGoogle, loginWithGithub } = useAuth();
   const location = useLocation();
   const [role, setRole] = useState(location.state?.role === "freelancer" ? "freelancer" : "client");
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [githubLoading, setGithubLoading] = useState(false);
 
   const {
     register,
@@ -141,6 +142,21 @@ export default function RegisterPage() {
       toast.error(err.message || "Failed to sign up with Google");
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleGithubSignUp = async () => {
+    setServerError("");
+    setGithubLoading(true);
+    try {
+      await loginWithGithub(role);
+      toast.success("Account created with GitHub. Welcome to GigCraft!");
+    } catch (err) {
+      if (err.code === "auth/popup-closed-by-user") return;
+      setServerError(err.message || "Failed to sign up with GitHub");
+      toast.error(err.message || "Failed to sign up with GitHub");
+    } finally {
+      setGithubLoading(false);
     }
   };
 
@@ -200,13 +216,18 @@ export default function RegisterPage() {
 
           <div className="space-y-space-sm mb-space-lg">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
-              <button type="button" className={hardShadowBtn} onClick={() => toast("GitHub sign-up isn't available yet. Please register with email.")}>
+              <button
+                type="button"
+                disabled={googleLoading || githubLoading || isSubmitting}
+                className={`${hardShadowBtn} disabled:opacity-50`}
+                onClick={handleGithubSignUp}
+              >
                 <GithubIcon />
-                <span>Sign up with GitHub</span>
+                <span>{githubLoading ? "Connecting..." : `Sign up with GitHub as ${role === "freelancer" ? "Freelancer" : "Client"}`}</span>
               </button>
               <button
                 type="button"
-                disabled={googleLoading || isSubmitting}
+                disabled={googleLoading || githubLoading || isSubmitting}
                 className={`${hardShadowBtn} disabled:opacity-50`}
                 onClick={handleGoogleSignUp}
               >

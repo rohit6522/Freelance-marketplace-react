@@ -22,12 +22,19 @@ const trustCards = [
 ];
 
 export default function LoginPage() {
-  const { login, loginWithGoogle, completeGoogleRegistration } = useAuth();
+  const {
+    login,
+    loginWithGoogle,
+    completeGoogleRegistration,
+    loginWithGithub,
+    completeGithubRegistration,
+  } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const [verified, setVerified] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [pendingGoogleAuth, setPendingGoogleAuth] = useState(null);
+  const [githubLoading, setGithubLoading] = useState(false);
+  const [pendingAuth, setPendingAuth] = useState(null); // { type: 'google' | 'github', payload }
 
   const {
     register,
@@ -53,7 +60,7 @@ export default function LoginPage() {
     try {
       const res = await loginWithGoogle();
       if (res?.requiresRole) {
-        setPendingGoogleAuth(res.payload);
+        setPendingAuth({ type: "google", payload: res.payload });
         return;
       }
       setVerified(true);
@@ -67,23 +74,47 @@ export default function LoginPage() {
     }
   };
 
-  const handleSelectRole = async (selectedRole) => {
-    if (!pendingGoogleAuth) return;
-    setGoogleLoading(true);
+  const handleGithubSignIn = async () => {
+    setServerError("");
+    setGithubLoading(true);
     try {
-      await completeGoogleRegistration(pendingGoogleAuth, selectedRole);
-      setPendingGoogleAuth(null);
+      const res = await loginWithGithub();
+      if (res?.requiresRole) {
+        setPendingAuth({ type: "github", payload: res.payload });
+        return;
+      }
+      setVerified(true);
+      toast.success("Signed in with GitHub successfully!");
+    } catch (err) {
+      if (err.code === "auth/popup-closed-by-user") return;
+      setServerError(err.message || "Failed to sign in with GitHub");
+      toast.error(err.message || "Failed to sign in with GitHub");
+    } finally {
+      setGithubLoading(false);
+    }
+  };
+
+  const handleSelectRole = async (selectedRole) => {
+    if (!pendingAuth) return;
+    const isGithub = pendingAuth.type === "github";
+    if (isGithub) setGithubLoading(true);
+    else setGoogleLoading(true);
+    try {
+      if (isGithub) {
+        await completeGithubRegistration(pendingAuth.payload, selectedRole);
+      } else {
+        await completeGoogleRegistration(pendingAuth.payload, selectedRole);
+      }
+      setPendingAuth(null);
       setVerified(true);
       toast.success(`${selectedRole === "freelancer" ? "Freelancer" : "Client"} account created! Welcome to GigCraft.`);
     } catch (err) {
       toast.error(err.message || "Failed to complete registration");
     } finally {
+      setGithubLoading(false);
       setGoogleLoading(false);
     }
   };
-
-  const oauthUnavailable = (name) =>
-    toast(`${name} sign-in isn't available yet. Please use your email and password.`);
 
   return (
     <div>
@@ -132,15 +163,16 @@ export default function LoginPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm mb-space-lg">
               <button
                 type="button"
-                onClick={() => oauthUnavailable("GitHub")}
-                className="flex items-center justify-center gap-space-sm px-4 py-3 bg-surface-container-lowest border border-on-surface hover:bg-surface-container-low transition-all text-on-surface font-label-md text-label-md"
+                disabled={googleLoading || githubLoading || isSubmitting}
+                onClick={handleGithubSignIn}
+                className="flex items-center justify-center gap-space-sm px-4 py-3 bg-surface-container-lowest border border-on-surface hover:bg-surface-container-low transition-all text-on-surface font-label-md text-label-md disabled:opacity-50"
               >
                 <GithubIcon />
-                <span>GitHub Workspace</span>
+                <span>{githubLoading ? "Signing in..." : "GitHub Workspace"}</span>
               </button>
               <button
                 type="button"
-                disabled={googleLoading || isSubmitting}
+                disabled={googleLoading || githubLoading || isSubmitting}
                 onClick={handleGoogleSignIn}
                 className="flex items-center justify-center gap-space-sm px-4 py-3 bg-surface-container-lowest border border-on-surface hover:bg-surface-container-low transition-all text-on-surface font-label-md text-label-md disabled:opacity-50"
               >
@@ -326,8 +358,8 @@ export default function LoginPage() {
 
       {/* Role Selection Modal for new Google sign-ups on Login Page */}
       <Modal
-        open={Boolean(pendingGoogleAuth)}
-        onClose={() => setPendingGoogleAuth(null)}
+        open={Boolean(pendingAuth)}
+        onClose={() => setPendingAuth(null)}
         title="Select Account Type"
         maxWidth="max-w-xl"
       >
@@ -337,14 +369,18 @@ export default function LoginPage() {
               Welcome to GigCraft!
             </h3>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-              You are signing in for the first time with <span className="font-semibold text-on-surface">{pendingGoogleAuth?.email}</span>. How would you like to use your account?
+              You are signing in for the first time with{" "}
+              <span className="font-semibold text-on-surface">
+                {pendingAuth?.payload?.email || pendingAuth?.payload?.displayName || "your account"}
+              </span>
+              . How would you like to use your account?
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-2">
             <button
               type="button"
-              disabled={googleLoading}
+              disabled={googleLoading || githubLoading}
               onClick={() => handleSelectRole("client")}
               className="p-space-md border-2 border-outline-variant hover:border-primary text-left bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-[2px_2px_0px_#0b1c30] flex flex-col justify-between"
             >
@@ -365,7 +401,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              disabled={googleLoading}
+              disabled={googleLoading || githubLoading}
               onClick={() => handleSelectRole("freelancer")}
               className="p-space-md border-2 border-outline-variant hover:border-primary text-left bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-[2px_2px_0px_#0b1c30] flex flex-col justify-between"
             >

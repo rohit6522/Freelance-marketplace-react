@@ -19,6 +19,10 @@ export const authService = {
     const { data } = await api.post("/auth/google", payload);
     return data;
   },
+  async githubAuth(payload) {
+    const { data } = await api.post("/auth/github", payload);
+    return data;
+  },
   async register(payload) {
     const { data } = await api.post("/auth/register", payload);
     return data.user;

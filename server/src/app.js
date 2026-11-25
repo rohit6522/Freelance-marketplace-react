@@ -52,6 +52,7 @@ app.use(
           "https://gigcraft-marketplace.firebaseapp.com",
           "https://*.firebaseapp.com",
           "https://accounts.google.com",
+          "https://github.com",
         ],
         "img-src": [
           "'self'",
@@ -60,6 +61,8 @@ app.use(
           "https://placehold.co",
           "https://lh3.googleusercontent.com",
           "https://*.googleusercontent.com",
+          "https://avatars.githubusercontent.com",
+          "https://*.githubusercontent.com",
         ],
         "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],

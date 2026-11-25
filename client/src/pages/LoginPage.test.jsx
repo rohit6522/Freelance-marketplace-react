@@ -4,12 +4,28 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import LoginPage from "./LoginPage";
 
-const { login, loginWithGoogle, completeGoogleRegistration } = vi.hoisted(() => ({
+const {
+  login,
+  loginWithGoogle,
+  completeGoogleRegistration,
+  loginWithGithub,
+  completeGithubRegistration,
+} = vi.hoisted(() => ({
   login: vi.fn(),
   loginWithGoogle: vi.fn(),
   completeGoogleRegistration: vi.fn(),
+  loginWithGithub: vi.fn(),
+  completeGithubRegistration: vi.fn(),
 }));
-vi.mock("../hooks/useAuth", () => ({ useAuth: () => ({ login, loginWithGoogle, completeGoogleRegistration }) }));
+vi.mock("../hooks/useAuth", () => ({
+  useAuth: () => ({
+    login,
+    loginWithGoogle,
+    completeGoogleRegistration,
+    loginWithGithub,
+    completeGithubRegistration,
+  }),
+}));
 
 const setup = () => {
   const user = userEvent.setup();
@@ -83,5 +99,13 @@ it("shows the server's error message", async () => {
     expect(password).toHaveAttribute("type", "text");
     await user.click(screen.getByRole("button", { name: /hide password/i }));
     expect(password).toHaveAttribute("type", "password");
+  });
+
+  it("triggers GitHub sign-in when the GitHub button is clicked", async () => {
+    loginWithGithub.mockResolvedValue({});
+    const { user } = setup();
+    const githubBtn = screen.getByRole("button", { name: /github workspace/i });
+    await user.click(githubBtn);
+    expect(loginWithGithub).toHaveBeenCalledTimes(1);
   });
 });

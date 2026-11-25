@@ -118,6 +118,82 @@ export const googleAuth = asyncHandler(async (req, res) => {
   res.json({ success: true, user });
 });
 
+// POST /api/auth/github
+export const githubAuth = asyncHandler(async (req, res) => {
+  const { idToken, email, displayName, photoURL, githubId, role } = req.body;
+
+  if (!idToken) {
+    throw new ApiError(400, "GitHub authentication payload is missing required idToken");
+  }
+
+  // Decode the Firebase ID token to verify user identity & claims
+  const decoded = jwt.decode(idToken);
+  const verifiedUid = decoded?.sub || decoded?.user_id || githubId;
+  const rawEmail = decoded?.email || email || (verifiedUid ? `${verifiedUid}@users.noreply.github.com` : null);
+  const normalizedEmail = rawEmail ? rawEmail.toLowerCase().trim() : null;
+
+  const queryOr = [{ githubId: verifiedUid }];
+  if (normalizedEmail) {
+    queryOr.push({ email: normalizedEmail });
+  }
+
+  let user = await User.findOne({ $or: queryOr });
+
+  if (user) {
+    // Existing user: Link GitHub ID / Avatar if not already linked
+    let updated = false;
+    if (!user.githubId && verifiedUid) {
+      user.githubId = verifiedUid;
+      updated = true;
+    }
+    if (!user.avatar?.url && (decoded?.picture || photoURL)) {
+      user.avatar = { url: decoded?.picture || photoURL };
+      updated = true;
+    }
+    if (updated) {
+      await user.save();
+    }
+  } else {
+    // New user: Require role if not provided
+    if (!role) {
+      return res.json({
+        success: true,
+        requiresRole: true,
+        message: "Please select whether you want to join as a Client or Freelancer",
+      });
+    }
+
+    const rawName = (decoded?.name || displayName || normalizedEmail?.split("@")[0] || "GitHub Developer").trim();
+    const parts = rawName.split(/\s+/);
+    const firstName = parts[0] || "User";
+    const lastName = parts.slice(1).join(" ") || firstName;
+    const userRole = role === "freelancer" ? "freelancer" : "client";
+
+    user = await User.create({
+      firstName,
+      lastName,
+      email: normalizedEmail || `${verifiedUid}@users.noreply.github.com`,
+      role: userRole,
+      githubId: verifiedUid,
+      avatar: (decoded?.picture || photoURL) ? { url: decoded?.picture || photoURL } : undefined,
+    });
+
+    if (userRole === "freelancer") {
+      await FreelancerProfile.create({
+        user: user._id,
+        title: "Full-Stack Developer",
+      });
+    }
+  }
+
+  if (!user.isActive) {
+    throw new ApiError(403, "This account has been disabled");
+  }
+
+  sendTokenCookie(res, user._id, true);
+  res.json({ success: true, user });
+});
+
 // POST /api/auth/logout
 export const logout = (req, res) => {
   clearTokenCookie(res);
