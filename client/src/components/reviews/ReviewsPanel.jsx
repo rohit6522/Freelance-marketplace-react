@@ -100,6 +100,9 @@ export default function ReviewsPanel({ scope, showGigTitle = false, actions }) {
                   <div className="flex items-center gap-2 mt-0.5">
                     <StarRating value={r.rating} />
                     <span className="font-code-sm text-code-sm text-on-surface-variant">{shortDate(r.createdAt)}</span>
+                    {r.editedAt && (
+                      <span className="font-code-sm text-code-sm text-secondary italic">(edited)</span>
+                    )}
                   </div>
                 </div>
               </div>

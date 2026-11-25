@@ -6,6 +6,17 @@ export const createReviewRules = [
   body("comment").isString().trim().isLength({ min: 10, max: 1500 }).withMessage("Feedback must be 10-1500 characters"),
 ];
 
+export const updateReviewRules = [
+  body("rating").optional().isInt({ min: 1, max: 5 }).withMessage("Rating must be a whole number from 1 to 5"),
+  body("comment").optional().isString().trim().isLength({ min: 10, max: 1500 }).withMessage("Feedback must be 10-1500 characters"),
+  body().custom((val) => {
+    if (val.rating === undefined && val.comment === undefined) {
+      throw new Error("Provide at least a rating or comment to update");
+    }
+    return true;
+  }),
+];
+
 export const listReviewsRules = [
   query("gig").optional().isMongoId().withMessage("Invalid gig id"),
   query("freelancer").optional().isMongoId().withMessage("Invalid freelancer id"),

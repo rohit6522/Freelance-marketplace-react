@@ -23,6 +23,7 @@ const reviewSchema = new mongoose.Schema(
         _id: false,
       },
     ],
+    editedAt: { type: Date },
     isHidden: { type: Boolean, default: false },
   },
   { timestamps: true }

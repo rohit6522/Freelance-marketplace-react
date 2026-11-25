@@ -4,7 +4,7 @@ import Modal from "../ui/Modal";
 import Icon from "../ui/Icon";
 import { reviewService } from "../../services/reviewService";
 
-export default function ReviewModal({ open, onClose, orderId, onDone }) {
+export default function ReviewModal({ open, onClose, orderId, initialReview = null, onDone }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
@@ -12,11 +12,11 @@ export default function ReviewModal({ open, onClose, orderId, onDone }) {
 
   useEffect(() => {
     if (open) {
-      setRating(0);
-      setComment("");
+      setRating(initialReview?.rating || 0);
+      setComment(initialReview?.comment || "");
       setError("");
     }
-  }, [open]);
+  }, [open, initialReview]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -25,8 +25,13 @@ export default function ReviewModal({ open, onClose, orderId, onDone }) {
     setBusy(true);
     setError("");
     try {
-      await reviewService.create({ orderId, rating, comment: comment.trim() });
-      toast.success("Thanks! Your review has been posted");
+      if (initialReview?._id) {
+        await reviewService.update(initialReview._id, { rating, comment: comment.trim() });
+        toast.success("Review updated successfully!");
+      } else {
+        await reviewService.create({ orderId, rating, comment: comment.trim() });
+        toast.success("Thanks! Your review has been posted");
+      }
       onClose();
       onDone();
     } catch (err) {
@@ -36,8 +41,10 @@ export default function ReviewModal({ open, onClose, orderId, onDone }) {
     }
   };
 
+  const isEditing = Boolean(initialReview?._id);
+
   return (
-    <Modal open={open} onClose={onClose} title="Leave a review" maxWidth="max-w-lg">
+    <Modal open={open} onClose={onClose} title={isEditing ? "Edit your review" : "Leave a review"} maxWidth="max-w-lg">
       <form onSubmit={submit} className="p-space-lg space-y-space-md">
         <div>
           <span className="block font-label-md text-label-md text-on-surface mb-1">Your rating *</span>
@@ -64,7 +71,7 @@ export default function ReviewModal({ open, onClose, orderId, onDone }) {
         <div className="flex flex-col-reverse sm:flex-row gap-space-sm sm:justify-end">
           <button type="button" onClick={onClose} className="px-space-lg py-2.5 border border-on-surface font-label-md text-label-md uppercase font-bold hover:bg-surface-container-high">Back</button>
           <button type="submit" disabled={busy} className="px-space-lg py-2.5 bg-primary text-on-primary border border-primary font-label-md text-label-md uppercase font-bold hover:bg-primary-container disabled:opacity-60">
-            {busy ? "Posting..." : "Post review"}
+            {busy ? (isEditing ? "Saving..." : "Posting...") : (isEditing ? "Save changes" : "Post review")}
           </button>
         </div>
       </form>

@@ -4,6 +4,7 @@ import PageHeader from "../../components/dashboard/PageHeader";
 import SectionCard from "../../components/dashboard/SectionCard";
 import ReviewModal from "../../components/orders/ReviewModal";
 import Avatar from "../../components/ui/Avatar";
+import Icon from "../../components/ui/Icon";
 import StarRating from "../../components/ui/StarRating";
 import ErrorBox from "../../components/ui/ErrorBox";
 import SkeletonBlocks from "../../components/ui/SkeletonBlocks";
@@ -14,6 +15,7 @@ import { dayMonth, fullName, money, shortDate } from "../../utils/format";
 export default function ClientReviewsPage() {
   const { data, error, reload } = useFetch(() => reviewService.mine(), []);
   const [reviewOrder, setReviewOrder] = useState(null);
+  const [editingReview, setEditingReview] = useState(null);
 
   return (
     <div className="space-y-space-lg">
@@ -61,7 +63,17 @@ export default function ClientReviewsPage() {
                   <article key={r._id} className="bg-surface-container-low p-space-md">
                     <div className="flex flex-wrap items-center justify-between gap-space-sm mb-space-xs">
                       <Link to={`/gigs/${r.gig?._id}`} className="font-label-md text-label-md text-on-surface font-bold hover:text-primary">{r.gig?.title}</Link>
-                      <span className="font-code-sm text-code-sm text-on-surface-variant">{shortDate(r.createdAt)}</span>
+                      <div className="flex items-center gap-space-sm">
+                        {r.editedAt && <span className="font-code-sm text-code-sm text-secondary italic">(edited)</span>}
+                        <span className="font-code-sm text-code-sm text-on-surface-variant">{shortDate(r.createdAt)}</span>
+                        <button
+                          type="button"
+                          onClick={() => setEditingReview(r)}
+                          className="font-label-sm text-label-sm uppercase font-bold text-primary hover:text-primary-container px-2 py-0.5 border border-primary hover:bg-surface-container-high transition-colors flex items-center gap-1"
+                        >
+                          <Icon name="edit" className="text-xs" /> Edit
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center gap-space-sm mb-space-xs">
                       <StarRating value={r.rating} />
@@ -82,6 +94,7 @@ export default function ClientReviewsPage() {
         </>
       )}
       <ReviewModal open={Boolean(reviewOrder)} onClose={() => setReviewOrder(null)} orderId={reviewOrder} onDone={reload} />
+      <ReviewModal open={Boolean(editingReview)} onClose={() => setEditingReview(null)} initialReview={editingReview} onDone={reload} />
     </div>
   );
 }

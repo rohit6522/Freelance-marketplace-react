@@ -34,6 +34,26 @@ export const createReview = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, review });
 });
 
+// PATCH /api/reviews/:id  (client edits their existing review)
+export const updateReview = asyncHandler(async (req, res) => {
+  const { rating, comment } = req.body;
+  const review = await Review.findById(req.params.id);
+  if (!review) throw new ApiError(404, "Review not found");
+  if (String(review.client) !== String(req.user._id)) {
+    throw new ApiError(403, "You can only edit your own reviews");
+  }
+
+  if (rating !== undefined) review.rating = rating;
+  if (comment !== undefined) review.comment = comment;
+  review.editedAt = new Date();
+  await review.save();
+
+  // Recalculate average ratings
+  await Promise.all([recalcGigStats(review.gig), recalcFreelancerStats(review.freelancer)]);
+
+  res.json({ success: true, review });
+});
+
 // GET /api/reviews?gig=<id>  or  ?freelancer=<userId>   (public)
 export const listReviews = asyncHandler(async (req, res) => {
   const { gig, freelancer } = req.query;

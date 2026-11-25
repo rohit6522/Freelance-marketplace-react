@@ -9,6 +9,10 @@ export const reviewService = {
     const { data } = await api.post("/reviews", payload);
     return data.review;
   },
+  async update(id, payload) {
+    const { data } = await api.patch(`/reviews/${id}`, payload);
+    return data.review;
+  },
   async reply(id, text) {
     const { data } = await api.post(`/reviews/${id}/reply`, { text });
     return data.review;
