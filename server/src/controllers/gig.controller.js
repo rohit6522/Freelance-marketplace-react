@@ -352,6 +352,21 @@ export const myGigs = asyncHandler(async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /api/gigs/tags  (public - popular tags across published gigs)
+// ---------------------------------------------------------------------------
+export const getPopularTags = asyncHandler(async (req, res) => {
+  const result = await Gig.aggregate([
+    { $match: { status: "published" } },
+    { $unwind: "$tags" },
+    { $group: { _id: { $toLower: "$tags" }, count: { $sum: 1 } } },
+    { $sort: { count: -1, _id: 1 } },
+    { $limit: 30 },
+  ]);
+  const tags = result.map((r) => ({ tag: r._id, count: r.count }));
+  res.json({ success: true, tags });
+});
+
+// ---------------------------------------------------------------------------
 // POST /api/gigs
 // ---------------------------------------------------------------------------
 export const createGig = asyncHandler(async (req, res) => {

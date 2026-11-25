@@ -10,7 +10,7 @@ import { LEVELS, money } from "../utils/format";
 import SEO from "../components/common/SEO";
 
 const PAGE_SIZE = 12;
-const FILTER_KEYS = ["category", "minPrice", "maxPrice", "maxDelivery", "minRating", "levels", "minExperience"];
+const FILTER_KEYS = ["category", "minPrice", "maxPrice", "maxDelivery", "minRating", "levels", "minExperience", "tags"];
 const SORTS = [
   ["relevance", "Best Match"],
   ["rating", "Highest Rated"],
@@ -45,8 +45,23 @@ export default function ExplorePage() {
     didYouMean: null,
     isFallback: false,
   });
+  const [popularTags, setPopularTags] = useState([]);
   const [reloadKey, setReloadKey] = useState(0);
   const query = params.toString();
+
+  // Load popular tags for quick filter chips
+  useEffect(() => {
+    let active = true;
+    gigService
+      .getTags()
+      .then((tags) => {
+        if (active && Array.isArray(tags)) setPopularTags(tags);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Server-side search + filters + sort + pagination, driven entirely by the URL
   useEffect(() => {
@@ -115,6 +130,29 @@ export default function ExplorePage() {
   if (applied.minRating) pills.push({ label: `RATING: ${applied.minRating}★ & Up`, clear: { minRating: "" } });
   if (applied.levels) pills.push({ label: `TIER: ${applied.levels.split(",").map((l) => LEVELS[l]?.label || l).join(", ")}`, clear: { levels: "" } });
   if (applied.minExperience) pills.push({ label: `EXPERIENCE: ${applied.minExperience}+ yrs`, clear: { minExperience: "" } });
+
+  const activeTags = applied.tags
+    ? applied.tags.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
+    : [];
+
+  if (activeTags.length) {
+    activeTags.forEach((t) => {
+      pills.push({
+        label: `TAG: #${t}`,
+        clear: {
+          tags: activeTags.filter((x) => x !== t).join(","),
+        },
+      });
+    });
+  }
+
+  const toggleTag = (t) => {
+    const norm = t.trim().toLowerCase();
+    const next = activeTags.includes(norm)
+      ? activeTags.filter((x) => x !== norm)
+      : [...activeTags, norm];
+    update({ tags: next.join(",") });
+  };
 
   const filterCount = pills.filter((p) => !("q" in p.clear)).length;
   const clearAll = () => update({ q: "", ...Object.fromEntries(FILTER_KEYS.map((k) => [k, ""])) });
@@ -202,7 +240,14 @@ export default function ExplorePage() {
       {/* Body */}
       <section className="max-w-7xl mx-auto px-margin-sm lg:px-margin py-space-lg w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
-          <GigFilters categories={categories} applied={applied} activeCount={filterCount} onApply={update} onReset={resetFilters} />
+          <GigFilters
+            categories={categories}
+            applied={applied}
+            activeCount={filterCount}
+            popularTags={popularTags}
+            onApply={update}
+            onReset={resetFilters}
+          />
 
           <div className="lg:col-span-9 flex flex-col">
             <div className="flex items-center justify-between bg-surface-container-lowest border border-outline-variant px-space-md py-space-xs mb-space-md">
@@ -213,6 +258,35 @@ export default function ExplorePage() {
                 <span className="text-secondary">{pagination ? `${gigs.length} OF ${pagination.total} GIGS LOADED` : "LOADING"}</span>
               </div>
             </div>
+
+            {/* Quick popular tags filter strip */}
+            {popularTags.length > 0 && (
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 px-space-md mb-space-md border border-outline-variant bg-surface-container-lowest">
+                <span className="font-code-sm text-code-sm text-secondary uppercase whitespace-nowrap flex items-center gap-1 font-semibold">
+                  <Icon name="sell" className="text-[14px] text-primary" /> Tags:
+                </span>
+                <div className="flex items-center gap-1.5 flex-nowrap">
+                  {popularTags.slice(0, 10).map(({ tag, count }) => {
+                    const isSelected = activeTags.includes(tag.toLowerCase());
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleTag(tag)}
+                        className={`font-code-sm text-code-sm px-2.5 py-1 border transition-colors whitespace-nowrap flex items-center gap-1 ${
+                          isSelected
+                            ? "bg-primary text-on-primary border-primary font-bold shadow-sm"
+                            : "bg-surface-container-low text-on-surface border-outline-variant hover:border-on-surface hover:bg-surface-container-high"
+                        }`}
+                      >
+                        <span>#{tag}</span>
+                        {count !== undefined && <span className="text-[10px] opacity-70">({count})</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Typo fallback banner */}
             {!loading && !error && gigs.length > 0 && isFallback && (

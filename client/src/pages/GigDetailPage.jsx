@@ -167,9 +167,18 @@ export default function GigDetailPage() {
 
         {/* Header */}
         <header className="mb-space-lg">
-          <div className="flex items-center gap-space-sm mb-space-xs">
+          <div className="flex flex-wrap items-center gap-space-sm mb-space-xs">
             <span className={`font-label-sm text-label-sm px-2 py-0.5 uppercase tracking-wider font-bold ${level.badge}`}>{level.label}</span>
             {gig.category && <span className="bg-surface-container-high text-on-surface font-label-sm text-label-sm px-2 py-0.5 uppercase font-bold">{gig.category.name}</span>}
+            {(gig.tags || []).map((t) => (
+              <Link
+                key={t}
+                to={`/explore?tags=${encodeURIComponent(t.toLowerCase())}`}
+                className="font-code-sm text-code-sm bg-surface-container-lowest text-secondary hover:text-primary hover:border-primary border border-outline-variant px-2 py-0.5 uppercase tracking-wider font-semibold transition-colors"
+              >
+                #{t}
+              </Link>
+            ))}
           </div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface uppercase tracking-tight leading-none mb-space-md">{gig.title}</h1>
 

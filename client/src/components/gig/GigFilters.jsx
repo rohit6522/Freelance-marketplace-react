@@ -36,8 +36,9 @@ function Radio({ name, checked, onChange, children, count }) {
   );
 }
 
-export default function GigFilters({ categories, applied, activeCount, onApply, onReset }) {
+export default function GigFilters({ categories, applied, activeCount, popularTags = [], onApply, onReset }) {
   const [draft, setDraft] = useState(applied);
+  const [tagInput, setTagInput] = useState("");
   const appliedKey = JSON.stringify(applied);
   // Keep the sidebar in sync when filters change elsewhere (pills, navbar search, back button)
   useEffect(() => setDraft(applied), [appliedKey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -46,6 +47,24 @@ export default function GigFilters({ categories, applied, activeCount, onApply, 
   const levels = draft.levels ? draft.levels.split(",") : [];
   const toggleLevel = (lv) =>
     set("levels", (levels.includes(lv) ? levels.filter((x) => x !== lv) : [...levels, lv]).join(","));
+
+  const selectedTags = draft.tags ? draft.tags.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean) : [];
+  const toggleTag = (t) => {
+    const norm = t.trim().toLowerCase();
+    const next = selectedTags.includes(norm)
+      ? selectedTags.filter((x) => x !== norm)
+      : [...selectedTags, norm];
+    set("tags", next.join(","));
+  };
+  const addCustomTag = (e) => {
+    if (e) e.preventDefault();
+    if (!tagInput.trim()) return;
+    const clean = tagInput.trim().toLowerCase().replace(/^#+/, "");
+    if (!selectedTags.includes(clean)) {
+      set("tags", [...selectedTags, clean].join(","));
+    }
+    setTagInput("");
+  };
 
   const submit = (e) => {
     e.preventDefault();
@@ -78,13 +97,85 @@ export default function GigFilters({ categories, applied, activeCount, onApply, 
           ))}
         </Section>
 
-        <Section title="Delivery Time" index="02">
+        <Section title="Skills & Tags" index="02">
+          <div className="flex items-center border border-outline bg-surface-container-lowest mb-space-xs">
+            <span className="px-2 font-code-sm text-code-sm bg-surface-container-high text-on-surface border-r border-outline font-bold">#</span>
+            <input
+              type="text"
+              placeholder="Add tag filter..."
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCustomTag(e);
+                }
+              }}
+              className="w-full font-code-sm text-code-sm py-1.5 px-2 bg-transparent text-on-surface focus:outline-none"
+            />
+            {tagInput && (
+              <button
+                type="button"
+                onClick={addCustomTag}
+                className="px-2 font-code-sm text-code-sm bg-primary text-on-primary font-bold uppercase hover:bg-primary-container"
+              >
+                +
+              </button>
+            )}
+          </div>
+
+          {selectedTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {selectedTags.map((t) => (
+                <span
+                  key={t}
+                  className="inline-flex items-center gap-1 font-code-sm text-code-sm bg-primary text-on-primary px-2 py-0.5 border border-primary font-semibold"
+                >
+                  #{t}
+                  <button
+                    type="button"
+                    onClick={() => toggleTag(t)}
+                    className="hover:opacity-75 font-bold"
+                    aria-label={`Remove ${t}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {popularTags && popularTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 max-h-36 overflow-y-auto pr-1">
+              {popularTags.slice(0, 16).map(({ tag, count }) => {
+                const active = selectedTags.includes(tag.toLowerCase());
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`font-code-sm text-code-sm px-2 py-0.5 border transition-colors flex items-center gap-1 ${
+                      active
+                        ? "bg-primary text-on-primary border-primary font-bold shadow-sm"
+                        : "bg-surface-container-low text-on-surface border-outline-variant hover:border-on-surface hover:bg-surface-container-high"
+                    }`}
+                  >
+                    <span>#{tag}</span>
+                    {count !== undefined && <span className="text-[10px] opacity-70">({count})</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </Section>
+
+        <Section title="Delivery Time" index="03">
           {[["", "Anytime"], ["1", "Up to 24 hours (Rush)"], ["3", "Up to 3 days"], ["7", "Up to 7 days"]].map(([v, l]) => (
             <Radio key={v} name="delivery" checked={draft.maxDelivery === v} onChange={() => set("maxDelivery", v)}>{l}</Radio>
           ))}
         </Section>
 
-        <Section title="Budget (₹ INR)" index="03">
+        <Section title="Budget (₹ INR)" index="04">
           <div className="grid grid-cols-2 gap-space-xs mb-space-sm">
             {[["minPrice", "Min"], ["maxPrice", "Max"]].map(([key, label]) => (
               <div key={key}>
@@ -118,7 +209,7 @@ export default function GigFilters({ categories, applied, activeCount, onApply, 
           </div>
         </Section>
 
-        <Section title="Seller Tier" index="04">
+        <Section title="Seller Tier" index="05">
           {Object.entries(LEVELS).map(([key, lv]) => (
             <label key={key} className={labelCls}>
               <input type="checkbox" checked={levels.includes(key)} onChange={() => toggleLevel(key)} className={`${box} accent-primary`} />
@@ -127,7 +218,7 @@ export default function GigFilters({ categories, applied, activeCount, onApply, 
           ))}
         </Section>
 
-        <Section title="Review Score" index="05">
+        <Section title="Review Score" index="06">
           {[["", "Any rating"], ["4.5", "4.5 & above"], ["4", "4.0 & above"]].map(([v, l]) => (
             <Radio key={v} name="rating" checked={draft.minRating === v} onChange={() => set("minRating", v)}>
               {v ? (
@@ -142,7 +233,7 @@ export default function GigFilters({ categories, applied, activeCount, onApply, 
           ))}
         </Section>
 
-        <Section title="Seller Experience" index="06" last>
+        <Section title="Seller Experience" index="07" last>
           {[["", "Any experience"], ["2", "2+ years"], ["5", "5+ years"], ["8", "8+ years"]].map(([v, l]) => (
             <Radio key={v} name="experience" checked={draft.minExperience === v} onChange={() => set("minExperience", v)}>{l}</Radio>
           ))}

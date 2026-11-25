@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  listGigs, getGig, myGigs, createGig, updateGig, setGigStatus, deleteGig, gigSuggestions,
+  listGigs, getGig, myGigs, createGig, updateGig, setGigStatus, deleteGig, gigSuggestions, getPopularTags,
 } from "../controllers/gig.controller.js";
 import { protect, authorize, optionalAuth } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
@@ -10,6 +10,7 @@ const router = Router();
 const seller = [protect, authorize("freelancer")];
 
 router.get("/", listGigsRules, validate, listGigs);
+router.get("/tags", getPopularTags); // must be before "/:id"
 router.get("/suggestions", gigSuggestions); // must be before "/:id"
 router.get("/mine", ...seller, myGigs); // must be before "/:id"
 router.get("/:id", optionalAuth, idRule, validate, getGig);

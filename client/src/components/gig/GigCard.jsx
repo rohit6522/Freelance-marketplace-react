@@ -74,9 +74,14 @@ export default function GigCard({ gig }) {
 
           <div className="flex flex-wrap gap-1 mb-space-md">
             {(gig.tags || []).slice(0, 3).map((t) => (
-              <span key={t} className="font-code-sm text-code-sm bg-surface-container px-1.5 py-0.5 text-on-surface border border-outline-variant">
-                {t}
-              </span>
+              <Link
+                key={t}
+                to={`/explore?tags=${encodeURIComponent(t.toLowerCase())}`}
+                onClick={(e) => e.stopPropagation()}
+                className="font-code-sm text-code-sm bg-surface-container hover:bg-primary hover:text-on-primary px-1.5 py-0.5 text-on-surface border border-outline-variant hover:border-primary transition-colors cursor-pointer"
+              >
+                #{t}
+              </Link>
             ))}
           </div>
         </div>

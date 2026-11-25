@@ -9,6 +9,10 @@ export const gigService = {
     const { data } = await api.get("/gigs/suggestions", { params: { q } });
     return data.suggestions; // { query, didYouMean, categories, tags, gigs }
   },
+  async getTags() {
+    const { data } = await api.get("/gigs/tags");
+    return data.tags; // [{ tag: "react", count: 4 }, ...]
+  },
   async get(id) {
     const { data } = await api.get(`/gigs/${id}`);
     return data; // { gig, seller }
