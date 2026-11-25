@@ -143,6 +143,9 @@
   *, ::before, ::after, ::backdrop {
     border-color: var(--color-gray-200);
   }
+  html {
+    color-scheme: light;
+  }
   html, body { margin: 0; padding: 0; }
   body {
     background: var(--color-background);
@@ -173,6 +176,7 @@
 
 /* ---- Dark Mode Tokens ---- */
 html.dark {
+  color-scheme: dark;
   --color-background: #0b111e;
   --color-surface: #0b111e;
   --color-surface-dim: #070b14;
@@ -220,4 +224,40 @@ html.dark {
 
 html.dark *, html.dark ::before, html.dark ::after, html.dark ::backdrop {
   border-color: var(--color-outline-variant);
+}
+
+/* ---- Custom Sleek Scrollbars (WCAG & Modern Web Standards) ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-outline-variant) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
+
+/* Hide scrollbar utility for clean horizontal navigation strips */
+.no-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }

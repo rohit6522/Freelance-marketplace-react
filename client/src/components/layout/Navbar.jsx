@@ -123,7 +123,14 @@ export default function Navbar() {
 
       {/* Category strip (real categories from the API) */}
       <div className="h-11 bg-surface-container-low border-t border-outline-variant">
-        <div className="max-w-7xl mx-auto px-margin-sm lg:px-margin h-full flex items-center overflow-x-auto gap-space-md">
+        <div
+          className="max-w-7xl mx-auto px-margin-sm lg:px-margin h-full flex items-center overflow-x-auto gap-space-md no-scrollbar scroll-smooth"
+          onWheel={(e) => {
+            if (e.deltaY !== 0) {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
+        >
           {categories.map((c, i) => (
             <Fragment key={c._id}>
               {i > 0 && <span className="text-outline-variant text-label-sm">/</span>}
