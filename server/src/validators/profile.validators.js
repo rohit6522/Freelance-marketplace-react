@@ -14,6 +14,7 @@ export const accountRules = [
   }),
   body("domainFocus").optional().isString().trim().isLength({ max: 100 }).withMessage("Domain focus is too long"),
   body("shareMessageStatus").optional().isBoolean().withMessage("Invalid value").toBoolean(),
+  body("emailNotifications").optional().isBoolean().withMessage("Invalid value").toBoolean(),
 ];
 
 export const freelancerProfileRules = [

@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
     marketingOptIn: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     shareMessageStatus: { type: Boolean, default: true }, // show typing and read status to people I message
+    emailNotifications: { type: Boolean, default: true }, // email notifications for orders and messages
     deletedAt: { type: Date },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },

@@ -7,6 +7,7 @@ import { createSimulatedPayment, releasePayment, refundPayment } from "../servic
 import { applyTransition, revisionsLeft, nextStatusesFor } from "../services/order.service.js";
 import { recalcGigStats, recalcFreelancerStats } from "../services/rating.service.js";
 import { notifyOrderUpdated } from "../realtime/socket.js";
+import { notifyOrderNotification } from "../services/notification.service.js";
 
 const csv = (v) => (typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : []);
 
@@ -88,6 +89,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
 
   notifyOrderUpdated(created.order);
+  notifyOrderNotification(created.order, "created").catch(() => {});
   res.status(201).json({
     success: true,
     order: created.order,
@@ -175,7 +177,7 @@ export const getOrder = asyncHandler(async (req, res) => {
 // ---------------------------------------------------------------------------
 // Status actions share one pattern: load -> validate transition -> mutate -> save
 // ---------------------------------------------------------------------------
-const act = (handler, after) =>
+const act = (handler, after, eventName, getDetails) =>
   asyncHandler(async (req, res) => {
     const order = await runInTransaction(async (session) => {
       const { order, role } = await loadOrder(req.params.id, req.user, session);
@@ -184,7 +186,11 @@ const act = (handler, after) =>
       return order;
     });
     if (after) await after(order);
-        notifyOrderUpdated(order);
+    notifyOrderUpdated(order);
+    if (eventName) {
+      const details = typeof getDetails === "function" ? getDetails(req) : null;
+      notifyOrderNotification(order, eventName, details).catch(() => {});
+    }
 
     res.json({ success: true, order });
   });
@@ -194,7 +200,7 @@ const act = (handler, after) =>
 export const acceptOrder = act(({ order, role, req }) => {
   applyTransition(order, role, "in_progress", req.user._id, "Order accepted");
   order.dueDate = new Date(Date.now() + order.packageSnapshot.deliveryDays * 24 * 60 * 60 * 1000);
-});
+}, null, "accepted");
 
 // POST /api/orders/:id/deliver  (freelancer) - first delivery or re-delivery after a revision
 export const deliverOrder = act(({ order, role, req }) => {
@@ -203,14 +209,14 @@ export const deliverOrder = act(({ order, role, req }) => {
     message: req.body.message,
     files: (req.body.files || []).map((f) => pick(f, ["url", "name", "size"])),
   });
-});
+}, null, "delivered");
 
 // POST /api/orders/:id/revision  (client)
 export const requestRevision = act(({ order, role, req }) => {
   applyTransition(order, role, "revision_requested", req.user._id, req.body.message);
   if (revisionsLeft(order) === 0) throw new ApiError(409, "No revisions left for this package");
   order.revisionsUsed += 1;
-});
+}, null, "revision_requested", (req) => req.body.message);
 
 // POST /api/orders/:id/complete  (client) - releases the simulated escrow
 export const completeOrder = act(
@@ -219,7 +225,8 @@ export const completeOrder = act(
     order.completedAt = new Date();
     await releasePayment(order._id, session);
   },
-  (order) => Promise.all([recalcGigStats(order.gig), recalcFreelancerStats(order.freelancer)])
+  (order) => Promise.all([recalcGigStats(order.gig), recalcFreelancerStats(order.freelancer)]),
+  "completed"
 );
 
 // POST /api/orders/:id/cancel  (client while pending; freelancer while pending/in progress/revision)
@@ -227,4 +234,4 @@ export const cancelOrder = act(async ({ order, role, req, session }) => {
   applyTransition(order, role, "cancelled", req.user._id, req.body.reason);
   order.cancelReason = req.body.reason;
   await refundPayment(order._id, session);
-});
+}, null, "cancelled", (req) => req.body.reason);

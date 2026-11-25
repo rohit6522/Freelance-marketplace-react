@@ -19,6 +19,7 @@ export default function AccountForm() {
       firstName: user.firstName, lastName: user.lastName,
       companyName: user.companyName || "", domainFocus: user.domainFocus || "",
       shareMessageStatus: user.shareMessageStatus !== false, // on unless it was switched off
+      emailNotifications: user.emailNotifications !== false,
     },
   });
 
@@ -31,6 +32,7 @@ export default function AccountForm() {
         companyName: v.companyName.trim(),
         domainFocus: v.domainFocus.trim(),
         shareMessageStatus: v.shareMessageStatus,
+        emailNotifications: v.emailNotifications,
       });
       setUser(updated);
       reset({ ...v });
@@ -84,6 +86,14 @@ export default function AccountForm() {
           <span className="font-body-sm text-body-sm text-on-surface-variant">
             <strong className="text-on-surface">Show typing and read status.</strong> Let people you message see when you're
             typing and when you've read their messages. If you turn this off, they won't see either one.
+          </span>
+        </label>
+
+        <label className="flex items-start gap-space-sm cursor-pointer">
+          <input type="checkbox" className="mt-1 w-[18px] h-[18px] rounded-none accent-primary" {...register("emailNotifications")} />
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            <strong className="text-on-surface">Email notifications.</strong> Receive instant email updates when an order is created,
+            accepted, delivered, or completed, and when you receive new chat messages.
           </span>
         </label>
 

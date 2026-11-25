@@ -37,3 +37,92 @@ export function passwordChangedEmail({ name }) {
     text: `Hi ${name},\n\nYour GigCraft password was just changed. If this wasn't you, reset it right away using "Forgot password" on the sign-in page.`,
   };
 }
+
+export function orderNotificationEmail({
+  recipientName,
+  orderNumber,
+  gigTitle,
+  status,
+  price,
+  actionDetails,
+  orderUrl,
+}) {
+  let headline = "";
+  let bodyContent = "";
+
+  switch (status) {
+    case "created":
+      headline = `New order received (#${orderNumber})`;
+      bodyContent = `<p>Hi ${esc(recipientName)},</p>
+        <p>Great news! You received a new order for <strong>${esc(gigTitle)}</strong> valued at <strong>₹${Number(price || 0).toLocaleString()}</strong>.</p>
+        <p>Please review the order requirements and accept it to begin working.</p>`;
+      break;
+    case "accepted":
+      headline = `Your order is in progress (#${orderNumber})`;
+      bodyContent = `<p>Hi ${esc(recipientName)},</p>
+        <p>The freelancer has accepted your order for <strong>${esc(gigTitle)}</strong>. Work is now underway!</p>`;
+      break;
+    case "delivered":
+      headline = `Work delivered for order #${orderNumber}`;
+      bodyContent = `<p>Hi ${esc(recipientName)},</p>
+        <p>The freelancer has submitted their delivery for <strong>${esc(gigTitle)}</strong>.</p>
+        <p>Please inspect the delivered work and either approve it to release funds or request a revision.</p>`;
+      break;
+    case "revision_requested":
+      headline = `Revision requested on order #${orderNumber}`;
+      bodyContent = `<p>Hi ${esc(recipientName)},</p>
+        <p>The client has requested a revision on <strong>${esc(gigTitle)}</strong>:</p>
+        <blockquote style="margin:12px 0;padding:12px 16px;background:#f0f4f2;border-left:4px solid #005d42;font-style:italic;">
+          ${esc(actionDetails || "Please check the order page for details.")}
+        </blockquote>`;
+      break;
+    case "completed":
+      headline = `Order #${orderNumber} completed!`;
+      bodyContent = `<p>Hi ${esc(recipientName)},</p>
+        <p>The client approved your delivery for <strong>${esc(gigTitle)}</strong>! Escrow funds have been successfully released.</p>`;
+      break;
+    case "cancelled":
+      headline = `Order #${orderNumber} cancelled`;
+      bodyContent = `<p>Hi ${esc(recipientName)},</p>
+        <p>Order #${orderNumber} for <strong>${esc(gigTitle)}</strong> was cancelled.</p>
+        ${actionDetails ? `<p><strong>Reason:</strong> ${esc(actionDetails)}</p>` : ""}`;
+      break;
+    default:
+      headline = `Update on order #${orderNumber}`;
+      bodyContent = `<p>Hi ${esc(recipientName)},</p><p>There is an update on order #${orderNumber} for <strong>${esc(gigTitle)}</strong>.</p>`;
+  }
+
+  const html = layout(
+    headline,
+    `${bodyContent}
+     <p style="margin-top:24px;">
+       <a href="${esc(orderUrl)}" style="display:inline-block;background:#005d42;color:#ffffff;padding:12px 20px;text-decoration:none;font-weight:bold;">View Order Details</a>
+     </p>`
+  );
+
+  const text = `Hi ${recipientName},\n\n${headline}\nGig: ${gigTitle}\nView order: ${orderUrl}`;
+
+  return {
+    subject: `GigCraft: ${headline}`,
+    html,
+    text,
+  };
+}
+
+export function newMessageEmail({ recipientName, senderName, messageSnippet, conversationUrl }) {
+  return {
+    subject: `New message from ${senderName} on GigCraft`,
+    html: layout(
+      `New message from ${esc(senderName)}`,
+      `<p>Hi ${esc(recipientName)},</p>
+       <p><strong>${esc(senderName)}</strong> sent you a message:</p>
+       <blockquote style="margin:12px 0;padding:12px 16px;background:#f0f4f2;border-left:4px solid #005d42;font-style:italic;">
+         ${esc(messageSnippet)}
+       </blockquote>
+       <p style="margin-top:24px;">
+         <a href="${esc(conversationUrl)}" style="display:inline-block;background:#005d42;color:#ffffff;padding:12px 20px;text-decoration:none;font-weight:bold;">Reply on GigCraft</a>
+       </p>`
+    ),
+    text: `Hi ${recipientName},\n\n${senderName} sent you a message on GigCraft:\n"${messageSnippet}"\n\nReply here:\n${conversationUrl}`,
+  };
+}

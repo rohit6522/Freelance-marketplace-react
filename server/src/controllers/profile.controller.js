@@ -21,7 +21,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 
 // PUT /api/profile/account   (any logged-in user)
 export const updateAccount = asyncHandler(async (req, res) => {
-  const data = pick(req.body, ["firstName", "lastName", "companyName", "domainFocus", "shareMessageStatus"]);
+  const data = pick(req.body, ["firstName", "lastName", "companyName", "domainFocus", "shareMessageStatus", "emailNotifications"]);
   const user = await User.findByIdAndUpdate(req.user._id, data,{ returnDocument: "after", runValidators: true });
   res.json({ success: true, user });
 });

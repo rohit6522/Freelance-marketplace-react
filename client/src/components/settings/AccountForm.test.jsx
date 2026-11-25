@@ -67,7 +67,7 @@ describe("AccountForm: typing and read status setting", () => {
     await user.click(screen.getByRole("button", { name: /save changes/i }));
     await waitFor(() => expect(profileService.updateAccount).toHaveBeenCalled());
     expect(profileService.updateAccount).toHaveBeenCalledWith({
-      firstName: "Maya", lastName: "Client", companyName: "", domainFocus: "", shareMessageStatus: true,
+      firstName: "Maya", lastName: "Client", companyName: "", domainFocus: "", shareMessageStatus: true, emailNotifications: true,
     });
   });
 });

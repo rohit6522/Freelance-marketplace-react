@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import { getConversationForUser, sendMessage, markRead, unreadCounts } from "../services/messaging.service.js";
 import { notifyMessagesRead } from "../realtime/socket.js";
+import { notifyMessageNotification } from "../services/notification.service.js";
 
 const PERSON = "firstName lastName avatar role companyName";
 
@@ -133,6 +134,7 @@ export const postMessage = asyncHandler(async (req, res) => {
     text: req.body.text,
     attachments: (req.body.attachments || []).map((f) => pick(f, ["url", "name", "size", "publicId"])),
   });
+  notifyMessageNotification({ conversation: convo, sender: req.user, text: req.body.text }).catch(() => {});
   res.status(201).json({ success: true, message });
 });
 
