@@ -3,8 +3,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import { getConversationForUser, sendMessage, markRead, unreadCounts } from "../services/messaging.service.js";
-import { notifyMessagesRead } from "../realtime/socket.js";
-import { notifyMessageNotification } from "../services/notification.service.js";
+import { notifyMessagesRead, notifyOrderUpdated } from "../realtime/socket.js";
+import { notifyMessageNotification, notifyOrderNotification } from "../services/notification.service.js";
+import { createSimulatedPayment } from "../services/payment.service.js";
+import { runInTransaction } from "../utils/transaction.js";
 
 const PERSON = "firstName lastName avatar role companyName";
 
@@ -156,4 +158,112 @@ export const readConversation = asyncHandler(async (req, res) => {
   }
 
   res.json({ success: true, marked: updated });
+});
+
+// POST /api/conversations/:id/custom-offer  (freelancer sends custom offer)
+export const createCustomOffer = asyncHandler(async (req, res) => {
+  const { gigId, title, description, price, deliveryDays, revisions } = req.body;
+  const convo = await getConversationForUser(req.params.id, req.user._id);
+
+  const otherId = convo.participants.find((p) => String(p) !== String(req.user._id));
+  const other = await User.findById(otherId).select("isActive firstName email emailNotifications");
+  if (!other?.isActive) throw new ApiError(409, "Recipient account is no longer active");
+
+  const message = await Message.create({
+    conversation: convo._id,
+    sender: req.user._id,
+    text: `Custom Offer: ${title} (₹${Number(price).toLocaleString()})`,
+    readBy: [req.user._id],
+    customOffer: {
+      gig: gigId || convo.gig || undefined,
+      title: title.trim(),
+      description: description.trim(),
+      price: Number(price),
+      deliveryDays: Number(deliveryDays),
+      revisions: Number(revisions) ?? 1,
+      status: "pending",
+    },
+  });
+
+  convo.lastMessage = {
+    text: `[Custom Offer] ${title} - ₹${Number(price).toLocaleString()}`,
+    sender: req.user._id,
+    at: message.createdAt,
+  };
+  await convo.save();
+
+  notifyMessageNotification({
+    conversation: convo,
+    sender: req.user,
+    text: `Custom Offer: ${title} (₹${price})`,
+  }).catch(() => {});
+
+  res.status(201).json({ success: true, message });
+});
+
+// POST /api/conversations/:id/messages/:messageId/accept-offer  (client accepts custom offer)
+export const acceptCustomOffer = asyncHandler(async (req, res) => {
+  const convo = await getConversationForUser(req.params.id, req.user._id);
+  const message = await Message.findOne({ _id: req.params.messageId, conversation: convo._id });
+  if (!message || !message.customOffer) throw new ApiError(404, "Custom offer not found");
+  if (message.customOffer.status !== "pending") throw new ApiError(409, `This offer is already ${message.customOffer.status}`);
+  if (String(message.sender) === String(req.user._id)) throw new ApiError(400, "You cannot accept your own offer");
+
+  const offer = message.customOffer;
+  let gig = offer.gig ? await Gig.findById(offer.gig) : null;
+  if (!gig) {
+    gig = convo.gig ? await Gig.findById(convo.gig) : await Gig.findOne({ freelancer: message.sender, status: "published" });
+  }
+
+  const created = await runInTransaction(async (session) => {
+    const order = new Order({
+      gig: gig?._id || offer.gig,
+      client: req.user._id,
+      freelancer: message.sender,
+      packageTier: "basic",
+      isCustomOffer: true,
+      packageSnapshot: {
+        title: offer.title,
+        price: offer.price,
+        deliveryDays: offer.deliveryDays,
+        revisions: offer.revisions,
+        features: [offer.description],
+      },
+      price: offer.price,
+      requirements: offer.description,
+      status: "in_progress", // custom offers go directly in progress once accepted
+      dueDate: new Date(Date.now() + offer.deliveryDays * 24 * 60 * 60 * 1000),
+      statusHistory: [
+        { status: "pending", by: req.user._id, note: "Custom offer accepted" },
+        { status: "in_progress", by: message.sender, note: "Order automatically started upon acceptance" },
+      ],
+    });
+    await order.save({ session });
+    const payment = await createSimulatedPayment({ order, session });
+
+    message.customOffer.status = "accepted";
+    message.customOffer.order = order._id;
+    await message.save({ session });
+
+    return { order, payment };
+  });
+
+  notifyOrderUpdated(created.order);
+  notifyOrderNotification(created.order, "created").catch(() => {});
+
+  res.json({ success: true, order: created.order, message });
+});
+
+// POST /api/conversations/:id/messages/:messageId/decline-offer  (client declines custom offer)
+export const declineCustomOffer = asyncHandler(async (req, res) => {
+  const convo = await getConversationForUser(req.params.id, req.user._id);
+  const message = await Message.findOne({ _id: req.params.messageId, conversation: convo._id });
+  if (!message || !message.customOffer) throw new ApiError(404, "Custom offer not found");
+  if (message.customOffer.status !== "pending") throw new ApiError(409, `This offer is already ${message.customOffer.status}`);
+  if (String(message.sender) === String(req.user._id)) throw new ApiError(400, "You cannot decline your own offer");
+
+  message.customOffer.status = "declined";
+  await message.save();
+
+  res.json({ success: true, message });
 });

@@ -25,6 +25,16 @@ export default function CheckoutModal({ open, onClose, gig, tier }) {
 
   const [idempotencyKey] = useState(newIdempotencyKey); // new each time the dialog opens, reused if the request is repeated
   const [priceChanged, setPriceChanged] = useState(false);
+  const [selectedAddons, setSelectedAddons] = useState([]);
+
+  const addonsTotal = (gig.addons || [])
+    .filter((a) => selectedAddons.includes(a._id))
+    .reduce((sum, a) => sum + (Number(a.price) || 0), 0);
+  const addonsDays = (gig.addons || [])
+    .filter((a) => selectedAddons.includes(a._id))
+    .reduce((sum, a) => sum + (Number(a.deliveryDays) || 0), 0);
+  const finalPrice = pkg.price + addonsTotal;
+  const finalDays = pkg.deliveryDays + addonsDays;
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
@@ -51,7 +61,8 @@ export default function CheckoutModal({ open, onClose, gig, tier }) {
           tier,
           requirements: requirements.trim(),
           attachments: files.map(({ url, name, size, publicId }) => ({ url, name, size, publicId })),
-          expectedPrice: pkg.price, // the price shown on the page, used only to detect that it changed
+          expectedPrice: finalPrice, // the price shown on the page, used only to detect that it changed
+          addonIds: selectedAddons,
         },
         idempotencyKey
       );
@@ -74,13 +85,58 @@ export default function CheckoutModal({ open, onClose, gig, tier }) {
               <div className="font-headline-sm text-headline-sm text-on-surface font-bold">{pkg.title}</div>
               <div className="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">{gig.title}</div>
             </div>
-            <div className="font-headline-lg text-headline-lg text-primary font-bold">{money(pkg.price)}</div>
+            <div className="font-headline-lg text-headline-lg text-primary font-bold">{money(finalPrice)}</div>
           </div>
           <div className="mt-space-sm pt-space-sm border-t border-outline-variant flex flex-wrap gap-x-space-lg gap-y-1 font-code-sm text-code-sm text-on-surface">
-            <span>DELIVERY: <strong>{daysLabel(pkg.deliveryDays)}</strong></span>
+            <span>DELIVERY: <strong>{daysLabel(finalDays)}</strong></span>
             <span>REVISIONS: <strong>{revisionsLabel(pkg.revisions)}</strong></span>
           </div>
         </div>
+
+        {gig.addons?.length > 0 && (
+          <div className="space-y-2">
+            <span className="font-label-md text-label-md text-on-surface block font-bold">
+              Upgrade with Optional Add-ons
+            </span>
+            <div className="space-y-1.5">
+              {gig.addons.map((a) => {
+                const checked = selectedAddons.includes(a._id);
+                return (
+                  <label
+                    key={a._id}
+                    className={`flex items-center justify-between p-space-sm border cursor-pointer transition-colors ${
+                      checked
+                        ? "bg-primary/5 border-primary text-on-surface"
+                        : "bg-surface-container-low border-outline-variant/60 text-on-surface-variant hover:bg-surface-container"
+                    }`}
+                  >
+                    <div className="flex items-center gap-space-sm">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedAddons([...selectedAddons, a._id]);
+                          else setSelectedAddons(selectedAddons.filter((id) => id !== a._id));
+                        }}
+                        className="w-4 h-4 rounded-none accent-primary"
+                      />
+                      <div>
+                        <div className="font-body-sm text-body-sm font-semibold text-on-surface">{a.title}</div>
+                        {a.description && <div className="font-code-xs text-code-xs text-on-surface-variant">{a.description}</div>}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-code-sm text-code-sm font-bold text-primary">+{money(a.price)}</span>
+                      {a.deliveryDays > 0 && (
+                        <div className="font-code-xs text-code-xs text-on-surface-variant">+{a.deliveryDays}d</div>
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div>
           <label htmlFor="requirements" className="block font-label-md text-label-md text-on-surface mb-1">

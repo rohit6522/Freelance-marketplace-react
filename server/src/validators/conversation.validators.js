@@ -21,3 +21,11 @@ export const listMessagesRules = [
   query("before").optional().isMongoId().withMessage("Invalid cursor"),
   query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("Limit must be 1-100"),
 ];
+
+export const customOfferRules = [
+  body("title").isString().trim().isLength({ min: 3, max: 120 }).withMessage("Offer title must be 3-120 characters"),
+  body("description").isString().trim().isLength({ min: 10, max: 2000 }).withMessage("Offer description must be 10-2000 characters"),
+  body("price").isFloat({ min: 50, max: 10000000 }).withMessage("Price must be between ₹50 and ₹1,00,00,000"),
+  body("deliveryDays").isInt({ min: 1, max: 180 }).withMessage("Delivery must be 1-180 days"),
+  body("revisions").optional().isInt({ min: 0, max: 100 }),
+];

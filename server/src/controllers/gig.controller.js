@@ -8,7 +8,7 @@ import { deleteAsset } from "../services/upload.service.js";
 import { escapeRegex, correctQuery } from "../services/search.service.js";
 
 const ACTIVE_ORDER_STATUSES = ["pending", "in_progress", "delivered", "revision_requested"];
-const EDITABLE = ["title", "description", "category", "tags", "images", "packages"];
+const EDITABLE = ["title", "description", "category", "tags", "images", "packages", "addons"];
 
 const csv = (v) => (typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : []);
 

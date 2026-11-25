@@ -10,7 +10,8 @@ import { useTypingIndicator } from "../../hooks/useTypingIndicator";
 import { conversationService } from "../../services/conversationService";
 import { uploadService } from "../../services/uploadService";
 import { lastSeenOwnId } from "../../utils/readReceipts";
-import { dateTime, fullName } from "../../utils/format";
+import { dateTime, fullName, money } from "../../utils/format";
+import CustomOfferModal from "./CustomOfferModal";
 
 const POLL_MS = 10000;
 
@@ -34,6 +35,7 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
   const [seenFromSocket, setSeenFromSocket] = useState("");
+  const [offerModal, setOfferModal] = useState(false);
   const listRef = useRef(null);
   const stickRef = useRef(true);
   const activityRef = useRef(onActivity);
@@ -44,6 +46,39 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
   const otherId = other ? String(other._id) : "";
   const { onInput: signalTyping, stop: stopTyping } = useTypingEmitter(conversationId);
   const { otherTyping, clearTyping } = useTypingIndicator(conversationId);
+
+  const acceptOffer = async (messageId) => {
+    try {
+      const res = await conversationService.acceptCustomOffer(conversationId, messageId);
+      toast.success("Custom offer accepted! Order created in progress.");
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === messageId
+            ? { ...m, customOffer: { ...m.customOffer, status: "accepted", order: res.order._id } }
+            : m
+        )
+      );
+      activityRef.current?.();
+    } catch (err) {
+      toast.error(err.message || "Failed to accept offer");
+    }
+  };
+
+  const declineOffer = async (messageId) => {
+    try {
+      await conversationService.declineCustomOffer(conversationId, messageId);
+      toast.success("Custom offer declined");
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === messageId
+            ? { ...m, customOffer: { ...m.customOffer, status: "declined" } }
+            : m
+        )
+      );
+    } catch (err) {
+      toast.error(err.message || "Failed to decline offer");
+    }
+  };
 
   // Only a visible tab counts as "reading", so the other person's "Seen" is honest
   const markRead = useCallback(() => {
@@ -259,6 +294,58 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
                     <span className="font-code-sm text-code-sm text-on-surface-variant">{dateTime(m.createdAt)}</span>
                   </div>
                   <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-wrap break-words">{m.text}</p>
+                  {m.customOffer && (
+                    <div className="mt-2 p-space-sm bg-surface-container-lowest border border-primary/40 space-y-2">
+                      <div className="flex items-center justify-between gap-space-sm">
+                        <span className="font-label-xs uppercase font-bold text-primary flex items-center gap-1">
+                          <Icon name="local_offer" className="text-body-sm" /> Custom Offer
+                        </span>
+                        <span className="font-code-md text-code-md font-bold text-primary">
+                          {money(m.customOffer.price)}
+                        </span>
+                      </div>
+                      <div className="font-title-sm text-title-sm font-bold text-on-surface">
+                        {m.customOffer.title}
+                      </div>
+                      <p className="font-body-xs text-body-xs text-on-surface-variant whitespace-pre-wrap">
+                        {m.customOffer.description}
+                      </p>
+                      <div className="flex flex-wrap items-center justify-between gap-space-xs text-code-xs text-on-surface-variant border-t border-outline-variant/40 pt-1.5">
+                        <div className="flex gap-space-sm">
+                          <span>Delivery: <strong>{m.customOffer.deliveryDays}d</strong></span>
+                          <span>Revisions: <strong>{m.customOffer.revisions}</strong></span>
+                        </div>
+                        <div>
+                          {m.customOffer.status === "pending" ? (
+                            !mine && user.role === "client" ? (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => acceptOffer(m._id)}
+                                  className="px-2.5 py-1 bg-primary text-on-primary font-label-xs text-label-xs uppercase font-bold hover:bg-primary-container"
+                                >
+                                  Accept & Order
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => declineOffer(m._id)}
+                                  className="px-2 py-1 bg-surface-container-low text-on-surface hover:text-error font-label-xs text-label-xs uppercase border border-outline-variant/60"
+                                >
+                                  Decline
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-amber-400 font-bold uppercase font-code-xs">Pending Review</span>
+                            )
+                          ) : m.customOffer.status === "accepted" ? (
+                            <span className="text-primary font-bold uppercase font-code-xs">✓ Offer Accepted</span>
+                          ) : (
+                            <span className="text-error font-bold uppercase font-code-xs">Declined</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {m.attachments?.length > 0 && (
                     <div className="pt-space-xs flex flex-wrap items-center gap-space-xs">
                       {m.attachments.map((a) => (
@@ -317,6 +404,17 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
             <Icon name={uploading ? "sync" : "attach_file"} className={`text-body-md ${uploading ? "animate-spin" : ""}`} />
             <input type="file" className="sr-only" onChange={addFile} disabled={uploading} accept=".jpg,.jpeg,.png,.webp,.pdf,.zip,.json,.txt,.md" />
           </label>
+          {user.role === "freelancer" && (
+            <button
+              type="button"
+              onClick={() => setOfferModal(true)}
+              className="p-2 text-on-surface hover:text-primary cursor-pointer flex items-center gap-1 font-label-xs text-label-xs uppercase font-bold"
+              title="Create Custom Offer"
+            >
+              <Icon name="local_offer" className="text-body-md" />
+              <span className="hidden sm:inline">Offer</span>
+            </button>
+          )}
           <button
             type="submit" disabled={sending || uploading}
             className="bg-on-surface hover:bg-primary text-surface-container-lowest px-space-md py-2 font-label-sm text-label-sm uppercase transition-colors disabled:opacity-60"
@@ -325,6 +423,15 @@ export default function MessageThread({ conversationId, events = [], footerSlot 
           </button>
         </div>
       </form>
+
+      <CustomOfferModal
+        open={offerModal}
+        onClose={() => setOfferModal(false)}
+        conversationId={conversationId}
+        onDone={() => {
+          conversationService.messages(conversationId, { limit: 30 }).then((d) => setMessages(d.messages));
+        }}
+      />
     </div>
   );
 }

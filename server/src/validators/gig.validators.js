@@ -38,6 +38,10 @@ export const gigBodyRules = [
     .withMessage("Image URLs must be valid https URLs"),
   body("images.*.publicId").optional().isString().isLength({ max: 200 }).withMessage("Invalid image reference"),
   body("status").optional().isIn(["draft", "published"]).withMessage("Status must be draft or published"),
+  body("addons").optional().isArray({ max: 5 }).withMessage("A maximum of 5 add-ons is allowed"),
+  body("addons.*.title").isString().trim().isLength({ min: 2, max: 100 }).withMessage("Add-on title must be 2-100 characters"),
+  body("addons.*.price").isFloat({ min: 0, max: 1000000 }).withMessage("Add-on price must be between ₹0 and ₹10,00,000"),
+  body("addons.*.deliveryDays").optional().isInt({ min: 0, max: 30 }).withMessage("Add-on delivery days must be 0-30"),
   ...tiers.flatMap(packageRules),
 ];
 

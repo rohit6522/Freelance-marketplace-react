@@ -19,6 +19,7 @@ const REVISION_OPTIONS = [...Array(11).keys()].map((n) => [String(n), n === 0 ? 
 const emptyForm = () => ({
   title: "", category: "", description: "", tags: "",
   packages: Object.fromEntries(TIERS.map((t) => [t, { title: "", description: "", price: "", deliveryDays: "", revisions: "1", featuresText: "" }])),
+  addonsText: "",
 });
 
 const toForm = (g) => ({
@@ -26,6 +27,7 @@ const toForm = (g) => ({
   category: g.category?._id || g.category || "",
   description: g.description,
   tags: (g.tags || []).join(", "),
+  addonsText: (g.addons || []).map((a) => `${a.title} | ${a.price} | ${a.deliveryDays || 0}`).join("\n"),
   packages: Object.fromEntries(
     TIERS.map((t) => {
       const p = g.packages[t];
@@ -43,6 +45,19 @@ const toPayload = (v, images) => ({
   description: v.description.trim(),
   tags: splitTags(v.tags),
   images: images.map(({ url, publicId }) => ({ url, publicId })),
+  addons: (v.addonsText || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [title, price, days] = line.split("|").map((s) => s?.trim());
+      return {
+        title: title || "Add-on",
+        price: Math.max(0, Number(price) || 0),
+        deliveryDays: Math.max(0, Number(days) || 0),
+      };
+    })
+    .slice(0, 5),
   packages: Object.fromEntries(
     TIERS.map((t) => {
       const p = v.packages[t];
@@ -238,6 +253,19 @@ export default function GigFormPage() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-space-md">
           {TIERS.map((t) => <PackageFields key={t} tier={t} register={register} errors={errors} />)}
         </div>
+      </SectionCard>
+
+      <SectionCard title="Optional Add-ons" description="Offer buyers extra services at checkout (one per line: Service Title | Price in ₹ | Extra Days). Up to 5.">
+        <textarea
+          id="addonsText"
+          rows={3}
+          placeholder="Fast 1-Day Delivery | 500 | 0&#10;Full Source Code & Assets | 1000 | 1&#10;Additional 1 Round of Revisions | 300 | 0"
+          className={inputCls(false)}
+          {...register("addonsText")}
+        />
+        <p className="font-code-xs text-code-xs text-on-surface-variant mt-1">
+          Format: <code>Service Title | Price | Delivery Days</code> (e.g. <code>Express Delivery | 500 | 0</code>)
+        </p>
       </SectionCard>
 
       {serverError && <p role="alert" className="p-space-sm bg-error-container text-on-error-container font-body-sm border border-error">{serverError}</p>}

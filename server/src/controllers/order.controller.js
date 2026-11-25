@@ -26,7 +26,7 @@ async function loadOrder(id, user, session) {
 // POST /api/orders  (client) - checkout: price comes from the gig, never the request
 // ---------------------------------------------------------------------------
 export const createOrder = asyncHandler(async (req, res) => {
-  const { gigId, tier, requirements, expectedPrice } = req.body;
+  const { gigId, tier, requirements, expectedPrice, addonIds = [] } = req.body;
   const idempotencyKey = req.get("Idempotency-Key") || undefined;
 
   // The same checkout request sent again (double-click, retry, second tab) returns the first order instead of creating another
@@ -50,9 +50,14 @@ export const createOrder = asyncHandler(async (req, res) => {
   if (!seller?.isActive) throw new ApiError(404, "Gig not found or unavailable");
 
   const p = gig.packages[tier];
+  const selectedAddons = (gig.addons || []).filter((a) => (addonIds || []).map(String).includes(String(a._id)));
+  const addonsPrice = selectedAddons.reduce((sum, a) => sum + (Number(a.price) || 0), 0);
+  const addonsDays = selectedAddons.reduce((sum, a) => sum + (Number(a.deliveryDays) || 0), 0);
+  const finalPrice = p.price + addonsPrice;
+  const finalDays = p.deliveryDays + addonsDays;
 
   // The price the buyer saw is only a staleness check. The amount charged always comes from the gig.
-  if (expectedPrice !== undefined && Number(expectedPrice) !== p.price) {
+  if (expectedPrice !== undefined && Number(expectedPrice) !== finalPrice) {
     throw new ApiError(409, "The price of this package changed while you were ordering. Reload the page to see the current price.");
   }
 
@@ -66,12 +71,13 @@ export const createOrder = asyncHandler(async (req, res) => {
         packageTier: tier,
         packageSnapshot: {
           title: p.title,
-          price: p.price,
-          deliveryDays: p.deliveryDays,
+          price: finalPrice,
+          deliveryDays: finalDays,
           revisions: p.revisions,
-          features: [...p.features],
+          features: [...p.features, ...selectedAddons.map((a) => `Add-on: ${a.title}`)],
         },
-        price: p.price,
+        addons: selectedAddons.map((a) => ({ title: a.title, price: a.price, deliveryDays: a.deliveryDays })),
+        price: finalPrice,
         requirements,
         attachments: (req.body.attachments || []).map((f) => pick(f, ["url", "name", "size", "publicId"])),
         status: "pending",

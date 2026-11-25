@@ -24,4 +24,16 @@ export const conversationService = {
   async read(id) {
     await api.post(`/conversations/${id}/read`);
   },
+  async sendCustomOffer(id, payload) {
+    const { data } = await api.post(`/conversations/${id}/custom-offer`, payload);
+    return data.message;
+  },
+  async acceptCustomOffer(id, messageId) {
+    const { data } = await api.post(`/conversations/${id}/messages/${messageId}/accept-offer`);
+    return data; // { order, message }
+  },
+  async declineCustomOffer(id, messageId) {
+    const { data } = await api.post(`/conversations/${id}/messages/${messageId}/decline-offer`);
+    return data.message;
+  },
 };

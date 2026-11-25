@@ -2,11 +2,12 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import {
   startConversation, listConversations, unreadCount, listMessages, postMessage, readConversation,
+  createCustomOffer, acceptCustomOffer, declineCustomOffer,
 } from "../controllers/conversation.controller.js";
 import { protect } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { idRule } from "../validators/gig.validators.js";
-import { startConversationRules, sendMessageRules, listMessagesRules } from "../validators/conversation.validators.js";
+import { startConversationRules, sendMessageRules, listMessagesRules, customOfferRules } from "../validators/conversation.validators.js";
 
 const router = Router();
 router.use(protect);
@@ -25,5 +26,8 @@ router.post("/", startConversationRules, validate, startConversation);
 router.get("/:id/messages", idRule, listMessagesRules, validate, listMessages);
 router.post("/:id/messages", sendLimiter, idRule, sendMessageRules, validate, postMessage);
 router.post("/:id/read", idRule, validate, readConversation);
+router.post("/:id/custom-offer", idRule, customOfferRules, validate, createCustomOffer);
+router.post("/:id/messages/:messageId/accept-offer", idRule, validate, acceptCustomOffer);
+router.post("/:id/messages/:messageId/decline-offer", idRule, validate, declineCustomOffer);
 
 export default router;

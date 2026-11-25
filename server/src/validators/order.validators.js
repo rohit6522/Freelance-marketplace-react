@@ -10,6 +10,7 @@ export const createOrderRules = [
   body("attachments.*.url").isURL({ protocols: ["https"], require_protocol: true }).withMessage("Attachment URLs must be valid https URLs"),
   header("idempotency-key").optional().isString().matches(/^[A-Za-z0-9_-]{8,64}$/).withMessage("Invalid Idempotency-Key"),
   body("expectedPrice").optional().isFloat({ min: 0 }).withMessage("Invalid expected price"),
+  body("addonIds").optional().isArray({ max: 5 }).withMessage("Maximum 5 add-ons"),
 ];
 
 export const listOrdersRules = [

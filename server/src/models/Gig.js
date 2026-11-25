@@ -12,6 +12,16 @@ const packageSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const addonSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true, trim: true, maxlength: 100 },
+    description: { type: String, trim: true, maxlength: 300 },
+    price: { type: Number, required: true, min: 0 },
+    deliveryDays: { type: Number, default: 0, min: 0 },
+  },
+  { _id: true }
+);
+
 const gigSchema = new mongoose.Schema(
   {
     freelancer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -31,6 +41,7 @@ const gigSchema = new mongoose.Schema(
       standard: { type: packageSchema, required: true },
       premium: { type: packageSchema, required: true },
     },
+    addons: [addonSchema],
     status: { type: String, enum: ["draft", "published", "paused"], default: "draft" },
 
     // Derived fields so we can sort/filter on the server (set automatically, never from client)

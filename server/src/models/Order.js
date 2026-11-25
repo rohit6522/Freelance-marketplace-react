@@ -50,6 +50,14 @@ const orderSchema = new Schema(
       features: [String],
     },
     price: { type: Number, required: true, min: 0 }, // always set by the server
+    addons: [
+      {
+        title: { type: String, required: true },
+        price: { type: Number, required: true },
+        deliveryDays: { type: Number, default: 0 },
+      },
+    ],
+    isCustomOffer: { type: Boolean, default: false },
     requirements: { type: String, required: [true, "Project requirements are required"], trim: true, maxlength: 5000 },
     attachments: [fileSchema],
     status: { type: String, enum: ORDER_STATUSES, default: "pending" },
