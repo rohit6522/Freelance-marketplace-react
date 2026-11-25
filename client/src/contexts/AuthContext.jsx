@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, GithubAuthProvider } from "firebase/auth";
 import { authService } from "../services/authService";
 import { auth, googleProvider, githubProvider } from "../config/firebase";
 
@@ -57,13 +57,41 @@ export function AuthProvider({ children }) {
   const loginWithGithub = useCallback(async (role) => {
     const result = await signInWithPopup(auth, githubProvider);
     const idToken = await result.user.getIdToken();
+    let email = result.user.email || result.user.providerData?.find((p) => p.email)?.email || null;
+
+    // If GitHub user has private email, attempt to retrieve primary verified email with OAuth accessToken
+    if (!email) {
+      try {
+        const credential = GithubAuthProvider.credentialFromResult(result);
+        if (credential?.accessToken) {
+          const res = await fetch("https://api.github.com/user/emails", {
+            headers: {
+              Authorization: `Bearer ${credential.accessToken}`,
+              Accept: "application/vnd.github.v3+json",
+            },
+          });
+          if (res.ok) {
+            const emails = await res.json();
+            if (Array.isArray(emails)) {
+              const primary = emails.find((e) => e.primary && e.verified) || emails.find((e) => e.primary) || emails[0];
+              if (primary?.email) {
+                email = primary.email;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not retrieve private GitHub email:", e);
+      }
+    }
+
     const payload = {
       idToken,
-      email: result.user.email,
-      displayName: result.user.displayName,
-      photoURL: result.user.photoURL,
+      ...(email ? { email } : {}),
+      displayName: result.user.displayName || result.user.providerData?.[0]?.displayName || null,
+      photoURL: result.user.photoURL || result.user.providerData?.[0]?.photoURL || null,
       githubId: result.user.uid,
-      role,
+      ...(role ? { role } : {}),
     };
     const res = await authService.githubAuth(payload);
     if (res?.requiresRole) {
@@ -75,6 +103,7 @@ export function AuthProvider({ children }) {
 
   const completeGithubRegistration = useCallback(async (pendingPayload, selectedRole) => {
     const payload = { ...pendingPayload, role: selectedRole };
+    if (!payload.email) delete payload.email;
     const res = await authService.githubAuth(payload);
     setUser(res?.user);
     return res?.user;

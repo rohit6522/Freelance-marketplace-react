@@ -37,8 +37,8 @@ export const googleAuthRules = [
 
 export const githubAuthRules = [
   body("idToken").isString().notEmpty().withMessage("Firebase ID token is required"),
-  body("email").optional().isEmail().withMessage("Valid email is required"),
-  body("role").optional().isIn(["client", "freelancer"]).withMessage("Role must be client or freelancer"),
+  body("email").optional({ values: "falsy" }).isEmail().withMessage("Valid email is required"),
+  body("role").optional({ values: "falsy" }).isIn(["client", "freelancer"]).withMessage("Role must be client or freelancer"),
 ];
 
 export const forgotPasswordRules = [email];

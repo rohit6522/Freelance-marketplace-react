@@ -129,7 +129,8 @@ export const githubAuth = asyncHandler(async (req, res) => {
   // Decode the Firebase ID token to verify user identity & claims
   const decoded = jwt.decode(idToken);
   const verifiedUid = decoded?.sub || decoded?.user_id || githubId;
-  const rawEmail = decoded?.email || email || (verifiedUid ? `${verifiedUid}@users.noreply.github.com` : null);
+  const providedEmail = typeof email === "string" && email.trim().length > 0 ? email.trim() : null;
+  const rawEmail = providedEmail || decoded?.email || (verifiedUid ? `${verifiedUid}@users.noreply.github.com` : null);
   const normalizedEmail = rawEmail ? rawEmail.toLowerCase().trim() : null;
 
   const queryOr = [{ githubId: verifiedUid }];
